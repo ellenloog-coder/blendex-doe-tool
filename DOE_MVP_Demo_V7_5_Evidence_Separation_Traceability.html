@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOE Analysis Tool Demo</title>
+<style>
+  :root{
+    --nav:#0f3557;
+    --primary:#1f4e79;
+    --primary-2:#2d6b9f;
+    --primary-soft:#eaf2f8;
+    --page:#f3f6f9;
+    --card:#ffffff;
+    --line:#d8e0e7;
+    --text:#1f2d3d;
+    --muted:#667788;
+    --green:#287a4b;
+    --green-soft:#eaf6ef;
+    --amber:#9b6500;
+    --amber-soft:#fff6df;
+    --red:#b42318;
+    --red-soft:#fff0ee;
+    --shadow:0 8px 22px rgba(15,53,87,.07);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--page);
+    color:var(--text);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+    font-size:14px;
+  }
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  .hidden{display:none!important}
+
+  .app-nav{
+    height:58px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  .nav-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:var(--nav);
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+  .brand-mark{
+    width:34px;height:34px;border-radius:8px;
+    background:var(--primary);
+    color:#fff;
+    display:grid;place-items:center;
+  }
+  .brand-mark svg{width:22px;height:22px}
+  .top-links{display:flex;align-items:center;gap:24px}
+  .top-links a{
+    color:#526273;text-decoration:none;font-size:13px;font-weight:700;
+    padding:20px 0 17px;border-bottom:3px solid transparent;
+  }
+  .top-links a:hover,.top-links a.active{color:var(--primary);border-bottom-color:var(--primary)}
+  .nav-language label{display:flex;align-items:center;gap:8px;color:#647383;font-size:12px;font-weight:700}
+  .nav-language select{
+    border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 9px;color:var(--text)
+  }
+
+  main{max-width:1220px;margin:0 auto;padding:30px 24px 60px}
+  .topbar{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px
+  }
+  .topbar h1{margin:0 0 7px;font-size:30px;letter-spacing:-.5px;color:#17324d}
+  .subtitle{margin:0;color:var(--muted);line-height:1.6;max-width:770px}
+  .top-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+
+  .workflow{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden
+  }
+  .workflow-step{
+    padding:14px 16px;border-right:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;background:#fff
+  }
+  .workflow-step:last-child{border-right:0}
+  .workflow-step.active{background:var(--primary-soft)}
+  .workflow-step.done .step-no{background:var(--green);border-color:var(--green);color:#fff}
+  .workflow-step.active .step-no{background:var(--primary);border-color:var(--primary);color:#fff}
+  .step-no{
+    width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+    border:1px solid #bdc9d4;color:#68798a;font-size:12px;font-weight:800;flex:none
+  }
+  .step-main{font-size:13px;font-weight:800;color:#2b3b4b}
+  .step-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .workspace-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.75fr);gap:18px}
+  .stack{display:grid;gap:18px;align-content:start}
+  .section{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .section-header{
+    padding:16px 18px;border-bottom:1px solid var(--line);
+    display:flex;align-items:flex-start;justify-content:space-between;gap:14px
+  }
+  .section-header h2{margin:0;font-size:17px;color:#21384e}
+  .section-header p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+  .section-body{padding:18px}
+  .section-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  .btn{
+    border:0;border-radius:7px;padding:9px 13px;font-weight:750;font-size:12px;
+    transition:.15s ease
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-secondary{background:var(--primary-soft);color:var(--primary);border:1px solid #c8dceb}
+  .btn-ghost{background:#fff;color:#455667;border:1px solid var(--line)}
+  .btn-danger{background:var(--red-soft);color:var(--red);border:1px solid #f4c8c2}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+  .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:#425365}
+  .field input,.field select,.field textarea{
+    width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 10px;background:#fff;color:var(--text)
+  }
+  .field textarea{min-height:130px;resize:vertical;line-height:1.45}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid rgba(31,78,121,.12);border-color:var(--primary)}
+
+  .subheading{
+    margin:18px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:12px
+  }
+  .subheading h3{margin:0;font-size:14px;color:#2a4054}
+  .note{
+    margin-top:14px;padding:11px 12px;border-radius:8px;font-size:12px;line-height:1.55
+  }
+  .note.info{background:var(--primary-soft);color:#315a79;border-left:3px solid var(--primary)}
+  .note.warn{background:var(--amber-soft);color:#725000;border-left:3px solid #d19713}
+  .note.good{background:var(--green-soft);color:#266443;border-left:3px solid var(--green)}
+
+  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}
+  table{width:100%;border-collapse:collapse;min-width:620px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;white-space:nowrap}
+  th{background:#f6f8fa;color:#546576;font-weight:800}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fafcfd}
+  td input,td select{width:100%;min-width:92px;border:1px solid var(--line);border-radius:6px;padding:7px 8px;background:#fff}
+  .row-btn{padding:6px 9px}
+
+  .summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .metric{
+    border:1px solid var(--line);border-radius:9px;padding:12px;background:#fbfcfd
+  }
+  .metric .label{font-size:11px;color:var(--muted);margin-bottom:6px}
+  .metric .value{font-size:19px;font-weight:850;color:var(--primary);line-height:1.15}
+  .metric .detail{font-size:11px;color:var(--muted);margin-top:5px}
+  .status-pill{
+    display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;
+    font-size:10px;font-weight:850
+  }
+  .status-pill.ready{background:var(--green-soft);color:var(--green)}
+  .status-pill.pending{background:var(--amber-soft);color:var(--amber)}
+  .status-pill.info{background:var(--primary-soft);color:var(--primary)}
+
+  .check-list{display:grid;gap:0}
+  .check-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 0;border-bottom:1px solid #e8edf1;font-size:12px
+  }
+  .check-row:last-child{border-bottom:0}
+  .check-label{color:#506171}
+  .check-value{font-weight:800;color:#2d3d4d;text-align:right}
+
+  .progress-track{height:8px;background:#e8edf2;border-radius:999px;overflow:hidden;margin-top:8px}
+  .progress-fill{height:100%;width:0;background:var(--primary);transition:.2s ease}
+
+  .results-layout{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .result-card{
+    border:1px solid var(--line);border-radius:9px;padding:13px;background:#fbfcfd
+  }
+  .result-card .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .result-card .v{font-size:18px;font-weight:850;color:#183b5c;margin-top:6px}
+  .result-card .s{font-size:11px;color:var(--muted);margin-top:4px}
+
+  .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:15px}
+  .chart-card{border:1px solid var(--line);border-radius:9px;padding:13px;background:#fff}
+  .chart-card h3{margin:0 0 4px;font-size:13px;color:#2c4256}
+  .chart-card p{margin:0 0 10px;font-size:11px;color:var(--muted)}
+  canvas{display:block;width:100%;height:230px}
+
+  .recommendation{
+    border:1px solid #b9d5c4;background:var(--green-soft);border-radius:9px;padding:14px;margin-top:15px
+  }
+  .recommendation h3{margin:0 0 5px;color:#225e3d;font-size:14px}
+  .recommendation p{margin:0;color:#38654d;font-size:12px;line-height:1.55}
+  .setting-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:11px}
+  .setting{background:#fff;border:1px solid #cde1d4;border-radius:7px;padding:9px}
+  .setting span{display:block;font-size:10px;color:#6c7d73;margin-bottom:4px}
+  .setting strong{font-size:12px;color:#244c36}
+  .decision-summary{border:1px solid #b9d5c4;background:var(--green-soft);border-radius:9px;padding:14px;margin-bottom:14px}
+  .decision-summary h3{margin:0 0 10px;color:#225e3d;font-size:15px}
+  .decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .decision-item{background:#fff;border:1px solid #cde1d4;border-radius:7px;padding:10px;min-height:72px}
+  .decision-item .label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#6c7d73;margin-bottom:5px;font-weight:800}
+  .decision-item .value{font-size:13px;color:#1f2d3d;font-weight:800;line-height:1.4}
+  .confidence-badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:850}
+  .confidence-high{background:var(--green-soft);color:var(--green);border:1px solid #b9d5c4}
+  .confidence-medium{background:var(--amber-soft);color:var(--amber);border:1px solid #ecd188}
+  .confidence-low{background:var(--red-soft);color:var(--red);border:1px solid #f4c8c2}
+  .evidence-package .section-body{display:grid;gap:14px}
+  .governance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+  .governance-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:12px}
+  .governance-card .label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:850;margin-bottom:6px}
+  .governance-card .value{font-size:18px;font-weight:850;color:#183b5c}
+  .governance-card .detail{font-size:11px;color:var(--muted);line-height:1.45;margin-top:6px}
+  .status-fail{color:var(--red)!important}
+  .status-pass{color:var(--green)!important}
+  .status-conditional{color:var(--amber)!important}
+  .evidence-layer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 14px}
+  .evidence-layer{border:1px solid var(--line);border-radius:9px;background:#fff;padding:14px}
+  .evidence-layer.measured{border-top:4px solid var(--primary)}
+  .evidence-layer.model{border-top:4px solid var(--amber)}
+  .evidence-layer.decision{border-top:4px solid var(--green)}
+  .evidence-layer h3{margin:0 0 4px;font-size:15px;color:#21384e}
+  .evidence-layer .purpose{font-size:11px;font-weight:850;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
+  .evidence-layer .source{font-size:11px;color:var(--muted);margin-top:10px;padding-top:8px;border-top:1px solid #e8edf1}
+  .evidence-layer .value{font-size:13px;line-height:1.5;color:#1f2d3d;font-weight:750}
+  .trace-list{display:grid;gap:8px}
+  .trace-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;border-bottom:1px solid #e8edf1;padding-bottom:8px;font-size:12px}
+  .trace-row:last-child{border-bottom:0;padding-bottom:0}
+  .trace-row strong{color:#425365}
+
+  .empty{
+    min-height:120px;border:1px dashed #c8d3dc;border-radius:8px;display:grid;place-items:center;
+    text-align:center;color:var(--muted);padding:20px;font-size:12px
+  }
+  .footer-note{font-size:11px;color:#758494;line-height:1.6;margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+  .full-width{grid-column:1/-1}
+
+  @media(max-width:980px){
+    .app-nav{height:auto;min-height:58px;padding:10px 16px;align-items:flex-start}
+    .top-links{gap:12px;flex-wrap:wrap;justify-content:flex-end}
+    .top-links a{padding:8px 0 6px}
+    main{padding:22px 16px 46px}
+    .workspace-grid{grid-template-columns:1fr}
+    .results-layout{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:700px){
+    .topbar{display:grid}
+    .top-actions{justify-content:flex-start}
+    .workflow{grid-template-columns:1fr 1fr}
+    .workflow-step:nth-child(2){border-right:0}
+    .workflow-step:nth-child(-n+2){border-bottom:1px solid var(--line)}
+    .grid-2,.grid-3,.chart-grid,.setting-grid,.summary-grid,.decision-grid,.governance-grid,.evidence-layer-grid{grid-template-columns:1fr}
+    .results-layout{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:#fff}
+    .app-nav,.workflow,.top-actions,.section-actions,.no-print{display:none!important}
+    main{max-width:none;padding:0}
+    .workspace-grid{display:block}
+    .section{box-shadow:none;break-inside:avoid;margin-bottom:12px}
+    .stack{display:block}
+    .stack>.section{margin-bottom:12px}
+  }
+</style>
+</head>
+<body>
+<header class="app-nav">
+  <a class="nav-brand" href="#plan" aria-label="DOE Home">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 18h16M6 15l3-5 4 3 5-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="6" cy="15" r="1.3" fill="currentColor"/>
+        <circle cx="9" cy="10" r="1.3" fill="currentColor"/>
+        <circle cx="13" cy="13" r="1.3" fill="currentColor"/>
+        <circle cx="18" cy="6" r="1.3" fill="currentColor"/>
+      </svg>
+    </span>
+    <span>DOE</span>
+  </a>
+  <nav class="top-links">
+    <a href="#plan" class="active" data-nav="plan">Plan</a>
+    <a href="#design" data-nav="design">Design</a>
+    <a href="#run" data-nav="run">Run</a>
+    <a href="#results" data-nav="results">Results</a>
+    <div class="nav-language">
+      <label>
+        <span id="uiLangLabel">Interface Language</span>
+        <select id="uiLanguageInput">
+          <option value="zh" selected>中文</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="topbar">
+    <div>
+      <h1 id="pageTitle">DOE Analysis Tool</h1>
+      <p class="subtitle" id="pageSubtitle">A standalone local tool for two-level experimental design, main-effects analysis and engineering-focused reporting.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-secondary" id="demoBtn">加载示例</button>
+      <button class="btn btn-ghost" id="resetBtn">重置</button>
+      <button class="btn btn-primary" id="printBtn">打印 / PDF</button>
+    </div>
+  </div>
+
+  <section class="workflow">
+    <div class="workflow-step active" id="wf1">
+      <div class="step-no">1</div>
+      <div><div class="step-main" id="wf1Main">定义问题</div><div class="step-sub" id="wf1Sub">Plan</div></div>
+    </div>
+    <div class="workflow-step" id="wf2">
+      <div class="step-no">2</div>
+      <div><div class="step-main" id="wf2Main">设计矩阵</div><div class="step-sub" id="wf2Sub">Design</div></div>
+    </div>
+    <div class="workflow-step" id="wf3">
+      <div class="step-no">3</div>
+      <div><div class="step-main" id="wf3Main">实验执行</div><div class="step-sub" id="wf3Sub">Run</div></div>
+    </div>
+    <div class="workflow-step" id="wf4">
+      <div class="step-no">4</div>
+      <div><div class="step-main" id="wf4Main">分析与报告</div><div class="step-sub" id="wf4Sub">Analyze & Report</div></div>
+    </div>
+  </section>
+
+  
+<div class="note info" style="margin-bottom:16px">
+<strong>DOE Engineering Workflow / DOE工程流程</strong><br>
+Define → Design → Execute → Analyze → Report<br>
+统一质量工程工具平台交互逻辑。
+</div>
+
+<div class="workspace-grid">
+    <div class="stack">
+      <section class="section" id="plan">
+        <div class="section-header">
+          <div>
+            <h2 id="planTitle">1. 定义问题</h2>
+            <p id="planDesc">定义一个响应、优化目标以及 2–6 个两水平因素。</p>
+          </div>
+          <span class="status-pill info" id="planStatus">待确认</span>
+        </div>
+        <div class="section-body">
+          
+          <div class="note info" style="margin-bottom:16px">
+            <strong>Experiment Definition / 实验定义</strong><br>
+            Define why this DOE is performed before selecting factors and generating the design matrix.
+          </div>
+          <div class="grid-2" style="margin-bottom:14px">
+            <div class="field">
+              <label>Experiment Type / 实验类型</label>
+              <select id="experimentType">
+                <option value="optimization">Optimization Study / 优化研究</option>
+                <option value="screening">Screening Study / 因素筛选</option>
+                <option value="rootcause">Root Cause Investigation / 根因分析</option>
+                <option value="robustness">Robustness Study / 稳健性研究</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Project ID</label>
+              <input id="projectId" placeholder="DOE-2026-001">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>Problem Statement / 问题描述</label>
+            <textarea id="problemStatement" rows="3" placeholder="Describe current condition, gap and engineering problem"></textarea>
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>Engineering Hypothesis / 工程假设</label>
+            <textarea id="engineeringHypothesis" rows="3" placeholder="What factors may influence the response?"></textarea>
+          </div>
+
+          <div class="note info" style="margin-bottom:16px">
+            <strong>CTQ Response Definition / CTQ响应定义</strong>
+          </div>
+          <div class="grid-3" style="margin-bottom:14px">
+            <div class="field">
+              <label>Characteristic Type / 特性类型</label>
+              <select id="responseType">
+                <option>Continuous / 连续型</option>
+                <option>Discrete / 离散型</option>
+                <option>Attribute / 属性型</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Target / 目标值</label>
+              <input id="responseTarget" placeholder="100">
+            </div>
+            <div class="field">
+              <label>Specification / 规格范围</label>
+              <input id="responseSpec" placeholder="LSL / USL">
+            </div>
+          </div>
+
+          <div class="note info" style="margin-bottom:16px">
+            <strong>Study Metadata / 试验追溯信息</strong>
+          </div>
+          <div class="grid-3" style="margin-bottom:18px">
+            <div class="field"><label>Product / 产品</label><input id="productName"></div>
+            <div class="field"><label>Part Number / 零件号</label><input id="partNumber"></div>
+            <div class="field"><label>Material Lot / 物料批次</label><input id="materialLot"></div>
+          </div>
+
+<div class="grid-2">
+            <div class="field">
+              <label id="projectLabel">实验名称</label>
+              <input id="projectName" value="Heat Seal Strength Optimization">
+            </div>
+            <div class="field">
+              <label id="responseLabel">响应名称</label>
+              <input id="responseName" value="Seal Strength">
+            </div>
+            <div class="field">
+              <label id="unitLabel">响应单位</label>
+              <input id="responseUnit" value="N/15mm">
+            </div>
+            <div class="field">
+              <label id="objectiveLabel">优化目标</label>
+              <select id="objective">
+                <option value="maximize">最大化</option>
+                <option value="minimize">最小化</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="subheading">
+            <h3 id="factorHeading">因素与水平</h3>
+            <button class="btn btn-secondary" id="addFactorBtn">+ 添加因素</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th id="thFactor">因素</th>
+                  <th id="thType">类型</th>
+                  <th>Factor Class</th>
+                  <th id="thLow">低水平</th>
+                  <th id="thHigh">高水平</th>
+                  <th id="thAction">操作</th>
+                </tr>
+              </thead>
+              <tbody id="factorBody"></tbody>
+            </table>
+          </div>
+
+          <div class="subheading">
+            <h3>Engineering Constraints / 工程约束</h3>
+          </div>
+          <div class="note info" style="margin-bottom:12px">
+            Define practical manufacturing limits. Hard constraints gate implementation readiness; soft constraints create a conditional release warning.
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Factor</th>
+                  <th>DOE Low</th>
+                  <th>DOE High</th>
+                  <th>Minimum Allowed</th>
+                  <th>Maximum Allowed</th>
+                  <th>Constraint Type</th>
+                </tr>
+              </thead>
+              <tbody id="constraintBody"></tbody>
+            </table>
+          </div>
+          
+<details style="margin-top:14px">
+<summary style="cursor:pointer;font-weight:800;color:#1f4e79">
+Advanced Study Information / 高级研究信息
+</summary>
+<p style="font-size:12px;color:#667788">
+Project ID、产品信息、物料批次、工程假设等用于报告追溯，不阻碍快速创建DOE。
+</p>
+</details>
+
+<div class="note info" id="planNote">
+            2–4 个因素使用全因子设计；5–6 个因素使用预定义的 8 次筛选设计。所有计算均在浏览器本地完成。
+          </div>
+          <div class="section-actions" style="margin-top:14px">
+            <button class="btn btn-primary" id="generateBtn">生成设计矩阵</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="design">
+        <div class="section-header">
+          <div>
+            <h2 id="designTitle">2. 实验设计</h2>
+            <p id="designDesc">自动选择设计类型，并保留标准顺序与随机运行顺序。</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-secondary" id="randomizeBtn">随机化顺序</button>
+            <button class="btn btn-ghost" id="restoreBtn">恢复标准顺序</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <div id="designEmpty" class="empty">完成定义问题后生成设计矩阵。</div>
+          <div id="designContent" class="hidden">
+            <div class="results-layout" style="margin-bottom:14px">
+              <div class="result-card"><div class="k" id="designTypeK">设计类型</div><div class="v" id="designTypeV">—</div><div class="s" id="designTypeS">自动选择</div></div>
+              <div class="result-card"><div class="k" id="factorCountK">因素数</div><div class="v" id="factorCountV">—</div><div class="s">Factors</div></div>
+              <div class="result-card"><div class="k" id="runCountK">运行数</div><div class="v" id="runCountV">—</div><div class="s">Runs</div></div>
+              <div class="result-card"><div class="k" id="orderK">运行顺序</div><div class="v" id="orderV">标准</div><div class="s">Run Order</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead id="designHead"></thead>
+                <tbody id="designBody"></tbody>
+              </table>
+            </div>
+            <div class="note warn hidden" id="screeningWarning">
+              筛选设计中的部分效应可能存在混杂。当前版本用于主效应筛选，不用于估算全部交互作用。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="run">
+        <div class="section-header">
+          <div>
+            <h2 id="runTitle">3. 执行实验</h2>
+            <p id="runDesc">按随机运行顺序执行实验，每次运行录入一个响应值。</p>
+          </div>
+          <div>
+            <span class="status-pill pending" id="runStatus">0 / 0 已完成</span>
+          </div>
+        </div>
+        <div class="section-body">
+          <div id="runEmpty" class="empty">生成设计矩阵后可录入实验响应。</div>
+          <div id="runContent" class="hidden">
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="table-wrap" style="margin-top:14px">
+              <table>
+                <thead id="runHead"></thead>
+                <tbody id="runBody"></tbody>
+              </table>
+            </div>
+            <div class="section-actions" style="margin-top:14px">
+              <button class="btn btn-secondary" id="fillResponsesBtn">填充示例响应</button>
+              <button class="btn btn-primary" id="analyzeBtn">运行分析</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="dataImportSection">
+        <div class="section-header">
+          <div>
+            <h2>DOE Data Import / 数据导入</h2>
+            <p>Import completed experimental results for analysis while keeping data processing local in the browser.</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-actions">
+            <button class="btn btn-secondary" id="downloadDoeTemplateBtn">Download CSV Template / 下载模板</button>
+            <button class="btn btn-primary" id="importDoeDataBtn">Import CSV / Excel</button>
+            <button class="btn btn-ghost" id="pasteDoeDataBtn">Paste Data</button>
+            <input id="doeCsvInput" type="file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
+          </div>
+          <div id="pasteImportBox" class="hidden" style="margin-top:12px">
+            <div class="field">
+              <label>Copy/Paste Table Data</label>
+              <textarea id="pasteDoeDataText" rows="6" placeholder="Paste CSV or tab-delimited data with headers"></textarea>
+            </div>
+            <button class="btn btn-secondary" id="previewPasteDataBtn" style="margin-top:10px">Preview Mapping</button>
+          </div>
+          <div id="importMappingPanel" class="note info hidden">
+            Import mapping preview will appear here.
+          </div>
+          <div class="note info" id="importStatus">
+            CSV format: Run, Factor columns, Response. Mapping must be confirmed before data is applied.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="dataValidationPanel">
+        <div class="section-header">
+          <div>
+            <h2>Data Validation / 数据验证</h2>
+            <p>Check DOE data before running analysis.</p>
+          </div>
+          <span class="status-pill pending" id="validationStatus">Pending</span>
+        </div>
+        <div class="section-body">
+          <div class="check-list">
+            <div class="check-row"><span class="check-label">Run Count</span><span class="check-value" id="validationRunCount">Not Checked</span></div>
+            <div class="check-row"><span class="check-label">Response Completeness</span><span class="check-value" id="validationResponse">Not Checked</span></div>
+            <div class="check-row"><span class="check-label">Factor Levels</span><span class="check-value" id="validationLevels">Not Checked</span></div>
+            <div class="check-row"><span class="check-label">Run Order</span><span class="check-value" id="validationRunOrder">Not Checked</span></div>
+            <div class="check-row"><span class="check-label">Replicates</span><span class="check-value" id="validationReplicates">Not Checked</span></div>
+            <div class="check-row"><span class="check-label">Missing Design Runs</span><span class="check-value" id="validationMissingRuns">Not Checked</span></div>
+            <div class="check-row"><span class="check-label">Analysis Readiness</span><span class="check-value" id="validationReady">Not Checked</span></div>
+          </div>
+          <button class="btn btn-secondary" id="runValidationBtn" style="margin-top:12px">Run Data Validation</button>
+        </div>
+      </section>
+
+      <section class="section" id="results">
+        <div class="section-header">
+          <div>
+            <h2 id="resultsTitle">4. 分析与报告</h2>
+            <p id="resultsDesc">比较高低水平平均响应，排序主效应，并形成确认试验建议。</p>
+          </div>
+          <span class="status-pill pending" id="analysisStatus">未分析</span>
+        </div>
+        <div class="section-body">
+          <div id="resultsEmpty" class="empty">完成全部响应值并运行分析后显示结果。</div>
+          <div id="resultsContent" class="hidden">
+
+<div class="note good" style="margin-bottom:12px">
+<strong>DOE Dashboard / DOE决策摘要</strong><br>
+Review dominant factors, recommended settings and confirmation status before implementation.
+</div>
+
+            <div class="evidence-layer-grid" id="evidenceSeparationLayers">
+              <div class="evidence-layer measured">
+                <h3>Measured Results / Experimental Evidence</h3>
+                <div class="purpose">What actually happened</div>
+                <div class="value" id="measuredLayerBody">—</div>
+                <div class="source">Measured · Source: Experimental Run Data</div>
+              </div>
+              <div class="evidence-layer model">
+                <h3>Model Prediction</h3>
+                <div class="purpose">What the DOE model estimates</div>
+                <div class="value" id="modelLayerBody">—</div>
+                <div class="source">Predicted · Source: DOE Model</div>
+              </div>
+              <div class="evidence-layer decision">
+                <h3>Engineering Decision</h3>
+                <div class="purpose">What we should do</div>
+                <div class="value" id="decisionLayerBody">—</div>
+                <div class="source">Decision · Source: Engineering Evaluation</div>
+              </div>
+            </div>
+
+            <div class="section" id="decisionTraceSection" style="margin-bottom:14px">
+              <div class="section-header">
+                <div>
+                  <h2>Decision Trace / 决策追溯</h2>
+                  <p>Measured evidence, model prediction, constraints, target and confirmation linked to the final decision.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="trace-list" id="decisionTraceBody"></div>
+              </div>
+            </div>
+
+            <div class="decision-summary" id="decisionSummary">
+              <h3>DOE Decision Summary / 工程决策摘要</h3>
+              <div class="decision-grid">
+                <div class="decision-item"><div class="label">Experiment Objective</div><div class="value" id="decisionObjective">—</div></div>
+                <div class="decision-item"><div class="label">Key Factors</div><div class="value" id="decisionKeyFactors">—</div></div>
+                <div class="decision-item"><div class="label">Statistical Evidence</div><div class="value" id="decisionEvidence">—</div></div>
+                <div class="decision-item"><div class="label">Engineering Direction</div><div class="value" id="decisionDirection">—</div></div>
+                <div class="decision-item"><div class="label">Recommended Setting</div><div class="value" id="decisionSetting">—</div></div>
+                <div class="decision-item"><div class="label">Validation Status</div><div class="value" id="decisionValidation">—</div></div>
+              </div>
+            </div>
+
+            <div class="governance-grid" id="implementationGovernance">
+              <div class="governance-card">
+                <div class="label">Engineering Constraints</div>
+                <div class="value" id="constraintGateStatus">—</div>
+                <div class="detail" id="constraintGateDetail">—</div>
+              </div>
+              <div class="governance-card">
+                <div class="label">Target Achievement</div>
+                <div class="value" id="targetGateStatus">—</div>
+                <div class="detail" id="targetGateDetail">—</div>
+              </div>
+              <div class="governance-card">
+                <div class="label">DOE Implementation Readiness</div>
+                <div class="value" id="readinessGateStatus">—</div>
+                <div class="detail" id="readinessGateDetail">—</div>
+              </div>
+            </div>
+
+            <div class="results-layout">
+              <div class="result-card">
+                <div class="k" id="largestK">最大效应因素</div>
+                <div class="v" id="largestV">—</div>
+                <div class="s" id="largestS">—</div>
+              </div>
+              <div class="result-card">
+                <div class="k" id="bestRunK">最佳已观察运行</div>
+                <div class="v" id="bestRunV">—</div>
+                <div class="s" id="bestRunS">—</div>
+              </div>
+              <div class="result-card">
+                <div class="k" id="objectiveK">优化目标</div>
+                <div class="v" id="objectiveV">—</div>
+                <div class="s">Response Objective</div>
+              </div>
+              <div class="result-card">
+                <div class="k" id="completeK">完整运行</div>
+                <div class="v" id="completeV">—</div>
+                <div class="s">Complete Runs</div>
+              </div>
+            </div>
+
+            <div class="chart-grid">
+              <div class="chart-card">
+                <h3 id="mainEffectsChartTitle">主效应图</h3>
+                <p id="mainEffectsChartDesc">每个因素低水平与高水平的平均响应。</p>
+                <canvas id="mainEffectsChart" width="520" height="230"></canvas>
+              </div>
+              <div class="chart-card">
+                <h3 id="rankingChartTitle">效应排序</h3>
+                <p id="rankingChartDesc">按主效应绝对值从大到小排序。</p>
+                <canvas id="rankingChart" width="520" height="230"></canvas>
+              </div>
+            </div>
+
+            <div class="subheading"><h3 id="effectTableTitle">主效应明细</h3></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th id="erFactor">因素</th>
+                    <th id="erLow">低水平平均值</th>
+                    <th id="erHigh">高水平平均值</th>
+                    <th id="erEffect">主效应</th>
+                    <th>Evidence</th>
+                    <th>Confidence</th>
+                    <th>Recommended Action</th>
+                  </tr>
+                </thead>
+                <tbody id="effectsBody"></tbody>
+              </table>
+            </div>
+
+            <div class="recommendation">
+              <h3 id="recommendTitle">基于主效应的预测推荐设定</h3>
+              <p id="recommendText">以下组合用于形成确认试验，不应直接视为已经验证的最优组合。</p>
+              <div class="setting-grid" id="settingGrid"></div>
+            </div>
+
+            <div class="note info" id="confirmationNote">
+              <strong>确认试验：</strong>按推荐设定再执行一次实验，并将实际响应与当前最佳结果比较。
+            </div>
+
+            <div class="section evidence-package" id="evidencePackage" style="margin-top:15px">
+              <div class="section-header">
+                <div>
+                  <h2>DOE Evidence Package / DOE证据包</h2>
+                  <p>Structured evidence for engineering review, confirmation and implementation decisions.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div>
+                  <div class="subheading"><h3>V7.5.1 Experimental Evidence</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportMeasuredEvidenceBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>V7.5.2 Model Output</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportModelOutputBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>V7.5.3 Engineering Decision</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportEngineeringDecisionBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>V7.5.4 Decision Trace</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportDecisionTraceBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>1. Experiment Definition</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportExperimentBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>2. DOE Design</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportDesignBody"></tbody></table></div>
+                  <div class="table-wrap" style="margin-top:10px">
+                    <table>
+                      <thead id="reportDesignMatrixHead"></thead>
+                      <tbody id="reportDesignMatrixBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>3. Data Validation</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportValidationBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>4. Analysis</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportAnalysisBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>5. Decision</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportDecisionBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>6. Engineering Constraint Review</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportConstraintBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>7. Target Verification</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportTargetBody"></tbody></table></div>
+                </div>
+                <div>
+                  <div class="subheading"><h3>8. Implementation Decision</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportImplementationBody"></tbody></table></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section" id="doeStudyReport" style="margin-top:15px">
+              <div class="section-header">
+                <div>
+                  <h2>DOE Study Record / 实验记录</h2>
+                  <p>Planning information retained for engineering review and reproducibility.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="table-wrap">
+                  <table>
+                    <tbody id="studyReportBody"></tbody>
+                  </table>
+                </div>
+                <div class="subheading"><h3>Factor Definition / 因素定义</h3></div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Factor</th>
+                        <th>Classification</th>
+                        <th>Low Level</th>
+                        <th>High Level</th>
+                      </tr>
+                    </thead>
+                    <tbody id="factorReportBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            <div class="section" id="confirmationLoop" style="margin-top:15px">
+              <div class="section-header">
+                <div>
+                  <h2>Confirmation Experiment / 确认实验</h2>
+                  <p>Validate the recommended settings before engineering implementation.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="grid-2">
+                  <div class="field">
+                    <label>Predicted Response / 预测响应</label>
+                    <input id="confirmationPredicted" type="number" step="any" placeholder="Model prediction">
+                  </div>
+                  <div class="field">
+                    <label>Actual Response / 实际响应</label>
+                    <input id="confirmationActual" type="number" step="any" placeholder="Confirmation result">
+                  </div>
+                </div>
+                <div class="summary-grid" style="margin-top:14px">
+                  <div class="metric"><div class="label">Prediction Error</div><div class="value" id="confirmationError">-</div></div>
+                  <div class="metric"><div class="label">Decision</div><div class="value" id="confirmationDecision">Pending</div></div>
+                </div>
+                <div class="note info" id="confirmationInterpretation">
+                  Confirmation is required before treating the DOE recommendation as an implemented process condition.
+                </div>
+              </div>
+            </div>
+
+<div class="footer-note" id="limitations">
+              本工具通过高水平平均值减去低水平平均值估算主效应。仅当重复全因子实验提供有效纯误差估计时才显示 ANOVA F 值和 p 值。筛选设计中的部分效应可能存在混杂，不提供独立交互作用结论。正式实施前必须进行确认试验。
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="stack">
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2 id="studySummaryTitle">研究摘要</h2>
+            <p id="studySummaryDesc">当前 DOE 项目的结构与状态。</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="summary-grid">
+            <div class="metric"><div class="label" id="sumFactorsLabel">因素数</div><div class="value" id="sumFactors">3</div><div class="detail">2–6 supported</div></div>
+            <div class="metric"><div class="label" id="sumRunsLabel">运行数</div><div class="value" id="sumRuns">—</div><div class="detail">Auto generated</div></div>
+            <div class="metric"><div class="label" id="sumResponseLabel">响应</div><div class="value" id="sumResponse">Seal Strength</div><div class="detail" id="sumUnit">N/15mm</div></div>
+            <div class="metric"><div class="label" id="sumProgressLabel">完成度</div><div class="value" id="sumProgress">0%</div><div class="detail">Run completion</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2 id="checksTitle">分析就绪检查</h2>
+            <p id="checksDesc">运行分析前的最小完整性检查。</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="check-list">
+            <div class="check-row"><span class="check-label" id="checkFactorsL">因素范围</span><span class="check-value" id="checkFactorsV">通过</span></div>
+            <div class="check-row"><span class="check-label" id="checkLevelsL">高低水平</span><span class="check-value" id="checkLevelsV">通过</span></div>
+            <div class="check-row"><span class="check-label" id="checkDesignL">设计矩阵</span><span class="check-value" id="checkDesignV">未生成</span></div>
+            <div class="check-row"><span class="check-label" id="checkResponsesL">响应数据</span><span class="check-value" id="checkResponsesV">未完成</span></div>
+            <div class="check-row"><span class="check-label" id="checkAnalysisL">分析状态</span><span class="check-value" id="checkAnalysisV">未就绪</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2 id="methodTitle">方法说明</h2>
+            <p id="methodDesc">MVP 当前支持范围。</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="check-list">
+            <div class="check-row"><span class="check-label">2–4 Factors</span><span class="check-value" id="methodFull">Full Factorial</span></div>
+            <div class="check-row"><span class="check-label">5–6 Factors</span><span class="check-value" id="methodScreen">8-Run Screening</span></div>
+            <div class="check-row"><span class="check-label" id="methodEffectL">效应计算</span><span class="check-value">Avg High − Avg Low</span></div>
+            <div class="check-row"><span class="check-label" id="methodLocalL">数据处理</span><span class="check-value" id="methodLocalV">浏览器本地</span></div>
+          </div>
+          <div class="note warn" id="methodWarning">
+            仅在重复全因子数据具备有效误差估计时计算 p-value；筛选设计不声明交互作用显著性或统计最优。
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script>
+const state={
+  lang:'zh',
+  randomized:false,
+  analyzed:false,
+  validation:null,
+  anova:null,
+  decision:null,
+  governance:null,
+  evidenceSeparation:null,
+  importPreview:null,
+  study:{
+    experimentType:'optimization',
+    projectId:'',
+    problemStatement:'',
+    engineeringHypothesis:'',
+    responseType:'Continuous / 连续型',
+    target:'',
+    specification:'',
+    product:'',
+    partNumber:'',
+    materialLot:''
+  },
+  factors:[
+    {id:'f1',name:'Temperature',type:'numeric',classification:'controlled',low:'160°C',high:'180°C',constraintMin:'',constraintMax:'',constraintType:'none'},
+    {id:'f2',name:'Pressure',type:'numeric',classification:'controlled',low:'2.0 bar',high:'3.0 bar',constraintMin:'',constraintMax:'',constraintType:'none'},
+    {id:'f3',name:'Dwell Time',type:'numeric',classification:'controlled',low:'0.8 s',high:'1.2 s',constraintMin:'',constraintMax:'',constraintType:'none'}
+  ],
+  design:null
+};
+
+const I18N={
+zh:{
+ uiLangLabel:'界面语言',pageTitle:'DOE Analysis Tool',
+ pageSubtitle:'一款用于两水平实验设计、主效应分析和工程化报告的浏览器本地工具。',
+ demo:'加载示例',reset:'重置',print:'打印 / PDF',
+ wf1:'定义问题',wf2:'设计矩阵',wf3:'实验执行',wf4:'分析与报告',
+ planTitle:'1. 定义问题',planDesc:'定义一个响应、优化目标以及 2–6 个两水平因素。',
+ pending:'待确认',complete:'已完成',project:'实验名称',response:'响应名称',unit:'响应单位',objective:'优化目标',
+ maximize:'最大化',minimize:'最小化',factorHeading:'因素与水平',addFactor:'+ 添加因素',
+ factor:'因素',type:'类型',numeric:'数值型',categorical:'类别型',low:'低水平',high:'高水平',action:'操作',remove:'删除',
+ planNote:'2–4 个因素使用全因子设计；5–6 个因素使用预定义的 8 次筛选设计。所有计算均在浏览器本地完成。',
+ generate:'生成设计矩阵',
+ designTitle:'2. 实验设计',designDesc:'自动选择设计类型，并保留标准顺序与随机运行顺序。',
+ randomize:'随机化顺序',restore:'恢复标准顺序',designEmpty:'完成定义问题后生成设计矩阵。',
+ designType:'设计类型',factorCount:'因素数',runCount:'运行数',order:'运行顺序',standard:'标准',randomized:'随机',
+ full:'全因子设计',screen:'8 次筛选设计',auto:'自动选择',
+ screeningWarning:'筛选设计中的部分效应可能存在混杂。当前版本用于主效应筛选，不用于估算全部交互作用。',
+ runTitle:'3. 执行实验',runDesc:'按随机运行顺序执行实验，每次运行录入一个响应值。',
+ runEmpty:'生成设计矩阵后可录入实验响应。',completed:'已完成',fill:'填充示例响应',analyze:'运行分析',
+ run:'运行',stdOrder:'标准序',responseValue:'响应值',
+ resultsTitle:'4. 分析与报告',resultsDesc:'比较高低水平平均响应，排序主效应，并形成确认试验建议。',
+ notAnalyzed:'未分析',analysisReady:'分析完成',resultsEmpty:'完成全部响应值并运行分析后显示结果。',
+ largest:'最大效应因素',bestRun:'最佳已观察运行',completeRuns:'完整运行',
+ mainChart:'主效应图',mainChartDesc:'每个因素低水平与高水平的平均响应。',
+ rankChart:'效应排序',rankChartDesc:'按主效应绝对值从大到小排序。',
+ effectTable:'主效应明细',avgLow:'低水平平均值',avgHigh:'高水平平均值',effect:'主效应',preferred:'推荐水平',meaning:'工程解释',
+ recommendTitle:'基于主效应的预测推荐设定',recommendText:'以下组合用于形成确认试验，不应直接视为已经验证的最优组合。',
+ confirmation:'<strong>确认试验：</strong>按推荐设定再执行一次实验，并将实际响应与当前最佳结果比较。',
+ limitations:'本工具通过高水平平均值减去低水平平均值估算主效应。仅当重复全因子实验提供有效纯误差估计时才显示 ANOVA F 值和 p 值。筛选设计中的部分效应可能存在混杂，不提供独立交互作用结论。正式实施前必须进行确认试验。',
+ studySummary:'研究摘要',studySummaryDesc:'当前 DOE 项目的结构与状态。',sumFactors:'因素数',sumRuns:'运行数',sumResponse:'响应',sumProgress:'完成度',
+ checks:'分析就绪检查',checksDesc:'运行分析前的最小完整性检查。',factorRange:'因素范围',levels:'高低水平',designMatrix:'设计矩阵',responseData:'响应数据',analysisStatus:'分析状态',
+ pass:'通过',notGenerated:'未生成',incomplete:'未完成',notReady:'未就绪',ready:'就绪',
+ method:'方法说明',methodDesc:'MVP 当前支持范围。',effectCalc:'效应计算',local:'数据处理',localValue:'浏览器本地',
+ methodWarning:'仅在重复全因子数据具备有效误差估计时计算 p-value；筛选设计不声明交互作用显著性或统计最优。',
+ highLevel:'高水平',lowLevel:'低水平',noDifference:'无明显差异',
+ highBetter:'高水平平均响应更优',lowBetter:'低水平平均响应更优',noObserved:'未观察到明显方向',
+ invalidCount:'仅支持 2–6 个因素。',missingFields:'请完整填写所有因素名称和高低水平。',
+ sameLevels:'同一因素的高低水平不能相同。',missingResponses:'请为每一次运行输入有效的数值响应。'
+},
+en:{
+ uiLangLabel:'Interface Language',pageTitle:'DOE Analysis Tool',
+ pageSubtitle:'A standalone local tool for two-level experimental design, main-effects analysis and engineering-focused reporting.',
+ demo:'Load Demo',reset:'Reset',print:'Print / PDF',
+ wf1:'Plan',wf2:'Design Matrix',wf3:'Execute Experiment',wf4:'Analyze & Report',
+ planTitle:'1. Define Problem',planDesc:'Define one response, an objective and 2–6 two-level factors.',
+ pending:'Pending',complete:'Complete',project:'Experiment Name',response:'Response Name',unit:'Response Unit',objective:'Objective',
+ maximize:'Maximize',minimize:'Minimize',factorHeading:'Factors and Levels',addFactor:'+ Add Factor',
+ factor:'Factor',type:'Type',numeric:'Numeric',categorical:'Categorical',low:'Low Level',high:'High Level',action:'Action',remove:'Remove',
+ planNote:'A full factorial design is used for 2–4 factors. A predefined 8-run screening design is used for 5–6 factors. All calculations run locally in the browser.',
+ generate:'Generate Design',
+ designTitle:'2. Experimental Design',designDesc:'Select the design automatically and retain both standard and randomized run order.',
+ randomize:'Randomize Order',restore:'Restore Standard Order',designEmpty:'Complete the experiment plan, then generate the design matrix.',
+ designType:'Design Type',factorCount:'Factors',runCount:'Runs',order:'Run Order',standard:'Standard',randomized:'Randomized',
+ full:'Full Factorial',screen:'8-Run Screening',auto:'Auto selected',
+ screeningWarning:'Some effects in the screening design may be confounded. This version is intended for main-effects screening, not estimation of all interactions.',
+ runTitle:'3. Experimental Run and Data Entry',runDesc:'Execute the experiment in run order and enter one response for every run.',
+ runEmpty:'Generate a design before entering responses.',completed:'completed',fill:'Fill Demo Responses',analyze:'Run Analysis',
+ run:'Run',stdOrder:'Std. Order',responseValue:'Response',
+ resultsTitle:'4. Results and Engineering Interpretation',resultsDesc:'Compare low and high means, rank main effects and prepare a confirmation run.',
+ notAnalyzed:'Not Analyzed',analysisReady:'Analysis Complete',resultsEmpty:'Complete all response values and run the analysis to view results.',
+ largest:'Largest Effect',bestRun:'Best Observed Run',completeRuns:'Complete Runs',
+ mainChart:'Main Effects Plot',mainChartDesc:'Average response at the low and high level of each factor.',
+ rankChart:'Effect Ranking',rankChartDesc:'Factors ranked by absolute main effect.',
+ effectTable:'Main-Effects Details',avgLow:'Average at Low',avgHigh:'Average at High',effect:'Main Effect',preferred:'Preferred Level',meaning:'Engineering Interpretation',
+ recommendTitle:'Predicted Preferred Settings Based on Main Effects',recommendText:'Use this combination for a confirmation run. It is not yet a verified optimum.',
+ confirmation:'<strong>Confirmation run:</strong> Run the experiment once more at the recommended settings and compare the observed response with the current best result.',
+ limitations:'This tool estimates main effects as average at high minus average at low. ANOVA F values and p-values are shown only when replicated full-factorial data provides a valid pure-error estimate. Screening effects may be confounded and do not support independent interaction conclusions. Confirm the recommendation before implementation.',
+ studySummary:'Study Summary',studySummaryDesc:'Structure and status of the current DOE project.',sumFactors:'Factors',sumRuns:'Runs',sumResponse:'Response',sumProgress:'Completion',
+ checks:'Analysis Readiness',checksDesc:'Minimum completeness checks before analysis.',factorRange:'Factor Range',levels:'Low / High Levels',designMatrix:'Design Matrix',responseData:'Response Data',analysisStatus:'Analysis Status',
+ pass:'Pass',notGenerated:'Not Generated',incomplete:'Incomplete',notReady:'Not Ready',ready:'Ready',
+ method:'Method Notes',methodDesc:'Current MVP scope.',effectCalc:'Effect Calculation',local:'Data Processing',localValue:'Local Browser',
+ methodWarning:'p-values are calculated only when replicated full-factorial data has a valid error estimate. Screening designs do not claim interaction significance or a statistical optimum.',
+ highLevel:'High',lowLevel:'Low',noDifference:'No Clear Difference',
+ highBetter:'The high level has the better average response',lowBetter:'The low level has the better average response',noObserved:'No clear direction was observed',
+ invalidCount:'Only 2–6 factors are supported.',missingFields:'Complete all factor names and low/high levels.',
+ sameLevels:'Low and high levels must be different for each factor.',missingResponses:'Enter a valid numeric response for every run.'
+}};
+
+const $=id=>document.getElementById(id);
+const t=k=>I18N[state.lang][k]||k;
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:3});
+const formatP=p=>p<0.0001?'<0.0001':Number(p).toLocaleString(undefined,{maximumFractionDigits:4});
+
+/* STAT_ENGINE_START */
+function statMean(list){return list.reduce((sum,value)=>sum+value,0)/list.length}
+function statVarianceWithinGroups(groups){
+  let ss=0,df=0;
+  groups.forEach(values=>{
+    if(values.length>1){
+      const mean=statMean(values);
+      ss+=values.reduce((sum,value)=>sum+(value-mean)**2,0);
+      df+=values.length-1;
+    }
+  });
+  return {ss,df,ms:df>0?ss/df:null};
+}
+function logGamma(z){
+  const p=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(z<0.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-logGamma(1-z);
+  z-=1;
+  let x=0.99999999999980993;
+  for(let i=0;i<p.length;i++)x+=p[i]/(z+i+1);
+  const t=z+p.length-0.5;
+  return 0.9189385332046727+(z+0.5)*Math.log(t)-t+Math.log(x);
+}
+function betaContinuedFraction(x,a,b){
+  const maxIterations=100,epsilon=3e-7,fpmin=1e-30;
+  let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+  if(Math.abs(d)<fpmin)d=fpmin;
+  d=1/d;
+  let h=d;
+  for(let m=1;m<=maxIterations;m++){
+    const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d;if(Math.abs(d)<fpmin)d=fpmin;
+    c=1+aa/c;if(Math.abs(c)<fpmin)c=fpmin;
+    d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d;if(Math.abs(d)<fpmin)d=fpmin;
+    c=1+aa/c;if(Math.abs(c)<fpmin)c=fpmin;
+    d=1/d;
+    const del=d*c;
+    h*=del;
+    if(Math.abs(del-1)<epsilon)break;
+  }
+  return h;
+}
+function regularizedBeta(x,a,b){
+  if(x<=0)return 0;
+  if(x>=1)return 1;
+  const bt=Math.exp(logGamma(a+b)-logGamma(a)-logGamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  if(x<(a+1)/(a+b+2))return bt*betaContinuedFraction(x,a,b)/a;
+  return 1-bt*betaContinuedFraction(1-x,b,a)/b;
+}
+function fSurvival(f,df1,df2){
+  if(!(f>=0)||df1<=0||df2<=0)return null;
+  const x=(df1*f)/(df1*f+df2);
+  return Math.max(0,Math.min(1,1-regularizedBeta(x,df1/2,df2/2)));
+}
+function combinationKeyFromRun(run,factors){
+  return factors.map(f=>`${f.id}:${String(run.settings[f.id]).trim()}`).join('|');
+}
+function expectedFullFactorialKeys(factors){
+  return factors.reduce((rows,f)=>rows.flatMap(row=>[
+    {...row,[f.id]:f.low},
+    {...row,[f.id]:f.high}
+  ]),[{}]).map(settings=>combinationKeyFromRun({settings},factors));
+}
+function validateDOEDataDetailed(design,factors){
+  const result={valid:false,errors:[],warnings:[],metrics:{}};
+  if(!design){result.errors.push('No DOE design has been generated.');return result}
+  const runs=design.runs||[];
+  const expectedKeys=design.type==='full_factorial'?expectedFullFactorialKeys(factors):[];
+  const runOrders=new Map(),standardOrders=new Map(),comboCounts=new Map();
+  let missingResponses=0,invalidResponses=0,invalidLevels=0;
+  runs.forEach((run,index)=>{
+    if(!Number.isFinite(Number(run.runOrder)) || runOrders.has(Number(run.runOrder)))result.errors.push(`Duplicate or missing run order at row ${index+1}.`);
+    else runOrders.set(Number(run.runOrder),true);
+    if(run.standardOrder!=null){
+      if(standardOrders.has(Number(run.standardOrder)))result.warnings.push(`Standard order ${run.standardOrder} appears more than once; treated as replication if factor levels match.`);
+      standardOrders.set(Number(run.standardOrder),true);
+    }
+    if(run.response==null || run.response==='')missingResponses++;
+    else if(!Number.isFinite(Number(run.response)))invalidResponses++;
+    factors.forEach(f=>{
+      const value=String(run.settings?.[f.id]??'').trim();
+      if(value!==String(f.low).trim() && value!==String(f.high).trim())invalidLevels++;
+    });
+    const key=combinationKeyFromRun(run,factors);
+    comboCounts.set(key,(comboCounts.get(key)||0)+1);
+  });
+  const missingKeys=expectedKeys.filter(key=>!comboCounts.has(key));
+  const replicateCounts=[...comboCounts.values()].filter(count=>count>1);
+  const allCounts=[...comboCounts.values()];
+  const balancedReplicates=allCounts.length>0 && allCounts.every(count=>count===allCounts[0]);
+  if(missingResponses)result.errors.push(`${missingResponses} run(s) have missing responses.`);
+  if(invalidResponses)result.errors.push(`${invalidResponses} response value(s) are not numeric.`);
+  if(invalidLevels)result.errors.push(`${invalidLevels} factor level value(s) do not match the defined low/high levels.`);
+  if(missingKeys.length)result.errors.push(`${missingKeys.length} expected design combination(s) are missing.`);
+  if(design.type==='full_factorial' && replicateCounts.length && !balancedReplicates)result.warnings.push('Replicate counts are not balanced across all factor combinations.');
+  result.metrics={
+    runCount:runs.length,
+    expectedRunCount:design.type==='full_factorial'?2**factors.length:8,
+    missingResponses,
+    invalidResponses,
+    invalidLevels,
+    duplicateCombinations:replicateCounts.length,
+    maxReplicates:allCounts.length?Math.max(...allCounts):0,
+    missingRuns:missingKeys.length,
+    balancedReplicates
+  };
+  result.valid=result.errors.length===0;
+  return result;
+}
+function computeFullFactorialAnova(design,factors){
+  const validation=validateDOEDataDetailed(design,factors);
+  if(!validation.valid)return {valid:false,reason:validation.errors.join(' ')};
+  if(design.type!=='full_factorial')return {valid:false,reason:'ANOVA significance is disabled for screening designs because effects may be aliased/confounded.'};
+  const runs=design.runs.map(run=>({...run,response:Number(run.response)}));
+  const n=runs.length,grandMean=statMean(runs.map(run=>run.response));
+  const totalSS=runs.reduce((sum,run)=>sum+(run.response-grandMean)**2,0);
+  const factorRows=factors.map(f=>{
+    const low=runs.filter(run=>String(run.settings[f.id])===String(f.low)).map(run=>run.response);
+    const high=runs.filter(run=>String(run.settings[f.id])===String(f.high)).map(run=>run.response);
+    const lowMean=statMean(low),highMean=statMean(high);
+    const ss=(low.length*(lowMean-grandMean)**2)+(high.length*(highMean-grandMean)**2);
+    return {term:f.name,df:1,ss,ms:ss,effect:highMean-lowMean,coefficient:(highMean-lowMean)/2};
+  });
+  const factorSS=factorRows.reduce((sum,row)=>sum+row.ss,0);
+  const residualSS=Math.max(0,totalSS-factorSS);
+  const residualDf=n-factors.length-1;
+  const groups=new Map();
+  runs.forEach(run=>{
+    const key=combinationKeyFromRun(run,factors);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(run.response);
+  });
+  const pureError=statVarianceWithinGroups([...groups.values()]);
+  const lackOfFitSS=Math.max(0,residualSS-pureError.ss);
+  const lackOfFitDf=Math.max(0,residualDf-pureError.df);
+  const mse=pureError.df>0&&pureError.ms>0?pureError.ms:null;
+  const valid=Boolean(mse);
+  const pReason=valid?'':'Descriptive analysis only. Statistical significance cannot be estimated due to insufficient error estimation.';
+  factorRows.forEach(row=>{
+    row.f=mse?row.ms/mse:null;
+    row.p=mse?fSurvival(row.f,row.df,pureError.df):null;
+  });
+  return {
+    valid,
+    reason:pReason,
+    rows:factorRows,
+    residual:{term:'Residual',df:residualDf,ss:residualSS,ms:residualDf>0?residualSS/residualDf:null},
+    pureError:{term:'Pure Error',df:pureError.df,ss:pureError.ss,ms:pureError.ms},
+    lackOfFit:{term:'Lack of Fit / Interactions',df:lackOfFitDf,ss:lackOfFitSS,ms:lackOfFitDf>0?lackOfFitSS/lackOfFitDf:null},
+    total:{term:'Total',df:n-1,ss:totalSS,ms:null},
+    validation
+  };
+}
+/* STAT_ENGINE_END */
+
+function renderLanguage(){
+  $('uiLangLabel').textContent=t('uiLangLabel');
+  $('pageTitle').textContent=t('pageTitle'); $('pageSubtitle').textContent=t('pageSubtitle');
+  $('demoBtn').textContent=t('demo'); $('resetBtn').textContent=t('reset'); $('printBtn').textContent=t('print');
+  ['wf1','wf2','wf3','wf4'].forEach((id,i)=>$(id+'Main').textContent=t(id));
+  $('planTitle').textContent=t('planTitle'); $('planDesc').textContent=t('planDesc');
+  $('projectLabel').textContent=t('project'); $('responseLabel').textContent=t('response'); $('unitLabel').textContent=t('unit'); $('objectiveLabel').textContent=t('objective');
+  $('objective').options[0].textContent=t('maximize'); $('objective').options[1].textContent=t('minimize');
+  $('factorHeading').textContent=t('factorHeading'); $('addFactorBtn').textContent=t('addFactor');
+  $('thFactor').textContent=t('factor'); $('thType').textContent=t('type'); $('thLow').textContent=t('low'); $('thHigh').textContent=t('high'); $('thAction').textContent=t('action');
+  $('planNote').textContent=t('planNote'); $('generateBtn').textContent=t('generate');
+  $('designTitle').textContent=t('designTitle'); $('designDesc').textContent=t('designDesc');
+  $('randomizeBtn').textContent=t('randomize'); $('restoreBtn').textContent=t('restore'); $('designEmpty').textContent=t('designEmpty');
+  $('designTypeK').textContent=t('designType'); $('factorCountK').textContent=t('factorCount'); $('runCountK').textContent=t('runCount'); $('orderK').textContent=t('order'); $('designTypeS').textContent=t('auto');
+  $('screeningWarning').textContent=t('screeningWarning');
+  $('runTitle').textContent=t('runTitle'); $('runDesc').textContent=t('runDesc'); $('runEmpty').textContent=t('runEmpty'); $('fillResponsesBtn').textContent=t('fill'); $('analyzeBtn').textContent=t('analyze');
+  $('resultsTitle').textContent=t('resultsTitle'); $('resultsDesc').textContent=t('resultsDesc'); $('resultsEmpty').textContent=t('resultsEmpty');
+  $('largestK').textContent=t('largest'); $('bestRunK').textContent=t('bestRun'); $('objectiveK').textContent=t('objective'); $('completeK').textContent=t('completeRuns');
+  $('mainEffectsChartTitle').textContent=t('mainChart'); $('mainEffectsChartDesc').textContent=t('mainChartDesc');
+  $('rankingChartTitle').textContent=t('rankChart'); $('rankingChartDesc').textContent=t('rankChartDesc'); $('effectTableTitle').textContent=t('effectTable');
+  $('erFactor').textContent=t('factor'); $('erLow').textContent=t('avgLow'); $('erHigh').textContent=t('avgHigh'); $('erEffect').textContent=t('effect');
+  $('recommendTitle').textContent=t('recommendTitle'); $('recommendText').textContent=t('recommendText'); $('confirmationNote').innerHTML=t('confirmation'); $('limitations').textContent=t('limitations');
+  $('studySummaryTitle').textContent=t('studySummary'); $('studySummaryDesc').textContent=t('studySummaryDesc');
+  $('sumFactorsLabel').textContent=t('sumFactors'); $('sumRunsLabel').textContent=t('sumRuns'); $('sumResponseLabel').textContent=t('sumResponse'); $('sumProgressLabel').textContent=t('sumProgress');
+  $('checksTitle').textContent=t('checks'); $('checksDesc').textContent=t('checksDesc');
+  $('checkFactorsL').textContent=t('factorRange'); $('checkLevelsL').textContent=t('levels'); $('checkDesignL').textContent=t('designMatrix'); $('checkResponsesL').textContent=t('responseData'); $('checkAnalysisL').textContent=t('analysisStatus');
+  $('methodTitle').textContent=t('method'); $('methodDesc').textContent=t('methodDesc'); $('methodEffectL').textContent=t('effectCalc'); $('methodLocalL').textContent=t('local'); $('methodLocalV').textContent=t('localValue'); $('methodWarning').textContent=t('methodWarning');
+  renderFactors(); renderDesign(); renderRun(); updateStatus();
+  if(state.analyzed) analyze(false);
+}
+
+function ensureFactorGovernanceFields(f){
+  if(f.constraintMin==null)f.constraintMin='';
+  if(f.constraintMax==null)f.constraintMax='';
+  if(!f.constraintType)f.constraintType='none';
+  return f;
+}
+function renderFactors(){
+  const body=$('factorBody'); body.innerHTML='';
+  state.factors.forEach((f,i)=>{
+    ensureFactorGovernanceFields(f);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input data-i="${i}" data-k="name" value="${esc(f.name)}"></td>
+      <td><select data-i="${i}" data-k="type"><option value="numeric" ${f.type==='numeric'?'selected':''}>${t('numeric')}</option><option value="categorical" ${f.type==='categorical'?'selected':''}>${t('categorical')}</option></select></td>
+      <td><select data-i="${i}" data-k="classification">
+        <option value="controlled" ${f.classification==='controlled'?'selected':''}>Controlled</option>
+        <option value="noise" ${f.classification==='noise'?'selected':''}>Noise</option>
+        <option value="blocking" ${f.classification==='blocking'?'selected':''}>Blocking</option>
+      </select></td>
+      <td><input data-i="${i}" data-k="low" value="${esc(f.low)}"></td>
+      <td><input data-i="${i}" data-k="high" value="${esc(f.high)}"></td>
+      <td><button class="btn btn-danger row-btn" data-remove="${i}" ${state.factors.length<=2?'disabled':''}>${t('remove')}</button></td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('input,select').forEach(x=>x.addEventListener('input',e=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k;
+    state.factors[i][k]=e.target.value;
+    invalidateDesign();
+    renderConstraints();
+  }));
+  body.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{
+    state.factors.splice(+b.dataset.remove,1);invalidateDesign();renderFactors();renderConstraints();updateStatus();
+  }));
+  renderConstraints();
+}
+
+function renderConstraints(){
+  const body=$('constraintBody');
+  if(!body)return;
+  body.innerHTML=state.factors.map((f,i)=>{
+    ensureFactorGovernanceFields(f);
+    return `<tr>
+      <td>${esc(f.name)}</td>
+      <td>${esc(f.low)}</td>
+      <td>${esc(f.high)}</td>
+      <td><input data-constraint-i="${i}" data-constraint-k="constraintMin" value="${esc(f.constraintMin)}" placeholder="Min"></td>
+      <td><input data-constraint-i="${i}" data-constraint-k="constraintMax" value="${esc(f.constraintMax)}" placeholder="Max"></td>
+      <td><select data-constraint-i="${i}" data-constraint-k="constraintType">
+        <option value="none" ${f.constraintType==='none'?'selected':''}>Not Set</option>
+        <option value="hard" ${f.constraintType==='hard'?'selected':''}>Hard Limit</option>
+        <option value="soft" ${f.constraintType==='soft'?'selected':''}>Soft Limit</option>
+      </select></td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',e=>{
+    const i=+e.target.dataset.constraintI,k=e.target.dataset.constraintK;
+    state.factors[i][k]=e.target.value;
+    state.analyzed=false;state.governance=null;state.decision=null;
+    $('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
+    updateStatus();
+  }));
+}
+
+function invalidateDesign(){
+  state.design=null;state.randomized=false;state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.importPreview=null;
+  $('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
+  $('importMappingPanel').classList.add('hidden');
+  renderDesign();renderRun();updateStatus();
+}
+
+function validatePlan(show=true){
+  if(state.factors.length<2||state.factors.length>6){if(show)alert(t('invalidCount'));return false}
+  if(!state.factors.every(f=>f.name.trim()&&String(f.low).trim()&&String(f.high).trim())){if(show)alert(t('missingFields'));return false}
+  if(state.factors.some(f=>String(f.low).trim()===String(f.high).trim())){if(show)alert(t('sameLevels'));return false}
+  return true;
+}
+function cartesian(arrs){return arrs.reduce((a,c)=>a.flatMap(x=>c.map(y=>[...x,y])),[[]])}
+
+function generate(){
+  if(!validatePlan())return;
+  let combos,type;
+  if(state.factors.length<=4){
+    type='full_factorial';
+    combos=cartesian(state.factors.map(f=>[f.low,f.high]));
+  }else{
+    type='screening_8_run';
+    const m=[
+      [-1,-1,-1,-1,-1,-1],[-1,-1,1,1,1,1],[-1,1,-1,-1,1,1],[-1,1,1,1,-1,-1],
+      [1,-1,-1,1,-1,1],[1,-1,1,-1,1,-1],[1,1,-1,1,1,-1],[1,1,1,-1,-1,1]
+    ];
+    combos=m.map(r=>state.factors.map((f,i)=>r[i]===-1?f.low:f.high));
+  }
+  state.design={type,runs:combos.map((c,i)=>({
+    id:'run_'+(i+1),standardOrder:i+1,runOrder:i+1,
+    settings:Object.fromEntries(c.map((v,j)=>[state.factors[j].id,v])),
+    response:null
+  }))};
+  state.randomized=false;state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;
+  renderDesign();renderRun();updateStatus();
+  location.hash='design';
+}
+
+function renderDesign(){
+  if(!state.design){$('designEmpty').classList.remove('hidden');$('designContent').classList.add('hidden');return}
+  $('designEmpty').classList.add('hidden');$('designContent').classList.remove('hidden');
+  $('designTypeV').textContent=state.design.type==='full_factorial'?t('full'):t('screen');
+  $('factorCountV').textContent=state.factors.length;$('runCountV').textContent=state.design.runs.length;
+  $('orderV').textContent=state.randomized?t('randomized'):t('standard');
+  $('screeningWarning').classList.toggle('hidden',state.design.type!=='screening_8_run');
+  const runs=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
+  $('designHead').innerHTML='<tr><th>'+t('run')+'</th><th>'+t('stdOrder')+'</th>'+state.factors.map(f=>'<th>'+esc(f.name)+'</th>').join('')+'</tr>';
+  $('designBody').innerHTML=runs.map(r=>'<tr><td>'+r.runOrder+'</td><td>'+r.standardOrder+'</td>'+state.factors.map(f=>'<td>'+esc(r.settings[f.id])+'</td>').join('')+'</tr>').join('');
+}
+
+function renderRun(){
+  if(!state.design){$('runEmpty').classList.remove('hidden');$('runContent').classList.add('hidden');return}
+  $('runEmpty').classList.add('hidden');$('runContent').classList.remove('hidden');
+  const runs=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
+  $('runHead').innerHTML='<tr><th>'+t('run')+'</th><th>'+t('stdOrder')+'</th>'+state.factors.map(f=>'<th>'+esc(f.name)+'</th>').join('')+'<th>'+esc($('responseName').value||t('responseValue'))+'</th></tr>';
+  $('runBody').innerHTML=runs.map(r=>'<tr><td>'+r.runOrder+'</td><td>'+r.standardOrder+'</td>'+state.factors.map(f=>'<td>'+esc(r.settings[f.id])+'</td>').join('')+`<td><input type="number" step="any" data-response="${r.id}" value="${r.response??''}" placeholder="${t('responseValue')}"></td></tr>`).join('');
+  $('runBody').querySelectorAll('[data-response]').forEach(inp=>inp.addEventListener('input',e=>{
+    const r=state.design.runs.find(x=>x.id===e.target.dataset.response);
+    r.response=e.target.value===''?null:Number(e.target.value);
+    state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;$('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
+    updateStatus();
+  }));
+  updateStatus();
+}
+
+function randomize(){
+  if(!state.design)return;
+  const a=[...state.design.runs];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  a.forEach((r,i)=>r.runOrder=i+1);
+  state.randomized=true;renderDesign();renderRun();updateStatus();
+}
+function restore(){
+  if(!state.design)return;
+  state.design.runs.forEach(r=>r.runOrder=r.standardOrder);
+  state.randomized=false;renderDesign();renderRun();updateStatus();
+}
+
+function fillDemoResponses(){
+  if(!state.design)generate();
+  if(!state.design)return;
+  const factors=state.factors;
+  state.design.runs.forEach(r=>{
+    let y=30;
+    factors.forEach((f,i)=>{
+      const high=String(r.settings[f.id])===String(f.high);
+      const weights=[10,5,2.5,1.5,1,.6];
+      if(high)y+=weights[i]||.5;
+    });
+    y+=(r.standardOrder%3-1)*.7;
+    r.response=Number(y.toFixed(2));
+  });
+  state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;renderRun();updateStatus();
+}
+
+function computeEffects(){
+  const rs=state.design.runs;
+  return state.factors.map(f=>{
+    const lo=rs.filter(r=>String(r.settings[f.id])===String(f.low)).map(r=>r.response);
+    const hi=rs.filter(r=>String(r.settings[f.id])===String(f.high)).map(r=>r.response);
+    const avg=a=>a.reduce((s,v)=>s+v,0)/a.length;
+    const averageLow=avg(lo),averageHigh=avg(hi),effect=averageHigh-averageLow;
+    return{factor:f,averageLow,averageHigh,effect,abs:Math.abs(effect)}
+  });
+}
+
+/* DECISION_ENGINE_START */
+function preferred(e,obj){
+  if(Math.abs(e.effect)<1e-12)return{label:t('noDifference'),value:e.factor.low,meaning:t('noObserved')};
+  const high=obj==='maximize'?e.effect>0:e.effect<0;
+  return high?{label:t('highLevel'),value:e.factor.high,meaning:t('highBetter')}:{label:t('lowLevel'),value:e.factor.low,meaning:t('lowBetter')};
+}
+
+function anovaRowForEffect(effect){
+  return state.anova?.rows?.find(row=>row.term===effect.factor.name)||null;
+}
+function confidenceClass(level){return `confidence-badge confidence-${level.toLowerCase()}`}
+function confidenceLabel(level){return `${level} CONFIDENCE`}
+function effectEvidence(effect){
+  const row=anovaRowForEffect(effect);
+  if(state.anova?.valid && row?.p!=null){
+    return row.p<=0.05?`Statistically significant (p=${formatP(row.p)})`:`Not statistically significant (p=${formatP(row.p)})`;
+  }
+  return 'Descriptive effect only. Statistical significance cannot be estimated.';
+}
+function confidenceForEffect(effect,effects){
+  const row=anovaRowForEffect(effect);
+  if(state.design?.type==='screening_8_run')return 'LOW';
+  if(state.anova?.valid && row?.p!=null)return row.p<=0.05?'HIGH':'LOW';
+  const maxEffect=Math.max(...effects.map(item=>item.abs),0);
+  return maxEffect>0 && effect.abs>=maxEffect*0.5?'MEDIUM':'LOW';
+}
+function parseEngineeringNumber(value){
+  if(value==null||String(value).trim()==='')return null;
+  const match=String(value).replace(',', '').match(/-?\d+(?:\.\d+)?/);
+  return match?Number(match[0]):null;
+}
+function constraintCheck(settings,factors){
+  const rows=settings.map(setting=>{
+    const factor=factors.find(item=>item.name===setting.factor);
+    if(!factor)return {factor:setting.factor,setting:setting.value,type:'none',status:'PASS',reason:'No matching factor definition.',action:'No constraint action required.'};
+    const type=factor.constraintType||'none';
+    const value=parseEngineeringNumber(setting.value);
+    const min=parseEngineeringNumber(factor.constraintMin);
+    const max=parseEngineeringNumber(factor.constraintMax);
+    if(type==='none'||(min==null&&max==null)){
+      return {factor:factor.name,setting:setting.value,type,status:'PASS',reason:'No engineering limit defined.',action:'Proceed to confirmation using DOE recommendation.'};
+    }
+    if(value==null){
+      return {factor:factor.name,setting:setting.value,type,status:type==='hard'?'FAIL':'WARN',reason:'Recommended setting is non-numeric and cannot be checked against numeric limits.',action:'Review engineering constraint manually.'};
+    }
+    if(min!=null&&value<min){
+      return {factor:factor.name,setting:setting.value,type,status:type==='hard'?'FAIL':'WARN',reason:'Recommended setting is below engineering minimum.',action:'Select next feasible condition or review DOE range.'};
+    }
+    if(max!=null&&value>max){
+      return {factor:factor.name,setting:setting.value,type,status:type==='hard'?'FAIL':'WARN',reason:'Recommended setting exceeds engineering limit.',action:'Select next feasible condition or review DOE range.'};
+    }
+    return {factor:factor.name,setting:setting.value,type,status:'PASS',reason:'Recommended setting is within engineering constraints.',action:'Proceed to confirmation.'};
+  });
+  const hasFail=rows.some(row=>row.status==='FAIL');
+  const hasWarn=rows.some(row=>row.status==='WARN');
+  return {
+    status:hasFail?'FAILED':hasWarn?'CONDITIONAL':'PASSED',
+    message:hasFail?'One or more recommended settings violate hard engineering limits.':hasWarn?'Soft engineering constraints require review.':'Recommended setting is within engineering constraints.',
+    rows
+  };
+}
+function targetCheck(predicted,targetValue,objective){
+  const target=parseEngineeringNumber(targetValue);
+  if(target==null)return {status:'NOT SET',message:'No engineering response target defined.',target:null,predicted};
+  if(!Number.isFinite(predicted))return {status:'FAIL',message:'Predicted response is unavailable for target verification.',target,predicted};
+  const pass=objective==='maximize'?predicted>=target:predicted<=target;
+  return {
+    status:pass?'PASS':'FAIL',
+    message:pass?'Predicted response meets the engineering target.':'Recommended setting does not achieve required target.',
+    target,
+    predicted
+  };
+}
+function implementationReadinessGate(checklist){
+  if(!checklist.experimentCompleted||!checklist.dataValidated||!checklist.keyFactorsIdentified||!checklist.evidenceAvailable)return {
+    status:'REVIEW REQUIRED',
+    rationale:'Experiment, validation, key factor or evidence prerequisites are incomplete.'
+  };
+  if(!checklist.constraintPassed||!checklist.targetAchieved||checklist.confirmationStatus==='REVIEW')return {
+    status:'REVIEW REQUIRED',
+    rationale:'Constraint, target or confirmation gate failed.'
+  };
+  if(checklist.confirmationStatus==='PASS')return {
+    status:'READY FOR IMPLEMENTATION',
+    rationale:'Experiment, evidence, constraints, target and confirmation gates are complete.'
+  };
+  return {
+    status:'CONDITIONAL RELEASE',
+    rationale:'Core DOE gates pass, but confirmation completion is still required before full implementation.'
+  };
+}
+function buildGovernance(decision,validation,confirmationStatus='Pending'){
+  const constraints=constraintCheck(decision.settings,state.factors);
+  const target=targetCheck(decision.predicted,state.study.target,$('objective').value);
+  const checklist={
+    experimentCompleted:Boolean(state.design?.runs?.length&&state.design.runs.every(run=>Number.isFinite(run.response))),
+    dataValidated:Boolean(validation.valid),
+    keyFactorsIdentified:Boolean(decision.keyFactor),
+    evidenceAvailable:Boolean(state.analyzed&&decision.confidence),
+    constraintPassed:constraints.status!=='FAILED',
+    targetAchieved:target.status==='PASS'||target.status==='NOT SET',
+    confirmationStatus
+  };
+  return {constraints,target,readiness:implementationReadinessGate(checklist),checklist};
+}
+function modelBasisLabel(){
+  if(!state.design)return 'DOE model unavailable';
+  return state.design.type==='full_factorial'?'Full Factorial First-Order Coded Model':'8-Run Screening Main-Effect Model';
+}
+function cloneSettings(settings){
+  return settings.map(item=>({factor:item.factor,value:item.value,label:item.label}));
+}
+function bestMeasuredRun(runs,objective){
+  const sorted=[...runs].filter(run=>Number.isFinite(run.response)).sort((a,b)=>objective==='maximize'?b.response-a.response:a.response-b.response);
+  const best=sorted[0]||null;
+  if(!best)return null;
+  const replicateCount=runs.filter(run=>combinationKeyFromRun(run,state.factors)===combinationKeyFromRun(best,state.factors)).length;
+  return {
+    source:'Experimental Run Data',
+    runId:best.runOrder,
+    standardOrder:best.standardOrder,
+    settings:Object.fromEntries(state.factors.map(f=>[f.name,best.settings[f.id]])),
+    response:best.response,
+    replicateCount
+  };
+}
+function buildEvidenceSeparation(effects,decision,governance,confirmationGateResult){
+  const objective=$('objective').value;
+  const measured=bestMeasuredRun(state.design.runs,objective);
+  const model={
+    source:'DOE Model',
+    basis:modelBasisLabel(),
+    recommendedSettings:cloneSettings(decision.settings),
+    predictedResponse:decision.predicted,
+    limitation:'This is predicted, not measured. Prediction is based on the DOE model within the tested factor range.'
+  };
+  const engineeringDecision={
+    source:'Engineering Evaluation',
+    status:governance.readiness.status,
+    rationale:governance.readiness.rationale,
+    recommendation:decision.settings.map(item=>`${item.factor} = ${item.value}`).join('; '),
+    remainingRisk:governance.readiness.status==='READY FOR IMPLEMENTATION'
+      ? 'Long-term process capability verification required.'
+      : 'Confirmation, constraint, target or evidence gap remains before implementation.'
+  };
+  const trace={
+    decision:engineeringDecision.recommendation,
+    measuredResult:measured?`${measured.response} ${$('responseUnit').value||''} at run ${measured.runId}`:'No measured result available',
+    modelPrediction:Number.isFinite(model.predictedResponse)?`${model.predictedResponse} ${$('responseUnit').value||''}`:'Prediction unavailable',
+    target:governance.target.target==null?'Not set':`${$('objective').value==='maximize'?'≥':'≤'} ${governance.target.target} ${$('responseUnit').value||''} (${governance.target.status})`,
+    constraint:`${governance.constraints.status}: ${governance.constraints.message}`,
+    confirmation:confirmationGateResult?.status||'Pending',
+    finalStatus:governance.readiness.status,
+    reasoning:'Measured evidence → model interpretation → engineering constraints and target → implementation decision.'
+  };
+  return {measured,model,engineeringDecision,trace};
+}
+function renderEvidenceSeparation(evidence){
+  const measured=evidence.measured;
+  $('measuredLayerBody').innerHTML=measured?[
+    `Run: <strong>${esc(measured.runId)}</strong>`,
+    ...Object.entries(measured.settings).map(([name,value])=>`${esc(name)}: <strong>${esc(value)}</strong>`),
+    `Measured ${esc($('responseName').value||'Response')}: <strong>${fmt(measured.response)} ${esc($('responseUnit').value||'')}</strong>`,
+    `Replication information: ${measured.replicateCount>1?`${measured.replicateCount} replicate(s) at this setting`:'No replicated setting observed'}`
+  ].join('<br>'):'No measured run data available.';
+  $('modelLayerBody').innerHTML=[
+    `Model Basis: <strong>${esc(evidence.model.basis)}</strong>`,
+    `Recommended Setting:<br>${evidence.model.recommendedSettings.map(item=>`${esc(item.factor)}: <strong>${esc(item.value)}</strong>`).join('<br>')}`,
+    `Predicted Response: <strong>${Number.isFinite(evidence.model.predictedResponse)?`${fmt(evidence.model.predictedResponse)} ${esc($('responseUnit').value||'')}`:'Unavailable'}</strong>`,
+    `<em>${esc(evidence.model.limitation)}</em>`
+  ].join('<br>');
+  $('decisionLayerBody').innerHTML=[
+    `Decision Status: <strong>${esc(evidence.engineeringDecision.status)}</strong>`,
+    `Recommendation: ${esc(evidence.engineeringDecision.recommendation)}`,
+    `Rationale: ${esc(evidence.engineeringDecision.rationale)}`,
+    `Remaining Risk: ${esc(evidence.engineeringDecision.remainingRisk)}`
+  ].join('<br>');
+  $('decisionTraceBody').innerHTML=Object.entries(evidence.trace).map(([key,value])=>`
+    <div class="trace-row"><strong>${esc(key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase()))}</strong><span>${esc(value)}</span></div>
+  `).join('');
+}
+function renderEvidenceSeparationReport(evidence){
+  $('reportMeasuredEvidenceBody').innerHTML=rowsHtml([
+    ['Source','Experimental Run Data'],
+    ['Best Measured Run',evidence.measured?`Run ${evidence.measured.runId}`:'Unavailable'],
+    ['Factor Settings',evidence.measured?Object.entries(evidence.measured.settings).map(([name,value])=>`${esc(name)}: ${esc(value)}`).join('<br>'):'Unavailable'],
+    ['Actual Measured Response',evidence.measured?`${fmt(evidence.measured.response)} ${esc($('responseUnit').value||'')}`:'Unavailable'],
+    ['Confirmation Result',Number.isFinite(Number($('confirmationActual').value))?`${fmt(Number($('confirmationActual').value))} ${esc($('responseUnit').value||'')}`:'Pending']
+  ]);
+  $('reportModelOutputBody').innerHTML=rowsHtml([
+    ['Source','DOE Model'],
+    ['Model Type',esc(evidence.model.basis)],
+    ['Recommended Setting',evidence.model.recommendedSettings.map(item=>`${esc(item.factor)}: ${esc(item.value)}`).join('<br>')],
+    ['Predicted Response',Number.isFinite(evidence.model.predictedResponse)?`${fmt(evidence.model.predictedResponse)} ${esc($('responseUnit').value||'')}`:'Unavailable'],
+    ['Applicable Range',state.factors.map(f=>`${esc(f.name)}: ${esc(f.low)} to ${esc(f.high)}`).join('<br>')],
+    ['Limitations',esc(evidence.model.limitation)]
+  ]);
+  $('reportEngineeringDecisionBody').innerHTML=rowsHtml([
+    ['Source','Engineering Evaluation'],
+    ['Recommendation',esc(evidence.engineeringDecision.recommendation)],
+    ['Constraint Review',esc(state.governance.constraints.status)],
+    ['Target Verification',esc(state.governance.target.status)],
+    ['Decision Status',esc(evidence.engineeringDecision.status)],
+    ['Remaining Risk',esc(evidence.engineeringDecision.remainingRisk)]
+  ]);
+  $('reportDecisionTraceBody').innerHTML=rowsHtml(Object.entries(evidence.trace).map(([key,value])=>[
+    key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase()),
+    esc(value)
+  ]));
+}
+function engineeringMeaning(effect,obj){
+  if(Math.abs(effect.effect)<1e-12)return `${effect.factor.name} did not show a clear directional effect within the tested range.`;
+  const improves=(obj==='maximize'&&effect.effect>0)||(obj==='minimize'&&effect.effect<0);
+  const level=effect.effect>0?effect.factor.high:effect.factor.low;
+  const verb=improves?'improves':'moves against';
+  return `${effect.factor.name} at ${level} ${verb} ${$('responseName').value||'the response'} within the tested range.`;
+}
+function recommendedAction(effect,effects,obj){
+  const p=preferred(effect,obj);
+  const confidence=confidenceForEffect(effect,effects);
+  const governance=state.governance;
+  const constraintRow=governance?.constraints?.rows?.find(row=>row.factor===effect.factor.name);
+  const constraintText=constraintRow?` Constraint: ${constraintRow.status}.`:'';
+  const targetText=governance?.target?` Target: ${governance.target.status}.`:'';
+  if(constraintRow?.status==='FAIL')return `Review DOE range before implementation; ${p.value} violates engineering limits.${targetText}`;
+  if(confidence==='HIGH')return `Confirm ${effect.factor.name} at ${p.value} before implementation.${constraintText}${targetText}`;
+  if(confidence==='MEDIUM')return `Treat ${p.value} as the confirmation setting; collect confirmation evidence before changing the process.${constraintText}${targetText}`;
+  return `Do not implement from this factor alone; use ${p.value} only as a confirmation candidate.${constraintText}${targetText}`;
+}
+function recommendedSettings(effects,obj){
+  return effects.map(effect=>({factor:effect.factor.name,value:preferred(effect,obj).value,label:preferred(effect,obj).label}));
+}
+function predictedResponseForSettings(effects,obj){
+  const responses=state.design.runs.map(run=>run.response).filter(Number.isFinite);
+  if(!responses.length)return null;
+  const intercept=statMean(responses);
+  return effects.reduce((prediction,effect)=>{
+    const p=preferred(effect,obj);
+    const code=String(p.value)===String(effect.factor.high)?1:-1;
+    return prediction+(effect.effect/2)*code;
+  },intercept);
+}
+function buildDecisionSummary(effects,obj,validation){
+  const top=effects[0];
+  const p=preferred(top,obj);
+  const topRow=anovaRowForEffect(top);
+  const topConfidence=confidenceForEffect(top,effects);
+  const settings=recommendedSettings(effects,obj);
+  const objectiveText=`${obj==='maximize'?t('maximize'):t('minimize')} ${$('responseName').value||'Response'}`;
+  const evidence=state.anova?.valid && topRow?.p!=null
+    ? `${top.factor.name}: p=${formatP(topRow.p)} (${topRow.p<=0.05?'significant':'not significant'})`
+    : 'Descriptive effect analysis only. Statistical significance cannot be estimated.';
+  const direction=engineeringMeaning(top,obj);
+  return {
+    objectiveText,
+    keyFactor:`${top.factor.name} is the dominant observed factor (effect ${top.effect>=0?'+':''}${fmt(top.effect)} ${$('responseUnit').value||''}).`,
+    evidence,
+    direction,
+    settings,
+    validation: validation.valid?'Confirmation experiment required before implementation.':'Data validation review required before analysis.',
+    confidence:topConfidence,
+    predicted:predictedResponseForSettings(effects,obj)
+  };
+}
+function renderDecisionSummary(decision){
+  $('decisionObjective').textContent=decision.objectiveText;
+  $('decisionKeyFactors').textContent=decision.keyFactor;
+  $('decisionEvidence').innerHTML=`${esc(decision.evidence)}<br><span class="${confidenceClass(decision.confidence)}">${confidenceLabel(decision.confidence)}</span>`;
+  $('decisionDirection').textContent=decision.direction;
+  $('decisionSetting').innerHTML=decision.settings.map(item=>`${esc(item.factor)}: <strong>${esc(item.value)}</strong>`).join('<br>');
+  $('decisionValidation').textContent=state.governance?`${state.governance.readiness.status}: ${state.governance.readiness.rationale}`:decision.validation;
+}
+function gateStatusClass(status){
+  if(['PASSED','PASS','READY FOR IMPLEMENTATION'].includes(status))return 'status-pass';
+  if(['CONDITIONAL','CONDITIONAL RELEASE','NOT SET'].includes(status))return 'status-conditional';
+  return 'status-fail';
+}
+function renderGovernance(governance){
+  $('constraintGateStatus').textContent=governance.constraints.status;
+  $('constraintGateStatus').className='value '+gateStatusClass(governance.constraints.status);
+  $('constraintGateDetail').textContent=governance.constraints.message;
+  $('targetGateStatus').textContent=governance.target.status;
+  $('targetGateStatus').className='value '+gateStatusClass(governance.target.status);
+  $('targetGateDetail').textContent=governance.target.message;
+  $('readinessGateStatus').textContent=governance.readiness.status;
+  $('readinessGateStatus').className='value '+gateStatusClass(governance.readiness.status);
+  $('readinessGateDetail').textContent=governance.readiness.rationale;
+}
+function renderEffectInterpretation(effects,obj){
+  $('effectsBody').innerHTML=effects.map(effect=>{
+    const p=preferred(effect,obj);
+    const confidence=confidenceForEffect(effect,effects);
+    const modelDelta=effect.effect/2;
+    return `<tr>
+      <td>${esc(effect.factor.name)}</td>
+      <td>${fmt(effect.averageLow)}</td>
+      <td>${fmt(effect.averageHigh)}</td>
+      <td>${effect.effect>=0?'+':''}${fmt(effect.effect)}</td>
+      <td>
+        <strong>Measured Evidence:</strong> ${esc(effect.factor.name)} changed average ${esc($('responseName').value||'response')} by ${effect.effect>=0?'+':''}${fmt(effect.effect)} ${esc($('responseUnit').value||'')} between tested levels.<br>
+        <strong>Model Output:</strong> Coded-model coefficient contribution is ${modelDelta>=0?'+':''}${fmt(modelDelta)} per coded level.<br>
+        <strong>Evidence:</strong> ${esc(effectEvidence(effect))}
+      </td>
+      <td><span class="${confidenceClass(confidence)}">${confidenceLabel(confidence)}</span></td>
+      <td><strong>Engineering Decision:</strong> ${esc(recommendedAction(effect,effects,obj))}<br><strong>${p.label}: ${esc(p.value)}</strong></td>
+    </tr>`;
+  }).join('');
+}
+function rowsHtml(rows){
+  return rows.map(row=>`<tr><th>${esc(row[0])}</th><td>${row[1]}</td></tr>`).join('');
+}
+function renderEvidencePackage(effects,decision,validation){
+  const factorLevels=state.factors.map(f=>`${esc(f.name)}: ${esc(f.low)} / ${esc(f.high)}`).join('<br>');
+  const anovaText=state.anova?.valid?'ANOVA valid with replicated pure-error estimate.':'ANOVA significance unavailable; descriptive analysis only.';
+  const modelText='First-order coded-factor model: low = -1, high = +1.';
+  const governance=state.governance||buildGovernance(decision,validation,'Pending');
+  const evidence=state.evidenceSeparation||buildEvidenceSeparation(effects,decision,governance,{status:'Pending'});
+  renderEvidenceSeparationReport(evidence);
+  $('reportExperimentBody').innerHTML=rowsHtml([
+    ['Objective',esc(decision.objectiveText)],
+    ['Problem Statement',esc(state.study.problemStatement||'-')],
+    ['Response',`${esc($('responseName').value||'-')} ${esc($('responseUnit').value||'')}`],
+    ['Factors and Levels',factorLevels]
+  ]);
+  $('reportDesignBody').innerHTML=rowsHtml([
+    ['Design Type',state.design.type==='full_factorial'?t('full'):t('screen')],
+    ['Design Matrix',`${state.design.runs.length} run rows retained in the run-order table.`],
+    ['Run Order',state.randomized?t('randomized'):t('standard')],
+    ['Randomization',state.randomized?'Randomized order active.':'Standard order active; randomization not applied.']
+  ]);
+  const reportRuns=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
+  $('reportDesignMatrixHead').innerHTML='<tr><th>Run</th><th>Std. Order</th>'+state.factors.map(f=>`<th>${esc(f.name)}</th>`).join('')+'<th>Response</th></tr>';
+  $('reportDesignMatrixBody').innerHTML=reportRuns.map(run=>`<tr><td>${run.runOrder}</td><td>${run.standardOrder}</td>${state.factors.map(f=>`<td>${esc(run.settings[f.id])}</td>`).join('')}<td>${Number.isFinite(run.response)?fmt(run.response):'-'}</td></tr>`).join('');
+  $('reportValidationBody').innerHTML=rowsHtml([
+    ['Data Completeness',validation.metrics?.missingResponses===0?'Complete':`${validation.metrics?.missingResponses||0} missing response(s)`],
+    ['Level Validation',validation.metrics?.invalidLevels===0?'Pass':`${validation.metrics?.invalidLevels||0} invalid level value(s)`],
+    ['Replication Status',validation.metrics?.duplicateCombinations?`${validation.metrics.duplicateCombinations} replicated combination(s), max n=${validation.metrics.maxReplicates}`:'No replicated combinations']
+  ]);
+  $('reportAnalysisBody').innerHTML=rowsHtml([
+    ['Main Effects',effects.map(effect=>`${esc(effect.factor.name)}: ${effect.effect>=0?'+':''}${fmt(effect.effect)}`).join('<br>')],
+    ['ANOVA',esc(anovaText)],
+    ['Model',esc(modelText)]
+  ]);
+  $('reportDecisionBody').innerHTML=rowsHtml([
+    ['Key Factors',esc(decision.keyFactor)],
+    ['Recommended Settings',decision.settings.map(item=>`${esc(item.factor)}: ${esc(item.value)}`).join('<br>')],
+    ['Confidence Level',`<span class="${confidenceClass(decision.confidence)}">${confidenceLabel(decision.confidence)}</span>`],
+    ['Confirmation Requirement',esc(decision.validation)],
+    ['Readiness Status',esc(governance.readiness.status)]
+  ]);
+  $('reportConstraintBody').innerHTML=governance.constraints.rows.map(row=>`<tr>
+    <th>${esc(row.factor)}</th>
+    <td>Recommended: ${esc(row.setting)}<br>Type: ${esc(row.type)}<br>Status: ${esc(row.status)}<br>${esc(row.reason)}<br>Action: ${esc(row.action)}</td>
+  </tr>`).join('');
+  $('reportTargetBody').innerHTML=rowsHtml([
+    ['Requirement',governance.target.target==null?'Not set':`${$('objective').value==='maximize'?'≥':'≤'} ${fmt(governance.target.target)} ${esc($('responseUnit').value||'')}`],
+    ['Predicted Response',Number.isFinite(governance.target.predicted)?`${fmt(governance.target.predicted)} ${esc($('responseUnit').value||'')}`:'Unavailable'],
+    ['Actual Confirmation Result',Number.isFinite(Number($('confirmationActual').value))?`${fmt(Number($('confirmationActual').value))} ${esc($('responseUnit').value||'')}`:'Pending'],
+    ['Target Status',esc(governance.target.status)]
+  ]);
+  $('reportImplementationBody').innerHTML=rowsHtml([
+    ['Readiness Status',esc(governance.readiness.status)],
+    ['Decision Rationale',esc(governance.readiness.rationale)],
+    ['Checklist',[
+      `Experiment completed: ${governance.checklist.experimentCompleted?'Yes':'No'}`,
+      `Data validated: ${governance.checklist.dataValidated?'Yes':'No'}`,
+      `Key factors identified: ${governance.checklist.keyFactorsIdentified?'Yes':'No'}`,
+      `Evidence available: ${governance.checklist.evidenceAvailable?'Yes':'No'}`,
+      `Constraint check passed: ${governance.checklist.constraintPassed?'Yes':'No'}`,
+      `Target achieved: ${governance.checklist.targetAchieved?'Yes':'No'}`,
+      `Confirmation completed: ${governance.checklist.confirmationStatus}`
+    ].map(esc).join('<br>')]
+  ]);
+}
+function confirmationGate(predicted,actual,hasSetting){
+  if(!hasSetting)return {status:'Pending',message:'Recommended setting is not defined. Run analysis before confirmation.',error:null,level:'warn'};
+  if(!Number.isFinite(actual))return {status:'Pending',message:'Confirmation response is required before implementation.',error:null,level:'info'};
+  if(Number.isFinite(predicted)&&predicted!==0){
+    const error=((actual-predicted)/Math.abs(predicted))*100;
+    return Math.abs(error)<=5
+      ? {status:'PASS',message:'Confirmation result supports implementation.',error,level:'good'}
+      : {status:'REVIEW',message:'Observed response differs from prediction. Further investigation recommended.',error,level:'warn'};
+  }
+  return {status:'REVIEW',message:'Prediction is unavailable. Compare confirmation evidence manually before implementation.',error:null,level:'warn'};
+}
+/* DECISION_ENGINE_END */
+
+function analyze(scroll=true){
+  const validation=validateDOEData(true);
+  if(!validation.valid){
+    alert('Data validation must pass before analysis:\n\n'+validation.errors.join('\n'));
+    return;
+  }
+  const obj=$('objective').value;
+  const effects=computeEffects().sort((a,b)=>b.abs-a.abs);
+  const best=[...state.design.runs].sort((a,b)=>obj==='maximize'?b.response-a.response:a.response-b.response)[0];
+  const top=effects[0];
+  state.anova=computeFullFactorialAnova(state.design,state.factors);
+  state.decision=buildDecisionSummary(effects,obj,validation);
+  state.governance=buildGovernance(state.decision,validation,'Pending');
+  state.evidenceSeparation=buildEvidenceSeparation(effects,state.decision,state.governance,{status:'Pending'});
+  $('largestV').textContent=top.factor.name;$('largestS').textContent=(top.effect>=0?'+':'')+fmt(top.effect);
+  $('bestRunV').textContent='#'+best.runOrder;$('bestRunS').textContent=fmt(best.response)+' '+$('responseUnit').value;
+  $('objectiveV').textContent=obj==='maximize'?t('maximize'):t('minimize');$('completeV').textContent=state.design.runs.length;
+  renderDecisionSummary(state.decision);
+  renderGovernance(state.governance);
+  renderEvidenceSeparation(state.evidenceSeparation);
+  renderEffectInterpretation(effects,obj);
+  $('settingGrid').innerHTML=effects.map(e=>{const p=preferred(e,obj);return `<div class="setting"><span>${esc(e.factor.name)}</span><strong>${esc(p.value)} · ${p.label}</strong></div>`}).join('');
+  if(Number.isFinite(state.decision.predicted))$('confirmationPredicted').value=Number(state.decision.predicted.toFixed(3));
+  $('resultsEmpty').classList.add('hidden');$('resultsContent').classList.remove('hidden');
+  $('analysisStatus').className='status-pill ready';$('analysisStatus').textContent=t('analysisReady');
+  state.analyzed=true;
+  drawMainEffects(effects);drawRanking(effects);renderAnovaAnalysis();renderInteractionAnalysis();renderRegressionModel();renderContributionAnalysis();renderEvidencePackage(effects,state.decision,validation);renderEvidenceSeparationReport(state.evidenceSeparation);updateConfirmationDecision();
+  updateStatus();
+  if(scroll)location.hash='results';
+}
+
+function drawMainEffects(effects){
+  const c=$('mainEffectsChart'),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);ctx.font='11px Segoe UI';ctx.fillStyle='#667788';
+  const vals=effects.flatMap(e=>[e.averageLow,e.averageHigh]);
+  let min=Math.min(...vals),max=Math.max(...vals);if(max===min){max+=1;min-=1}
+  const pad={l:44,r:18,t:20,b:45},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  ctx.strokeStyle='#d8e0e7';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=pad.t+ph*i/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();const v=max-(max-min)*i/4;ctx.fillText(fmt(v),4,y+4)}
+  const groupW=pw/effects.length;
+  effects.forEach((e,i)=>{
+    const x1=pad.l+groupW*i+groupW*.27,x2=pad.l+groupW*i+groupW*.73;
+    const y1=pad.t+(max-e.averageLow)/(max-min)*ph,y2=pad.t+(max-e.averageHigh)/(max-min)*ph;
+    ctx.strokeStyle='#1f4e79';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    ctx.fillStyle='#1f4e79';ctx.beginPath();ctx.arc(x1,y1,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2d7b54';ctx.beginPath();ctx.arc(x2,y2,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#526273';ctx.textAlign='center';ctx.fillText(e.factor.name.slice(0,14),pad.l+groupW*i+groupW/2,h-12);
+    ctx.fillStyle='#667788';ctx.font='10px Segoe UI';ctx.fillText(t('lowLevel'),x1,h-28);ctx.fillText(t('highLevel'),x2,h-28);ctx.font='11px Segoe UI';
+  });
+  ctx.textAlign='left';
+}
+
+function drawRanking(effects){
+  const c=$('rankingChart'),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);ctx.font='11px Segoe UI';
+  const max=Math.max(...effects.map(e=>e.abs),1),pad={l:110,r:45,t:18,b:18},ph=h-pad.t-pad.b,row=ph/effects.length;
+  effects.forEach((e,i)=>{
+    const y=pad.t+i*row+row*.22,bh=row*.55,bw=(w-pad.l-pad.r)*e.abs/max;
+    ctx.fillStyle='#e7edf2';ctx.fillRect(pad.l,y,w-pad.l-pad.r,bh);
+    ctx.fillStyle='#1f4e79';ctx.fillRect(pad.l,y,bw,bh);
+    ctx.fillStyle='#425365';ctx.textAlign='right';ctx.fillText(e.factor.name.slice(0,15),pad.l-9,y+bh*.72);
+    ctx.textAlign='left';ctx.fillStyle='#21384e';ctx.fillText(fmt(e.abs),pad.l+bw+7,y+bh*.72);
+  });
+  ctx.textAlign='left';
+}
+
+function validateDOEData(updateUi=true){
+  const validation=validateDOEDataDetailed(state.design,state.factors);
+  state.validation=validation;
+  if(updateUi){
+    const metrics=validation.metrics||{};
+    $('validationRunCount').textContent=state.design?`${metrics.runCount} / ${metrics.expectedRunCount} planned`:'No Design';
+    $('validationResponse').textContent=metrics.missingResponses===0&&metrics.invalidResponses===0?'Pass':`${metrics.missingResponses||0} missing, ${metrics.invalidResponses||0} invalid`;
+    $('validationLevels').textContent=metrics.invalidLevels===0?'Pass':`${metrics.invalidLevels} invalid`;
+    $('validationRunOrder').textContent=validation.errors.some(e=>e.includes('run order'))?'Review':'Pass';
+    $('validationReplicates').textContent=metrics.duplicateCombinations?`${metrics.duplicateCombinations} replicated combination(s), max n=${metrics.maxReplicates}`:'None';
+    $('validationMissingRuns').textContent=metrics.missingRuns===0?'Pass':`${metrics.missingRuns} missing`;
+    $('validationReady').textContent=validation.valid?'Ready':'Not Ready';
+    $('validationStatus').textContent=validation.valid?'Passed':'Review';
+    $('validationStatus').className='status-pill '+(validation.valid?'ready':'pending');
+    const detail=[...validation.errors,...validation.warnings];
+    if(detail.length){
+      $('importStatus').textContent=detail.join(' ');
+      $('importStatus').className='note '+(validation.errors.length?'warn':'info');
+    }else{
+      $('importStatus').textContent='Validation passed. Data is ready for analysis.';
+      $('importStatus').className='note good';
+    }
+  }
+  return validation;
+}
+
+function renderAnovaAnalysis(){
+  let box=document.getElementById('anovaAnalysis');
+  if(!box){
+    box=document.createElement('div');
+    box.id='anovaAnalysis';
+    box.className='section';
+    const target=document.querySelector('#resultsContent .recommendation');
+    if(target&&target.parentNode)target.parentNode.insertBefore(box,target);
+    else document.getElementById('resultsContent').appendChild(box);
+  }
+  const anova=state.anova||computeFullFactorialAnova(state.design,state.factors);
+  const factorRows=(anova.rows||[]).map(row=>`
+    <tr>
+      <td>${esc(row.term)}</td>
+      <td>${row.df}</td>
+      <td>${fmt(row.ss)}</td>
+      <td>${fmt(row.ms)}</td>
+      <td>${anova.valid?fmt(row.f):'--'}</td>
+      <td>${anova.valid?formatP(row.p):'--'}</td>
+    </tr>`).join('');
+  const supportRows=anova.rows?`
+    ${factorRows}
+    <tr><td>${esc(anova.pureError.term)}</td><td>${anova.pureError.df}</td><td>${fmt(anova.pureError.ss)}</td><td>${anova.pureError.ms==null?'--':fmt(anova.pureError.ms)}</td><td>--</td><td>--</td></tr>
+    <tr><td>${esc(anova.lackOfFit.term)}</td><td>${anova.lackOfFit.df}</td><td>${fmt(anova.lackOfFit.ss)}</td><td>${anova.lackOfFit.ms==null?'--':fmt(anova.lackOfFit.ms)}</td><td>--</td><td>--</td></tr>
+    <tr><td>${esc(anova.residual.term)}</td><td>${anova.residual.df}</td><td>${fmt(anova.residual.ss)}</td><td>${anova.residual.ms==null?'--':fmt(anova.residual.ms)}</td><td>--</td><td>--</td></tr>
+    <tr><td>${esc(anova.total.term)}</td><td>${anova.total.df}</td><td>${fmt(anova.total.ss)}</td><td>--</td><td>--</td><td>--</td></tr>
+  `:'';
+  box.innerHTML=`
+  <div class="section-header">
+    <div>
+      <h2>ANOVA Statistical Confidence / 方差分析置信层</h2>
+      <p>Full-factorial significance is reported only when replicated data provides a valid pure-error estimate.</p>
+    </div>
+    <span class="status-pill ${anova.valid?'ready':'pending'}">${anova.valid?'Valid Error Estimate':'Descriptive Only'}</span>
+  </div>
+  <div class="section-body">
+    <div class="note ${anova.valid?'good':'warn'}">
+      ${anova.valid
+        ? 'ANOVA p-values are estimated against replicated pure error. Use them with the engineering context and confirmation run.'
+        : 'Descriptive analysis only. Statistical significance cannot be estimated due to insufficient error estimation.'}
+      ${anova.reason&&!anova.valid?`<br>${esc(anova.reason)}`:''}
+    </div>
+    ${supportRows?`<div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Source</th><th>DF</th><th>SS</th><th>MS</th><th>F</th><th>p value</th></tr></thead>
+        <tbody>${supportRows}</tbody>
+      </table>
+    </div>`:''}
+  </div>`;
+}
+
+
+function renderFactorReport(){
+  const body=document.getElementById('factorReportBody');
+  if(!body) return;
+  body.innerHTML=state.factors.map(f=>`
+    <tr>
+      <td>${esc(f.name)}</td>
+      <td>${esc(f.classification||'-')}</td>
+      <td>${esc(f.low)}</td>
+      <td>${esc(f.high)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderStudyReport(){
+  const st=state.study||{};
+  const rows=[
+    ['Experiment Type',st.experimentType],
+    ['Project ID',st.projectId],
+    ['Problem Statement',st.problemStatement],
+    ['Engineering Hypothesis',st.engineeringHypothesis],
+    ['Response Type',st.responseType],
+    ['Target',st.target],
+    ['Specification',st.specification],
+    ['Product',st.product],
+    ['Part Number',st.partNumber],
+    ['Material Lot',st.materialLot]
+  ];
+  const body=document.getElementById('studyReportBody');
+  if(body) body.innerHTML=rows.map(r=>`<tr><th>${r[0]}</th><td>${r[1]||'-'}</td></tr>`).join('');
+}
+
+function updateStatus(){
+  renderStudyReport();
+  renderFactorReport();
+  const planOk=validatePlan(false);
+  const done=state.design?state.design.runs.filter(r=>Number.isFinite(r.response)).length:0;
+  const total=state.design?state.design.runs.length:0;
+  const pct=total?Math.round(done/total*100):0;
+  $('planStatus').className='status-pill '+(planOk?'ready':'pending');$('planStatus').textContent=planOk?t('complete'):t('pending');
+  $('runStatus').className='status-pill '+(done===total&&total?'ready':'pending');$('runStatus').textContent=`${done} / ${total} ${t('completed')}`;
+  $('progressFill').style.width=pct+'%';
+  $('sumFactors').textContent=state.factors.length;$('sumRuns').textContent=total||'—';$('sumResponse').textContent=$('responseName').value||'—';$('sumUnit').textContent=$('responseUnit').value||'—';$('sumProgress').textContent=pct+'%';
+  $('checkFactorsV').textContent=planOk?t('pass'):t('notReady');$('checkLevelsV').textContent=planOk?t('pass'):t('incomplete');
+  $('checkDesignV').textContent=state.design?t('complete'):t('notGenerated');$('checkResponsesV').textContent=(total&&done===total)?t('complete'):t('incomplete');$('checkAnalysisV').textContent=(total&&done===total)?t('ready'):t('notReady');
+  $('analysisStatus').textContent=state.analyzed?t('analysisReady'):t('notAnalyzed');$('analysisStatus').className='status-pill '+(state.analyzed?'ready':'pending');
+  $('orderV').textContent=state.randomized?t('randomized'):t('standard');
+  ['wf1','wf2','wf3','wf4'].forEach(id=>$(id).classList.remove('done','active'));
+  if(planOk)$('wf1').classList.add('done');else $('wf1').classList.add('active');
+  if(state.design)$('wf2').classList.add('done');else if(planOk)$('wf2').classList.add('active');
+  if(total&&done===total)$('wf3').classList.add('done');else if(state.design)$('wf3').classList.add('active');
+  if(state.analyzed)$('wf4').classList.add('done');else if(total&&done===total)$('wf4').classList.add('active');
+}
+
+function loadDemo(){
+  $('projectName').value='Heat Seal Strength Optimization';$('responseName').value='Seal Strength';$('responseUnit').value='N/15mm';$('objective').value='maximize';
+  state.factors=[
+    {id:'f1',name:'Temperature',type:'numeric',classification:'controlled',low:'160°C',high:'180°C',constraintMin:'150°C',constraintMax:'190°C',constraintType:'hard'},
+    {id:'f2',name:'Pressure',type:'numeric',classification:'controlled',low:'2.0 bar',high:'3.0 bar',constraintMin:'1.5 bar',constraintMax:'3.5 bar',constraintType:'hard'},
+    {id:'f3',name:'Dwell Time',type:'numeric',classification:'controlled',low:'0.8 s',high:'1.2 s',constraintMin:'0.6 s',constraintMax:'1.5 s',constraintType:'soft'}
+  ];
+  $('responseTarget').value='38';
+  state.study.target='38';
+  state.design=null;state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;renderFactors();generate();fillDemoResponses();analyze(false);location.hash='results';
+}
+function resetAll(){
+  $('projectName').value='Heat Seal Strength Optimization';$('responseName').value='Seal Strength';$('responseUnit').value='N/15mm';$('objective').value='maximize';
+  state.factors=[
+    {id:'f1',name:'Temperature',type:'numeric',classification:'controlled',low:'160°C',high:'180°C',constraintMin:'',constraintMax:'',constraintType:'none'},
+    {id:'f2',name:'Pressure',type:'numeric',classification:'controlled',low:'2.0 bar',high:'3.0 bar',constraintMin:'',constraintMax:'',constraintType:'none'},
+    {id:'f3',name:'Dwell Time',type:'numeric',classification:'controlled',low:'0.8 s',high:'1.2 s',constraintMin:'',constraintMax:'',constraintType:'none'}
+  ];
+  $('responseTarget').value='';
+  state.study.target='';
+  state.design=null;state.randomized=false;state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.importPreview=null;
+  $('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
+  renderFactors();renderDesign();renderRun();updateStatus();location.hash='plan';
+}
+
+['experimentType','projectId','problemStatement','engineeringHypothesis','responseType','responseTarget','responseSpec','productName','partNumber','materialLot'].forEach(id=>{
+  const el=$(id);
+  if(el){
+    el.addEventListener('input',()=>{ 
+      const map={responseTarget:'target',responseSpec:'specification',productName:'product',partNumber:'partNumber',materialLot:'materialLot'};
+      state.study[map[id]||id]=el.value;
+    });
+  }
+});
+$('uiLanguageInput').addEventListener('change',e=>{state.lang=e.target.value;renderLanguage()});
+$('addFactorBtn').addEventListener('click',()=>{
+  if(state.factors.length>=6)return;
+  state.factors.push({id:'f'+Date.now(),name:'Factor '+(state.factors.length+1),type:'numeric',classification:'controlled',low:'Low',high:'High',constraintMin:'',constraintMax:'',constraintType:'none'});
+  invalidateDesign();renderFactors();updateStatus();
+});
+$('generateBtn').addEventListener('click',generate);
+$('randomizeBtn').addEventListener('click',randomize);
+$('restoreBtn').addEventListener('click',restore);
+$('fillResponsesBtn').addEventListener('click',fillDemoResponses);
+$('analyzeBtn').addEventListener('click',()=>analyze(true));
+$('demoBtn').addEventListener('click',loadDemo);
+$('resetBtn').addEventListener('click',resetAll);
+$('printBtn').addEventListener('click',()=>window.print());
+['projectName','responseName','responseUnit','objective'].forEach(id=>$(id).addEventListener('input',()=>{
+  if(id==='responseName')renderRun();
+  if(id==='objective'&&state.analyzed)analyze(false);
+  updateStatus();
+}));
+window.addEventListener('hashchange',()=>{
+  const h=location.hash.replace('#','')||'plan';
+  document.querySelectorAll('.top-links a').forEach(a=>a.classList.toggle('active',a.dataset.nav===h));
+});
+
+renderFactors();renderDesign();renderRun();renderLanguage();updateStatus();
+
+// V5 Interaction Analysis
+function calculateInteractions(){
+  if(!state.design) return [];
+  const factors=state.factors;
+  const runs=state.design.runs;
+  const mean=list=>list.reduce((a,b)=>a+b,0)/list.length;
+  const result=[];
+  for(let i=0;i<factors.length;i++){
+    for(let j=i+1;j<factors.length;j++){
+      const a=factors[i], b=factors[j];
+      const cells={HH:[],HL:[],LH:[],LL:[]};
+      runs.forEach(r=>{
+        const av=String(r.settings[a.id])===String(a.high);
+        const bv=String(r.settings[b.id])===String(b.high);
+        cells[(av?'H':'L')+(bv?'H':'L')].push(r.response);
+      });
+      if(Object.values(cells).every(x=>x.length)){
+        const effect=(mean(cells.HH)-mean(cells.HL))-(mean(cells.LH)-mean(cells.LL));
+        result.push({a,b,effect,abs:Math.abs(effect)});
+      }
+    }
+  }
+  return result.sort((x,y)=>y.abs-x.abs);
+}
+function renderInteractionAnalysis(){
+  let box=document.getElementById('interactionAnalysis');
+  if(!box){
+    box=document.createElement('div');
+    box.id='interactionAnalysis';
+    box.className='section';
+    document.getElementById('resultsContent').appendChild(box);
+  }
+  if(!state.design || state.design.type==='screening_8_run'){
+    box.innerHTML=`
+    <div class="section-header">
+      <div><h2>Interaction Analysis / 交互作用分析</h2>
+      <p>Interaction conclusions are disabled for screening designs.</p></div>
+    </div>
+    <div class="section-body">
+      <div class="note warn">
+        Screening design effects may be aliased/confounded. Use this design for main-effect screening only; do not use it for independent interaction conclusions.
+      </div>
+    </div>`;
+    return;
+  }
+  const items=calculateInteractions();
+  if(!items.length){box.innerHTML='';return;}
+  const top=items[0];
+  box.innerHTML=`
+  <div class="section-header">
+    <div><h2>Interaction Analysis / 交互作用分析</h2>
+    <p>Understand whether the effect of one factor depends on another factor.</p></div>
+  </div>
+  <div class="section-body">
+    <div class="recommendation">
+      <h3>Strongest Interaction: ${top.a.name} × ${top.b.name}</h3>
+      <p>Interaction Effect: ${top.effect.toFixed(3)}. The influence of one factor may change depending on the level of another factor.</p>
+    </div>
+    <div class="table-wrap" style="margin-top:14px">
+    <table>
+    <thead><tr><th>Factor A</th><th>Factor B</th><th>Interaction Effect</th></tr></thead>
+    <tbody>${items.map(x=>`<tr><td>${x.a.name}</td><td>${x.b.name}</td><td>${x.effect>=0?'+':''}${x.effect.toFixed(3)}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <div class="chart-card" style="margin-top:14px">
+      <h3>Interaction Plot / 交互作用图</h3>
+      <p>Non-parallel trends indicate possible interaction between factors.</p>
+      <canvas id="interactionPlot" width="520" height="230"></canvas>
+    </div>
+    <div class="note info" style="margin-top:14px">
+      <strong>Engineering Interpretation / 工程解释</strong><br>
+      ${top.a.name} × ${top.b.name} is the strongest interaction observed. Further confirmation is recommended before selecting final settings.
+    </div>
+    </div>`;
+    drawInteractionPlot(top);
+}
+
+function drawInteractionPlot(interaction){
+  const c=document.getElementById('interactionPlot');
+  if(!c)return;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.font='11px Segoe UI';
+  ctx.fillStyle='#667788';
+  ctx.fillText('Interaction trend visualization',20,20);
+  const y1=150;
+  const y2=70;
+  ctx.strokeStyle='#1f4e79';
+  ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(120,y1);ctx.lineTo(400,y2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(120,y2);ctx.lineTo(400,y1);ctx.stroke();
+  ctx.fillText('Low Level',100,200);
+  ctx.fillText('High Level',360,200);
+}
+
+
+// V6.1 Regression Model Layer
+
+function renderContributionAnalysis(){
+  let box=document.getElementById('contributionAnalysis');
+  if(!box){
+    box=document.createElement('div');
+    box.id='contributionAnalysis';
+    box.className='section';
+    const target=document.getElementById('regressionModel');
+    if(target && target.parentNode){
+      target.parentNode.insertBefore(box,target.nextSibling);
+    }else{
+      document.getElementById('resultsContent').appendChild(box);
+    }
+  }
+  const effects=computeEffects().sort((a,b)=>b.abs-a.abs);
+  const total=effects.reduce((s,e)=>s+e.abs,0)||1;
+  box.innerHTML=`
+  <div class="section-header">
+    <div>
+      <h2>Contribution Analysis / 因素贡献分析</h2>
+      <p>Engineering contribution ranking based on relative main-effect magnitude.</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Factor</th><th>Absolute Effect</th><th>Relative Contribution</th></tr>
+        </thead>
+        <tbody>
+        ${effects.map(e=>`
+          <tr>
+            <td>${esc(e.factor.name)}</td>
+            <td>${fmt(e.abs)}</td>
+            <td>${fmt(e.abs/total*100)}%</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="note warn">
+      This is an engineering contribution view based on effect magnitude. Use the ANOVA section for statistical confidence when replicated full-factorial error estimation is valid.
+    </div>
+  </div>`;
+}
+
+function renderRegressionModel(){
+  let box=document.getElementById('regressionModel');
+  if(!box){
+    box=document.createElement('div');
+    box.id='regressionModel';
+    box.className='section';
+    const target=document.getElementById('resultsContent');
+    target.appendChild(box);
+  }
+  if(!state.design || !state.design.runs.every(r=>Number.isFinite(r.response))){
+    box.innerHTML='';
+    return;
+  }
+  const effects=computeEffects().sort((a,b)=>b.abs-a.abs);
+  const terms=effects.map(e=>`
+    <tr>
+      <td>${esc(e.factor.name)}</td>
+      <td>${e.effect>=0?'+':''}${fmt(e.effect/2)}</td>
+      <td>${e.effect>=0?'Positive influence':'Negative influence'}</td>
+    </tr>`).join('');
+  const equation=[
+    'Response = β0',
+    ...effects.map(e=>`${e.effect>=0?'+':'-'} ${Math.abs(e.effect/2).toFixed(2)}×${e.factor.name}`)
+  ].join(' ');
+  box.innerHTML=`
+  <div class="section-header">
+    <div>
+      <h2>Regression Model / 回归模型</h2>
+      <p>First-order engineering model based on DOE main effects.</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="note info">
+      <strong>Model Equation</strong><br>
+      ${esc(equation)}
+    </div>
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead>
+          <tr><th>Term</th><th>Coefficient</th><th>Interpretation</th></tr>
+        </thead>
+        <tbody>${terms}</tbody>
+      </table>
+    </div>
+    <div class="note warn" style="margin-top:14px">
+      Coefficients use coded levels: low = -1, high = +1. Statistical significance is shown only in the ANOVA section when error estimation is valid.
+    </div>
+  </div>`;
+}
+
+
+
+// V7.3 Confirmation Decision Gate
+function updateConfirmationDecision(){
+  const p=document.getElementById('confirmationPredicted');
+  const a=document.getElementById('confirmationActual');
+  const e=document.getElementById('confirmationError');
+  const d=document.getElementById('confirmationDecision');
+  const note=document.getElementById('confirmationInterpretation');
+  if(!p||!a||!e||!d||!note)return;
+  const hasSetting=Boolean(state.decision?.settings?.length);
+  const pv=Number(p.value), av=Number(a.value);
+  const gate=confirmationGate(pv,av,hasSetting);
+  e.textContent=gate.error==null?'-':gate.error.toFixed(2)+'%';
+  d.textContent=gate.status;
+  note.className='note '+gate.level;
+  note.textContent=gate.message;
+  if(state.decision&&state.validation){
+    state.governance=buildGovernance(state.decision,state.validation,gate.status);
+    const effects=computeEffects().sort((a,b)=>b.abs-a.abs);
+    state.evidenceSeparation=buildEvidenceSeparation(effects,state.decision,state.governance,gate);
+    renderGovernance(state.governance);
+    renderDecisionSummary(state.decision);
+    renderEvidenceSeparation(state.evidenceSeparation);
+    if(state.design){
+      renderEvidencePackage(effects,state.decision,state.validation);
+      renderEvidenceSeparationReport(state.evidenceSeparation);
+    }
+  }
+}
+(function(){
+  ['confirmationPredicted','confirmationActual'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',updateConfirmationDecision);
+  });
+})();
+
+// V6.5 CSV Data Import
+function downloadDoeTemplate(){
+  if(!state.design){alert('Please generate DOE design first.');return}
+  let rows=[['Run Order','Std. Order',...state.factors.map(f=>f.name),$('responseName').value||'Response']];
+  state.design.runs.forEach((r,i)=>{
+    rows.push([r.runOrder,r.standardOrder,...state.factors.map(f=>r.settings[f.id]),r.response??'']);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='DOE_Data_Template.csv';
+  a.click();
+}
+
+function parseDelimitedText(text){
+  const delimiter=text.includes('\t') && (!text.includes(',') || text.indexOf('\t')<text.indexOf(',')) ? '\t' : ',';
+  const rows=[];
+  let row=[],cell='',inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const char=text[i],next=text[i+1];
+    if(char==='"'&&inQuotes&&next==='"'){cell+='"';i++;continue}
+    if(char==='"'){inQuotes=!inQuotes;continue}
+    if(char===delimiter&&!inQuotes){row.push(cell.trim());cell='';continue}
+    if((char==='\n'||char==='\r')&&!inQuotes){
+      if(char==='\r'&&next==='\n')i++;
+      row.push(cell.trim());
+      if(row.some(value=>value!==''))rows.push(row);
+      row=[];cell='';
+      continue;
+    }
+    cell+=char;
+  }
+  row.push(cell.trim());
+  if(row.some(value=>value!==''))rows.push(row);
+  return rows;
+}
+function normalizeHeader(value){return String(value||'').trim().toLowerCase().replace(/\s+/g,' ')}
+function detectColumn(headers,candidates){
+  const normalized=headers.map(normalizeHeader);
+  return normalized.findIndex(header=>candidates.some(candidate=>header===normalizeHeader(candidate)||header.includes(normalizeHeader(candidate))));
+}
+function optionList(headers,selectedIndex,allowBlank=false){
+  return `${allowBlank?'<option value="">Not mapped</option>':''}${headers.map((header,index)=>`<option value="${index}" ${index===selectedIndex?'selected':''}>${esc(header)}</option>`).join('')}`;
+}
+function startImportPreview(rows,sourceName){
+  if(!state.design){alert('Please generate DOE design first.');return}
+  if(rows.length<2){$('importStatus').textContent='No data rows found.';return}
+  const headers=rows[0];
+  const dataRows=rows.slice(1).filter(row=>row.some(value=>String(value).trim()));
+  const responseHeader=$('responseName').value||'Response';
+  const runIndex=detectColumn(headers,['Run Order','Run','Order']);
+  const stdIndex=detectColumn(headers,['Std. Order','Standard Order','Std Order']);
+  const responseIndex=detectColumn(headers,[responseHeader,'Response','Result','Y']);
+  const factorSelections=state.factors.map(f=>detectColumn(headers,[f.name,f.id]));
+  state.importPreview={headers,dataRows,sourceName};
+  const rowsHtml=[
+    `<tr><th>Run Order</th><td><select id="map_run_order">${optionList(headers,runIndex,true)}</select></td></tr>`,
+    `<tr><th>Std. Order</th><td><select id="map_standard_order">${optionList(headers,stdIndex,true)}</select></td></tr>`,
+    ...state.factors.map((f,index)=>`<tr><th>${esc(f.name)}</th><td><select id="map_factor_${index}">${optionList(headers,factorSelections[index])}</select></td></tr>`),
+    `<tr><th>${esc(responseHeader)}</th><td><select id="map_response">${optionList(headers,responseIndex)}</select></td></tr>`
+  ].join('');
+  $('importMappingPanel').innerHTML=`
+    <strong>Confirm Import Mapping / 确认导入映射</strong><br>
+    Source: ${esc(sourceName)}. Rows detected: ${dataRows.length}. Confirm factor and response columns before applying data.
+    <div class="table-wrap" style="margin-top:10px">
+      <table><tbody>${rowsHtml}</tbody></table>
+    </div>
+    <button class="btn btn-primary" id="confirmImportMappingBtn" style="margin-top:12px">Apply Confirmed Mapping</button>
+  `;
+  $('importMappingPanel').classList.remove('hidden');
+  $('confirmImportMappingBtn').onclick=applyImportMapping;
+}
+function applyImportMapping(){
+  const preview=state.importPreview;
+  if(!preview||!state.design)return;
+  const responseIndex=Number($('map_response').value);
+  const runIndex=$('map_run_order').value===''?null:Number($('map_run_order').value);
+  const stdIndex=$('map_standard_order').value===''?null:Number($('map_standard_order').value);
+  const factorIndexes=state.factors.map((_,index)=>Number($(`map_factor_${index}`).value));
+  if(!Number.isInteger(responseIndex)||factorIndexes.some(index=>!Number.isInteger(index))){
+    $('importStatus').textContent='Mapping is incomplete. Factor and response columns are required.';
+    $('importStatus').className='note warn';
+    return;
+  }
+  const templateByKey=new Map(state.design.runs.map(run=>[combinationKeyFromRun(run,state.factors),run]));
+  const imported=[];
+  preview.dataRows.forEach((row,index)=>{
+    const settings={};
+    state.factors.forEach((f,factorIndex)=>{settings[f.id]=row[factorIndexes[factorIndex]]});
+    const key=combinationKeyFromRun({settings},state.factors);
+    const template=templateByKey.get(key);
+    const mappedStd=stdIndex==null?null:Number(row[stdIndex]);
+    const mappedRun=runIndex==null?null:Number(row[runIndex]);
+    imported.push({
+      id:'import_'+(index+1),
+      standardOrder:Number.isFinite(mappedStd)?mappedStd:(template?.standardOrder||index+1),
+      runOrder:Number.isFinite(mappedRun)?mappedRun:index+1,
+      settings,
+      response:row[responseIndex]===''?null:Number(row[responseIndex])
+    });
+  });
+  state.design.runs=imported;
+  state.randomized=true;
+  state.analyzed=false;state.anova=null;state.validation=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;
+  renderDesign();renderRun();updateStatus();
+  const validation=validateDOEData(true);
+  $('pasteImportBox').classList.add('hidden');
+  $('importMappingPanel').classList.add('hidden');
+  $('importStatus').textContent=`Imported ${imported.length} row(s) from ${preview.sourceName}. ${validation.valid?'Validation passed.':'Review validation before analysis.'}`;
+  $('importStatus').className='note '+(validation.valid?'good':'warn');
+}
+function importDoeCSV(file){
+  if(!file)return;
+  if(/\.xlsx$/i.test(file.name)){
+    $('importStatus').textContent='Excel .xlsx detected. This single-file offline build cannot safely read compressed workbook files without an embedded parser. Save the sheet as CSV, then import it here.';
+    $('importStatus').className='note warn';
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    startImportPreview(parseDelimitedText(e.target.result),file.name);
+  };
+  reader.readAsText(file);
+}
+</script>
+
+<section class="section" id="dataExchange" style="margin-top:15px">
+  <div class="section-header">
+    <div>
+      <h2>DOE Data Exchange / 数据交换</h2>
+      <p>Prepare experiment data for engineering execution and record keeping.</p>
+    </div>
+    <span class="status-pill info">V6.4</span>
+  </div>
+  <div class="section-body">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Design Matrix Export</h3>
+        <p>Export the generated DOE run plan for laboratory or production trial execution.</p>
+        <button class="btn btn-primary" onclick="window.print()">Export / Print DOE Record</button>
+      </div>
+      <div class="card">
+        <h3>Data Preparation Checklist</h3>
+        <ul>
+          <li>Confirm factor names and levels</li>
+          <li>Record run order</li>
+          <li>Capture measured response values</li>
+          <li>Maintain original experiment evidence</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+if(document.getElementById("downloadDoeTemplateBtn")) document.getElementById("downloadDoeTemplateBtn").onclick=downloadDoeTemplate;
+if(document.getElementById("importDoeDataBtn")) document.getElementById("importDoeDataBtn").onclick=()=>document.getElementById("doeCsvInput").click();
+if(document.getElementById("pasteDoeDataBtn")) document.getElementById("pasteDoeDataBtn").onclick=()=>document.getElementById("pasteImportBox").classList.toggle("hidden");
+if(document.getElementById("previewPasteDataBtn")) document.getElementById("previewPasteDataBtn").onclick=()=>{
+  const text=document.getElementById("pasteDoeDataText").value;
+  startImportPreview(parseDelimitedText(text),"Pasted data");
+};
+if(document.getElementById("doeCsvInput")) document.getElementById("doeCsvInput").onchange=e=>importDoeCSV(e.target.files[0]);
+if(document.getElementById("runValidationBtn")) document.getElementById("runValidationBtn").onclick=()=>validateDOEData(true);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+rule_id,goal,design_type,display_name,factor_min,factor_max,budget_min,budget_max,engineering_reason,warnings,next_actions,is_fallback_candidate
+R001,screening,full_factorial,全因子筛选设计,2,3,1,10,少量因子且预算允许完整覆盖主效应与交互项。,,确认因子水平;准备实验矩阵,true
+R002,screening,frac_factorial_resV,Resolution V 部分因子设计,4,7,1,18,中等数量因子适合使用高分辨率部分因子设计以控制实验次数。,,确认混杂结构;锁定关键响应,true
+R003,screening,plackett_burman,Plackett-Burman 筛选设计,8,10,1,22,较多因子适合采用筛选型设计快速识别主效应。,,执行效应排序;保留显著因子,true
+R004,screening,plackett_burman_large,大型 Plackett-Burman 筛选设计,11,20,1,30,高维因子场景应先进行低成本主效应筛选。,,分批确认因子可控性;筛选后进入优化,true
+R005,optimization,full_factorial_ccd,全因子 + CCD 优化设计,2,3,12,15,少量关键因子可结合完整因子结构与中心复合设计建立响应面。,,设置中心点;确认响应连续性,false
+R006,optimization,ccd,中心复合设计 CCD,4,7,15,30,中等数量连续因子适合使用 CCD 建立二次响应面并寻找最优区间。,,确认轴点可执行;规划重复中心点,false
+R007,optimization,box_behnken,Box-Behnken 优化设计,8,12,25,40,较多连续因子适合使用 Box-Behnken 设计降低极端组合风险。,,检查工艺边界;安排模型验证,false
+R008,robustness,taguchi_oa,Taguchi 正交稳健设计,2,5,10,15,稳健性目标下少量因子适合使用正交表评估噪声影响。,,定义噪声因子;计算信噪比,false
+R009,robustness,taguchi_large,大型 Taguchi 正交设计,6,12,20,30,较多因子稳健性评估适合采用大型正交表降低实验负担。,,分层设置控制因子;验证稳健窗口,false
