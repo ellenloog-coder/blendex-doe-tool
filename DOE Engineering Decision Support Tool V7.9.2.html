@@ -3518,7 +3518,7 @@ function renderDesign(){
   $('designBody').innerHTML=runs.map(r=>'<tr><td>'+r.runOrder+'</td><td>'+r.standardOrder+'</td>'+state.factors.map(f=>'<td>'+esc(r.settings[f.id])+'</td>').join('')+'</tr>').join('');
 }
 
-function renderRun(){
+function renderRun({refreshStatus=true}={}){
   if(!state.design){$('runEmpty').classList.remove('hidden');$('runContent').classList.add('hidden');return}
   $('runEmpty').classList.add('hidden');$('runContent').classList.remove('hidden');
   const runs=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
@@ -3528,10 +3528,10 @@ function renderRun(){
     const r=state.design.runs.find(x=>x.id===e.target.dataset.response);
     r.response=e.target.value===''?null:Number(e.target.value);
     state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;$('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
-    invalidateChartInterpretations();
-    updateStatus();
+    invalidateChartInterpretations({render:false});
+    updateStatus({refreshLanguage:false,showStep:false});
   }));
-  updateStatus();
+  if(refreshStatus)updateStatus();
 }
 
 function randomize(){
@@ -3561,7 +3561,7 @@ function fillDemoResponses(){
     y+=(r.standardOrder%3-1)*.7;
     r.response=Number(y.toFixed(2));
   });
-  state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;invalidateChartInterpretations();renderRun();updateStatus();
+  state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;invalidateChartInterpretations({render:false});renderRun({refreshStatus:false});updateStatus({refreshLanguage:false,showStep:false});
 }
 
 function computeEffects(){
@@ -4536,10 +4536,10 @@ function renderChartInterpretations(){
   renderChartInterpretationReport('reportParetoInterpretation',data.pareto_effects);
   renderChartInterpretationReport('reportInteractionInterpretation',data.interaction);
 }
-function invalidateChartInterpretations(){
+function invalidateChartInterpretations({render=true}={}){
   state.analysisContext=null;
   state.chartInterpretations={main_effects:null,pareto_effects:null,interaction:null};
-  renderChartInterpretations();
+  if(render)renderChartInterpretations();
 }
 function predictedResponseForSettings(effects,obj){
   const responses=state.design.runs.map(run=>run.response).filter(Number.isFinite);
@@ -5485,7 +5485,7 @@ function renderStudyReport(){
   if(body) body.innerHTML=rows.map(r=>`<tr><th>${esc(uiText(r[0]))}</th><td>${esc(uiValue(r[1]||'-'))}</td></tr>`).join('');
 }
 
-function updateStatus(){
+function updateStatus({refreshLanguage=true,showStep=true}={}){
   renderStudyReport();
   renderFactorReport();
   const planOk=validatePlan(false);
@@ -5506,8 +5506,8 @@ function updateStatus(){
   if(state.design)$('wf3').classList.add('done');
   if(total&&done===total)$('wf4').classList.add('done');
   if(state.analyzed)$('wf5').classList.add('done');
-  showWorkflowStep(state.activeWorkflowStep||'define',false);
-  refreshLocalizedUi();
+  if(showStep)showWorkflowStep(state.activeWorkflowStep||'define',false);
+  else if(refreshLanguage)refreshLocalizedUi();
 }
 
 const WORKFLOW_SECTION_MAP={
