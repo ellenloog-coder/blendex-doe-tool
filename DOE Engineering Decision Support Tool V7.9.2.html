@@ -158,7 +158,7 @@
   .note.warn{background:var(--amber-soft);color:#725000;border-left:3px solid #d19713}
   .note.good{background:var(--green-soft);color:#266443;border-left:3px solid var(--green)}
 
-  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}
+  .table-wrap{overflow:auto;max-width:100%;min-width:0;border:1px solid var(--line);border-radius:8px}
   table{width:100%;border-collapse:collapse;min-width:620px}
   th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;white-space:nowrap}
   th{background:#f6f8fa;color:#546576;font-weight:800}
@@ -206,7 +206,7 @@
   .chart-card{border:1px solid var(--line);border-radius:9px;padding:13px;background:#fff}
   .chart-card h3{margin:0 0 4px;font-size:13px;color:#2c4256}
   .chart-card p{margin:0 0 10px;font-size:11px;color:var(--muted)}
-  canvas{display:block;width:100%;height:230px}
+  canvas{display:block;width:100%;max-width:100%;height:230px}
   .doe-chart-grid{grid-template-columns:1fr}
   .doe-main-effect-card canvas{height:350px}
   .doe-pareto-card canvas{height:280px}
@@ -233,8 +233,8 @@
   .chart-metric-row span:last-child{font-weight:800;color:#263a4d;text-align:right}
   .report-chart-interpretation-block{break-inside:avoid;page-break-inside:avoid}
   .report-chart-interpretation-block .chart-interpretation-card{margin-top:8px}
-  .report-flow{display:grid;gap:12px}
-  .report-section{break-inside:auto;page-break-inside:auto}
+  .report-flow{display:grid;gap:12px;min-width:0;max-width:100%}
+  .report-section{min-width:0;max-width:100%;break-inside:auto;page-break-inside:auto}
   .report-section .subheading{margin:8px 0 7px}
   .report-keep,.report-chart-block{break-inside:avoid;page-break-inside:avoid}
   .report-chart-block canvas{border:1px solid var(--line);border-radius:10px;background:#fff;height:auto;max-height:360px}
@@ -259,7 +259,12 @@
   .confidence-high{background:var(--green-soft);color:var(--green);border:1px solid #b9d5c4}
   .confidence-medium{background:var(--amber-soft);color:var(--amber);border:1px solid #ecd188}
   .confidence-low{background:var(--red-soft);color:var(--red);border:1px solid #f4c8c2}
-  .evidence-package .section-body{display:grid;gap:14px}
+  .evidence-package .section-body{display:grid;gap:14px;min-width:0;max-width:100%}
+  .workspace-grid>*,
+  .stack,
+  .section,
+  .section-body,
+  [data-result-tab]{min-width:0;max-width:100%}
   .governance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
   .governance-card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:12px}
   .governance-card .label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:850;margin-bottom:6px}
@@ -443,6 +448,12 @@
     .results-layout{grid-template-columns:repeat(2,1fr)}
   }
   @media(max-width:700px){
+    .app-nav{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:stretch}
+    .nav-brand{min-width:0}
+    .top-links{display:grid;grid-template-columns:minmax(0,1fr) auto auto;width:100%;min-width:0;gap:8px}
+    .nav-demo,.nav-demo label,.nav-demo select{width:100%;min-width:0;max-width:100%}
+    .nav-mode,.nav-language{min-width:0}
+    .nav-mode select,.nav-language select{max-width:100%}
     .topbar{display:grid}
     .top-actions{justify-content:flex-start}
     .workflow{grid-template-columns:1fr}
@@ -450,6 +461,7 @@
     .workflow-step:last-child{border-bottom:0}
     .grid-2,.grid-3,.chart-grid,.setting-grid,.summary-grid,.decision-grid,.governance-grid,.evidence-layer-grid,.evidence-status-grid,.closure-grid,.strategy-grid,.chart-analysis-layout{grid-template-columns:1fr}
     .results-layout{grid-template-columns:1fr}
+    .report-flow,.report-section,.report-chart-block{width:100%;min-width:0;max-width:100%}
   }
   @media print{
     body{background:#fff}
@@ -6243,21 +6255,95 @@ function parseDelimitedText(text){
 function normalizeHeader(value){return String(value||'').trim().toLowerCase().replace(/\s+/g,' ')}
 function detectColumn(headers,candidates){
   const normalized=headers.map(normalizeHeader);
-  return normalized.findIndex(header=>candidates.some(candidate=>header===normalizeHeader(candidate)||header.includes(normalizeHeader(candidate))));
+  return normalized.findIndex(header=>candidates.some(candidate=>header===normalizeHeader(candidate)));
+}
+function importGuidance(){
+  return state.lang==='zh'?'请修正后重新导入，或下载 CSV 模板检查所需列。':'Correct the file and import it again, or download the CSV template to verify the required columns.';
+}
+function importError(code,details={}){
+  const column=details.column||'Response';
+  const row=details.row||'-';
+  const separator=state.lang==='zh'?'、':', ';
+  const detected=(details.detected||[]).filter(Boolean).join(separator)||(state.lang==='zh'?'无':'none');
+  const missing=(details.missing||[]).filter(Boolean).join(separator)||(state.lang==='zh'?'未知':'unknown');
+  const messages={
+    zh:{
+      empty:`导入失败：文件为空。请添加表头和数据行后重新导入，或下载 CSV 模板检查所需列。`,
+      headerOnly:`导入失败：文件只有表头，没有数据行。请添加实验数据后重新导入，或下载 CSV 模板检查所需列。`,
+      missingColumns:`导入失败：缺少必要列“${missing}”。当前检测到：${detected}。${importGuidance()}`,
+      rowStructure:`导入失败：第 ${row} 行的列数与表头不一致。应有 ${details.expected} 列，实际有 ${details.actual} 列。${importGuidance()}`,
+      requiredEmpty:`导入失败：第 ${row} 行的“${column}”不能为空。${importGuidance()}`,
+      responseNumeric:`导入失败：第 ${row} 行的“${column}”必须是数字。请修改该单元格后重新导入，或下载 CSV 模板检查列结构。`,
+      factorLevel:`导入失败：第 ${row} 行的“${column}”必须使用当前 DOE 的低水平或高水平。${importGuidance()}`,
+      rowCount:`导入失败：当前 DOE 需要 ${details.expected} 行数据，实际检测到 ${details.actual} 行。${importGuidance()}`,
+      designMismatch:`导入失败：数据行不能与当前 DOE 设计矩阵完整匹配。${importGuidance()}`
+    },
+    en:{
+      empty:`Import failed: the file is empty. Add a header and data rows, then import it again, or download the CSV template to verify the required columns.`,
+      headerOnly:`Import failed: the file contains a header but no data rows. Add experiment data and import it again, or download the CSV template to verify the required columns.`,
+      missingColumns:`Import failed: required column(s) “${missing}” are missing. Detected columns: ${detected}. ${importGuidance()}`,
+      rowStructure:`Import failed: row ${row} does not match the header structure. Expected ${details.expected} columns but found ${details.actual}. ${importGuidance()}`,
+      requiredEmpty:`Import failed: “${column}” in row ${row} is required. ${importGuidance()}`,
+      responseNumeric:`Import failed: “${column}” in row ${row} must be numeric. Correct the value and import the file again, or use the CSV template to verify the required columns.`,
+      factorLevel:`Import failed: “${column}” in row ${row} must match the current DOE low or high level. ${importGuidance()}`,
+      rowCount:`Import failed: the current DOE requires ${details.expected} data rows, but ${details.actual} were detected. ${importGuidance()}`,
+      designMismatch:`Import failed: the data rows do not completely match the current DOE design matrix. ${importGuidance()}`
+    }
+  };
+  return messages[state.lang][code];
+}
+function showImportError(code,details={}){
+  $('importStatus').textContent=importError(code,details);
+  $('importStatus').className='note warn';
+  $('importMappingPanel').classList.add('hidden');
+  state.importPreview=null;
 }
 function optionList(headers,selectedIndex,allowBlank=false){
   return `${allowBlank?`<option value="">${esc(uiText('Not mapped'))}</option>`:''}${headers.map((header,index)=>`<option value="${index}" ${index===selectedIndex?'selected':''}>${esc(header)}</option>`).join('')}`;
 }
 function startImportPreview(rows,sourceName){
   if(!state.design){alert(translateUiText('Please generate DOE design first.'));return}
-  if(rows.length<2){$('importStatus').textContent=uiText('No data rows found.');refreshLocalizedUi();return}
+  if(!rows.length){showImportError('empty');return}
+  if(rows.length<2){showImportError('headerOnly');return}
   const headers=rows[0];
   const dataRows=rows.slice(1).filter(row=>row.some(value=>String(value).trim()));
+  if(!dataRows.length){showImportError('headerOnly');return}
   const responseHeader=$('responseName').value||'Response';
-  const runIndex=detectColumn(headers,['Run Order','Run','Order']);
-  const stdIndex=detectColumn(headers,['Std. Order','Standard Order','Std Order']);
-  const responseIndex=detectColumn(headers,[responseHeader,'Response','Result','Y']);
+  const runIndex=detectColumn(headers,['Run Order','Run','Order',t('run')]);
+  const stdIndex=detectColumn(headers,['Std. Order','Standard Order','Std Order',t('stdOrder')]);
+  const responseIndex=detectColumn(headers,[responseHeader,'Response','Result','Y',t('responseValue')]);
   const factorSelections=state.factors.map(f=>detectColumn(headers,[f.name,f.id]));
+  const missing=[
+    ...state.factors.filter((_,index)=>factorSelections[index]<0).map(f=>f.name),
+    ...(responseIndex<0?[responseHeader]:[])
+  ];
+  if(missing.length){showImportError('missingColumns',{missing,detected:headers});return}
+  if(dataRows.length!==state.design.runs.length){
+    showImportError('rowCount',{expected:state.design.runs.length,actual:dataRows.length});
+    return;
+  }
+  for(let index=0;index<dataRows.length;index++){
+    const row=dataRows[index],rowNumber=index+2;
+    if(row.length!==headers.length){
+      showImportError('rowStructure',{row:rowNumber,expected:headers.length,actual:row.length});
+      return;
+    }
+    for(let factorIndex=0;factorIndex<state.factors.length;factorIndex++){
+      const factor=state.factors[factorIndex],columnIndex=factorSelections[factorIndex];
+      const value=String(row[columnIndex]??'').trim();
+      if(!value){showImportError('requiredEmpty',{row:rowNumber,column:factor.name});return}
+      if(value!==String(factor.low).trim()&&value!==String(factor.high).trim()){
+        showImportError('factorLevel',{row:rowNumber,column:factor.name});
+        return;
+      }
+    }
+    const responseValue=String(row[responseIndex]??'').trim();
+    if(!responseValue){showImportError('requiredEmpty',{row:rowNumber,column:responseHeader});return}
+    if(!Number.isFinite(Number(responseValue))){
+      showImportError('responseNumeric',{row:rowNumber,column:responseHeader});
+      return;
+    }
+  }
   state.importPreview={headers,dataRows,sourceName};
   const rowsHtml=[
     `<tr><th>${esc(t('run'))}</th><td><select id="map_run_order">${optionList(headers,runIndex,true)}</select></td></tr>`,
@@ -6292,9 +6378,25 @@ function applyImportMapping(){
   }
   const templateByKey=new Map(state.design.runs.map(run=>[combinationKeyFromRun(run,state.factors),run]));
   const imported=[];
-  preview.dataRows.forEach((row,index)=>{
+  for(let index=0;index<preview.dataRows.length;index++){
+    const row=preview.dataRows[index],rowNumber=index+2;
     const settings={};
-    state.factors.forEach((f,factorIndex)=>{settings[f.id]=row[factorIndexes[factorIndex]]});
+    for(let factorIndex=0;factorIndex<state.factors.length;factorIndex++){
+      const factor=state.factors[factorIndex];
+      const value=String(row[factorIndexes[factorIndex]]??'').trim();
+      if(!value){showImportError('requiredEmpty',{row:rowNumber,column:factor.name});return}
+      if(value!==String(factor.low).trim()&&value!==String(factor.high).trim()){
+        showImportError('factorLevel',{row:rowNumber,column:factor.name});
+        return;
+      }
+      settings[factor.id]=value;
+    }
+    const responseValue=String(row[responseIndex]??'').trim();
+    if(!responseValue){showImportError('requiredEmpty',{row:rowNumber,column:$('responseName').value||'Response'});return}
+    if(!Number.isFinite(Number(responseValue))){
+      showImportError('responseNumeric',{row:rowNumber,column:$('responseName').value||'Response'});
+      return;
+    }
     const key=combinationKeyFromRun({settings},state.factors);
     const template=templateByKey.get(key);
     const mappedStd=stdIndex==null?null:Number(row[stdIndex]);
@@ -6304,9 +6406,15 @@ function applyImportMapping(){
       standardOrder:Number.isFinite(mappedStd)?mappedStd:(template?.standardOrder||index+1),
       runOrder:Number.isFinite(mappedRun)?mappedRun:index+1,
       settings,
-      response:row[responseIndex]===''?null:Number(row[responseIndex])
+      response:Number(responseValue)
     });
-  });
+  }
+  const candidateDesign={...state.design,runs:imported};
+  const candidateValidation=validateDOEDataDetailed(candidateDesign,state.factors);
+  if(!candidateValidation.valid){
+    showImportError('designMismatch');
+    return;
+  }
   state.design.runs=imported;
   state.randomized=true;
   state.analyzed=false;state.anova=null;state.validation=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;
