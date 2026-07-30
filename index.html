@@ -30,8 +30,8 @@
     margin:0;
     background:var(--page);
     color:var(--text);
-    font-family:Inter,"PingFang SC","Microsoft YaHei",Arial;
-    font-size:13px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    font-size:14px;
   }
   button,input,select,textarea{font:inherit}
   button{cursor:pointer}
@@ -320,7 +320,7 @@
   #dataExchange{display:none}
 
   /* Guided 8D / MSA visual alignment: style-only overrides */
-  body{background:var(--page);font-size:13px;line-height:1.45;color:var(--text)}
+  body{background:var(--page);font-size:14px;line-height:1.45;color:var(--text)}
   .app-nav{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(16,24,40,.02)}
   .nav-brand{font-size:16px;color:var(--nav);letter-spacing:0}
   .brand-mark{width:30px;height:30px;border-radius:9px;background:var(--primary)}
@@ -481,63 +481,1028 @@
     .stack{display:block}
     .stack>.section{margin-bottom:12px}
   }
+
+  /* V7.9.2 UI candidate: reference-aligned presentation only */
+  :root{
+    --page:#f4f7fb;
+    --line:#dde5ef;
+    --primary-2:#3976e8;
+    --shadow:0 10px 28px rgba(16,24,40,.055);
+    --shadow-raised:0 18px 42px rgba(16,24,40,.075);
+  }
+  body{
+    min-width:0;
+    background:
+      radial-gradient(circle at 50% -180px,rgba(76,130,247,.10),transparent 420px),
+      var(--page);
+    -webkit-font-smoothing:antialiased;
+  }
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [data-step-nav]:focus-visible{
+    outline:3px solid rgba(57,118,232,.22);
+    outline-offset:2px;
+  }
+
+  .app-nav{
+    min-height:58px;
+    height:auto;
+    padding:0;
+    border-bottom:1px solid #e2e8f0;
+    box-shadow:none;
+    backdrop-filter:none;
+  }
+  .app-nav-inner{
+    width:100%;
+    max-width:none;
+    min-width:0;
+    min-height:58px;
+    margin:0;
+    padding:8px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+  }
+  .nav-left,.nav-right{
+    display:flex;
+    align-items:center;
+    min-width:0;
+  }
+  .nav-left{gap:6px}
+  .nav-right{justify-content:flex-start;gap:4px}
+  .nav-brand{
+    gap:10px;
+    min-width:0;
+    flex:none;
+    font-size:16.5px;
+    letter-spacing:0;
+  }
+  .brand-mark{
+    width:36px;
+    height:36px;
+    border-radius:10px;
+    border:1px solid #d6e3ff;
+    background:#eef4ff;
+    color:#3976e8;
+    box-shadow:none;
+  }
+  .brand-mark svg{width:20px;height:20px}
+  .nav-help-link{
+    min-height:34px;
+    padding:6px 8px;
+    border:0;
+    border-radius:6px;
+    background:transparent;
+    color:#475569;
+    font-size:12.65px;
+    font-weight:650;
+    white-space:nowrap;
+  }
+  .nav-help-link:hover,
+  .nav-help-link[aria-expanded="true"]{
+    color:#244f7d;
+    background:#f1f5f9;
+  }
+  .nav-demo,.nav-mode,.nav-language{min-width:0}
+  .nav-mode[hidden]{display:none!important}
+  .nav-right select,.nav-language select{
+    height:34px;
+    border:0;
+    border-radius:6px;
+    background:transparent;
+    color:#344054;
+    padding:5px 24px 5px 8px;
+    font-size:12.65px;
+    font-weight:650;
+    box-shadow:none;
+  }
+  .nav-right select:hover,.nav-language select:hover{background-color:#f1f5f9}
+  .nav-demo select{width:min(210px,22vw);max-width:210px}
+  .nav-mode select{width:104px}
+  .nav-language select{width:84px}
+  .nav-actions{display:flex;align-items:center;gap:4px}
+  .nav-actions .btn{
+    min-height:34px;
+    padding:6px 8px;
+    border:0;
+    border-radius:6px;
+    background:transparent;
+    box-shadow:none;
+    color:#475569;
+    font-size:12.65px;
+    white-space:nowrap;
+  }
+  .nav-actions .btn:hover{
+    border:0;
+    background:#f1f5f9;
+    box-shadow:none;
+    color:#244f7d;
+  }
+
+  .title-band{
+    width:100%;
+    border-bottom:1px solid #e2e8f0;
+    background:#eef2f7;
+  }
+  .topbar{
+    width:100%;
+    max-width:1320px;
+    margin:0 auto;
+    padding:30px 24px 28px;
+    display:block;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+    overflow:visible;
+  }
+  .topbar::before{display:none}
+  .title-band .topbar h1{
+    margin:0 0 8px;
+    color:#172033;
+    font-size:28px;
+    font-weight:760;
+    line-height:1.2;
+    letter-spacing:-.35px;
+  }
+  .title-band .subtitle{
+    max-width:980px;
+    color:#667085;
+    font-size:12.5px;
+    font-weight:450;
+    line-height:1.65;
+  }
+  main{max-width:1320px;padding:24px 24px 64px}
+
+  body.help-open{overflow:hidden}
+  .help-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    justify-content:flex-end;
+    background:rgba(15,23,42,.28);
+    backdrop-filter:blur(2px);
+  }
+  .help-drawer{
+    width:min(440px,100vw);
+    height:100%;
+    overflow:auto;
+    border-left:1px solid #dce4ee;
+    background:#fff;
+    box-shadow:-18px 0 48px rgba(15,23,42,.16);
+  }
+  .help-drawer-header{
+    position:sticky;
+    top:0;
+    z-index:1;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:18px;
+    padding:20px 22px 16px;
+    border-bottom:1px solid #e2e8f0;
+    background:rgba(255,255,255,.97);
+  }
+  .help-drawer-kicker{
+    margin-bottom:4px;
+    color:#3976e8;
+    font-size:10px;
+    font-weight:750;
+    letter-spacing:.8px;
+  }
+  .help-drawer-header h2{margin:0;color:#172b4d;font-size:19px}
+  .help-close{
+    width:34px;
+    height:34px;
+    border:1px solid #dbe3ed;
+    border-radius:9px;
+    background:#fff;
+    color:#475569;
+    font-size:22px;
+    line-height:1;
+  }
+  .help-close:hover{background:#f8fafc;color:#172b4d}
+  .help-drawer-body{padding:20px 22px 28px;color:#475569;font-size:12.5px;line-height:1.65}
+  .help-intro{margin:0 0 16px;color:#64748b}
+  .manual-section{margin-top:18px}
+  .manual-section:first-of-type{margin-top:0}
+  .manual-section h3{
+    margin:0 0 8px;
+    color:#27364a;
+    font-size:13px;
+    font-weight:700;
+  }
+  .manual-section p{margin:0;color:#64748b}
+  .manual-list{
+    display:grid;
+    gap:5px;
+    margin:0;
+    padding-left:18px;
+    color:#64748b;
+  }
+  .manual-key-list{display:grid;gap:8px}
+  .manual-key-item{
+    padding:9px 11px;
+    border-left:2px solid #cfe0ff;
+    background:#f8fafc;
+  }
+  .manual-key-item strong{display:block;color:#334155;font-size:12px}
+  .manual-steps{display:grid;gap:13px;margin:0;padding:0;list-style:none;counter-reset:manual-step}
+  .manual-steps li{
+    position:relative;
+    min-width:0;
+    padding:12px 13px 12px 42px;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    background:#fbfcfe;
+    counter-increment:manual-step;
+  }
+  .manual-steps li::before{
+    content:counter(manual-step);
+    position:absolute;
+    top:12px;
+    left:12px;
+    width:21px;
+    height:21px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:#eaf2ff;
+    color:#2f6fed;
+    font-size:10px;
+    font-weight:750;
+  }
+  .manual-steps strong{display:block;margin-bottom:3px;color:#27364a;font-size:12.5px}
+  .manual-note{
+    margin-top:16px;
+    padding:11px 12px;
+    border-left:3px solid #3976e8;
+    background:#f4f8ff;
+    color:#526273;
+  }
+  .faq-list{display:grid;gap:9px}
+  .faq-list details{
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    background:#fff;
+    overflow:hidden;
+  }
+  .faq-list summary{
+    position:relative;
+    padding:12px 38px 12px 13px;
+    color:#27364a;
+    font-weight:650;
+    cursor:pointer;
+    list-style:none;
+  }
+  .faq-list summary::-webkit-details-marker{display:none}
+  .faq-list summary::after{
+    content:"+";
+    position:absolute;
+    top:50%;
+    right:13px;
+    transform:translateY(-50%);
+    color:#64748b;
+    font-size:18px;
+    font-weight:400;
+  }
+  .faq-list details[open] summary::after{content:"−"}
+  .faq-answer{padding:0 13px 13px;color:#64748b}
+
+  .workflow{
+    border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+  .workflow-step{
+    position:relative;
+    min-width:0;
+    padding:14px 15px;
+  }
+  .workflow-step.active{background:#eef5ff}
+  .workflow-step.done{background:#fbfefc}
+  .workflow-step.done .step-no{box-shadow:inset 0 0 0 1px rgba(32,122,74,.04)}
+  .workflow-step.active .step-no{box-shadow:0 5px 12px rgba(57,118,232,.25)}
+  .step-main,.step-sub{overflow:hidden;text-overflow:ellipsis}
+
+  .workspace-grid{
+    grid-template-columns:minmax(0,1fr) minmax(288px,318px);
+    gap:22px;
+    align-items:start;
+  }
+  .main-stack{gap:18px}
+  .workspace-grid>aside{
+    position:sticky;
+    top:84px;
+    gap:14px;
+  }
+  .section{
+    border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+  .section:hover{border-color:#d5dfeb}
+  .section .section{
+    border-radius:14px;
+    box-shadow:none;
+  }
+  .section-header{
+    min-height:58px;
+    align-items:center;
+    background:linear-gradient(180deg,#fff,#fcfdff);
+  }
+  .section-header h2{letter-spacing:-.08px}
+  .section-body{padding:20px}
+  .workspace-grid>aside .section-header{min-height:auto;padding:14px 16px}
+  .workspace-grid>aside .section-body{padding:16px}
+  .workspace-grid>aside .summary-grid{gap:8px}
+  .workspace-grid>aside .metric{padding:10px}
+  .current-study-row{
+    display:grid;
+    gap:3px;
+    margin-bottom:12px;
+    padding:0 0 12px;
+    border-bottom:1px solid #e6ecf3;
+  }
+  .current-study-label{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.28px;
+    text-transform:uppercase;
+    color:#7b8494;
+  }
+  .current-study-value{
+    font-size:12px;
+    font-weight:650;
+    line-height:1.45;
+    color:#26364a;
+    overflow-wrap:anywhere;
+  }
+
+  .btn{min-height:36px;border-radius:10px}
+  .btn-primary{box-shadow:0 5px 12px rgba(20,35,59,.14)}
+  .btn-primary:hover{box-shadow:0 7px 16px rgba(20,35,59,.18)}
+  .field input,.field select,.field textarea,td input,td select{border-radius:9px}
+  .field input,.field select{min-height:38px}
+  .field textarea{line-height:1.55}
+  .table-wrap{border-radius:12px;scrollbar-gutter:stable}
+  th{
+    background:#f7f9fc;
+    color:#536176;
+    letter-spacing:.04px;
+  }
+  tbody tr{transition:background-color .12s ease}
+  .metric,.result-card,.governance-card,.evidence-status-card,.closure-card,.strategy-card,.chart-card,.evidence-layer,.decision-item,.setting{
+    border-radius:12px;
+  }
+  .metric{background:linear-gradient(180deg,#fff,#fafcff)}
+  .metric .value{line-height:1.25}
+  .status-pill{white-space:nowrap}
+
+  .results-tabs{
+    gap:6px;
+    padding:5px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#f7f9fc;
+    overflow-x:auto;
+  }
+  .results-tab{
+    flex:1 0 auto;
+    min-height:34px;
+    padding:7px 12px;
+    border:0;
+    border-radius:8px;
+  }
+  .results-tab.active{
+    color:#fff;
+    background:var(--primary-2);
+    border-bottom-color:transparent;
+    box-shadow:0 4px 10px rgba(57,118,232,.18);
+  }
+  .decision-summary,.recommendation{box-shadow:0 8px 20px rgba(16,24,40,.035)}
+  .chart-card{
+    padding:18px;
+    border-color:#dbe4ef;
+    background:linear-gradient(180deg,#fff,#fcfdff);
+    box-shadow:0 10px 24px rgba(16,24,40,.045);
+  }
+  .chart-visual-panel>h3{
+    margin-bottom:5px;
+    font-size:14px;
+    color:#172b4d;
+    letter-spacing:-.08px;
+  }
+  .chart-visual-panel>p{
+    margin-bottom:13px;
+    color:#697386;
+    line-height:1.5;
+  }
+  .chart-visual-panel canvas,
+  .report-chart-block canvas{
+    width:100%;
+    height:auto;
+    max-height:none;
+    border:1px solid #dce4ee;
+    border-radius:12px;
+    background:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .doe-main-effect-card canvas,
+  .doe-pareto-card canvas{height:auto}
+  .doe-chart-tooltip{
+    position:fixed;
+    z-index:1000;
+    width:max-content;
+    max-width:min(280px,calc(100vw - 16px));
+    padding:8px 10px;
+    border:1px solid rgba(148,163,184,.42);
+    border-radius:8px;
+    background:rgba(255,255,255,.98);
+    box-shadow:0 8px 24px rgba(15,23,42,.16);
+    color:#334155;
+    font-size:11px;
+    font-weight:400;
+    line-height:1.5;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(2px);
+    transition:opacity .12s ease,transform .12s ease,visibility .12s ease;
+  }
+  .doe-chart-tooltip.visible{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+  }
+  .doe-chart-tooltip-title{
+    margin-bottom:3px;
+    color:#172b4d;
+    font-weight:650;
+  }
+  .doe-chart-tooltip-row{white-space:normal}
+  .report-chart-block{
+    padding:15px;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    background:#fff;
+  }
+  .report-section-nav{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    width:100%;
+    min-width:0;
+    padding:5px;
+    border:1px solid #dce4ee;
+    border-radius:10px;
+    background:#f6f8fb;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:thin;
+  }
+  .report-section-tab{
+    flex:0 0 auto;
+    min-height:32px;
+    padding:6px 11px;
+    border:1px solid transparent;
+    border-radius:7px;
+    background:transparent;
+    color:#5f6f82;
+    font-size:11px;
+    font-weight:600;
+    line-height:1.2;
+    white-space:nowrap;
+    cursor:pointer;
+  }
+  .report-section-tab:hover{color:#254f7d;background:#eef3f9}
+  .report-section-tab.active{
+    border-color:#cdd9e7;
+    background:#fff;
+    color:#244f7d;
+    box-shadow:0 2px 7px rgba(15,23,42,.08);
+  }
+  .print-report-header{display:none}
+  .report-appendix-content{display:grid;gap:12px}
+  .report-appendix-group{
+    min-width:0;
+    padding-top:10px;
+    border-top:1px solid #e2e8f0;
+  }
+  .report-appendix-group:first-child{padding-top:0;border-top:0}
+  .report-appendix-group>h4{
+    margin:0 0 7px;
+    color:#334155;
+    font-size:12px;
+  }
+  #resultsContent.report-section-filtered [data-report-section]{display:none!important}
+  #resultsContent.report-section-filtered [data-report-section].active-report-section{display:block!important}
+  @media screen{
+    .report-flow .report-section td,
+    #doeStudyReport td{
+      color:#475569;
+      font-size:11.5px;
+      font-weight:400;
+      line-height:1.55;
+    }
+    .report-flow .report-section th,
+    #doeStudyReport th{font-weight:600}
+  }
+  #measuredLayerBody,
+  #modelLayerBody,
+  #decisionLayerBody{
+    font-size:11.5px;
+    font-weight:400;
+    line-height:1.65;
+    color:#475569;
+  }
+  #measuredLayerBody strong,
+  #modelLayerBody strong,
+  #decisionLayerBody strong{
+    font-weight:500;
+    color:#334155;
+  }
+  #measuredLayerBody em,
+  #modelLayerBody em,
+  #decisionLayerBody em{
+    font-weight:400;
+    color:#64748b;
+  }
+
+  @media(max-width:980px){
+    .app-nav{padding:0}
+    .app-nav-inner{
+      padding:9px 16px;
+      flex-wrap:wrap;
+      gap:8px 14px;
+    }
+    .nav-left{flex:1 1 auto}
+    .nav-right{
+      flex:1 1 100%;
+      justify-content:flex-end;
+    }
+    .nav-demo{flex:1 1 240px}
+    .nav-demo select{width:100%;max-width:none}
+    main{padding:22px 16px 50px}
+    .workspace-grid{grid-template-columns:1fr}
+    .chart-analysis-layout{grid-template-columns:1fr}
+    .workspace-grid>aside{
+      position:static;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    .title-band .topbar{padding:25px 16px 23px}
+  }
+  @media(max-width:700px){
+    .app-nav{display:block;padding:0}
+    .app-nav-inner{
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      padding:10px 14px;
+      gap:9px;
+    }
+    .nav-left{
+      display:grid;
+      grid-template-columns:auto auto minmax(82px,1fr);
+      width:100%;
+      gap:6px 10px;
+    }
+    .nav-brand{font-size:16.5px}
+    .nav-brand{
+      grid-column:1/-1;
+      width:100%;
+    }
+    .brand-mark{width:32px;height:32px}
+    .nav-help-link{
+      min-height:30px;
+      padding:5px 1px;
+    }
+    .nav-language{
+      justify-self:end;
+    }
+    .nav-language select{width:84px}
+    .nav-right.top-links{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 104px;
+      width:100%;
+      gap:7px;
+    }
+    .nav-demo{grid-column:1/-1}
+    .nav-demo select{width:100%;max-width:none}
+    .nav-mode{min-width:0}
+    .nav-mode select{width:100%}
+    .nav-actions{
+      grid-column:1/-1;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      width:100%;
+    }
+    .nav-actions .btn{
+      width:100%;
+      padding:7px 6px;
+      font-size:11.55px;
+    }
+    main{padding:16px 12px 40px}
+    .title-band .topbar{
+      padding:22px 14px 20px;
+      border-radius:0;
+    }
+    .title-band .topbar h1{font-size:22px}
+    .title-band .subtitle{font-size:11.5px}
+    .help-drawer{width:100vw}
+    .top-actions{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      width:100%;
+    }
+    .top-actions .btn{padding:7px 8px}
+    .workflow{
+      display:grid;
+      grid-template-columns:none;
+      grid-auto-flow:column;
+      grid-auto-columns:minmax(158px,1fr);
+      overflow-x:auto;
+      overscroll-behavior-inline:contain;
+      scroll-snap-type:x proximity;
+    }
+    .workflow-step{
+      min-height:58px;
+      padding:10px 12px;
+      border-right:1px solid var(--line);
+      border-bottom:0;
+      scroll-snap-align:start;
+    }
+    .workflow-step:last-child{border-right:0}
+    .workspace-grid>aside{display:grid;grid-template-columns:1fr}
+    .section{border-radius:14px}
+    .section-header{padding:14px 15px}
+    .section-body{padding:15px}
+    .section-header h2{font-size:15px}
+    .results-tabs{flex-wrap:nowrap}
+    .results-tab{flex:0 0 auto}
+    .chart-card{padding:13px}
+    .chart-analysis-layout{gap:14px}
+  }
+  @media(max-width:420px){
+    .nav-brand span:last-child{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .top-actions{gap:6px}
+    .top-actions .btn{font-size:11px}
+    .grid-2,.grid-3{gap:11px}
+  }
+  @page{size:A4 portrait;margin:10mm 11mm 12mm}
+  @media print{
+    html,body{
+      background:#fff!important;
+      color:#1f2937;
+      font-size:10pt;
+      line-height:1.35;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+    .doe-chart-tooltip,.help-backdrop{display:none!important}
+    .app-nav,.workflow,.topbar,.workspace-grid>aside,
+    .results-tabs,.report-section-nav,.section-actions,.no-print,
+    #results>.section-header,#resultsContent>.note.good{display:none!important}
+    aside{display:none!important}
+    main{max-width:none!important;padding:0!important}
+    .workspace-grid,.workspace-grid>.stack{display:block!important}
+    .step-panel{display:none!important}
+    #results.step-panel{display:block!important}
+    #results{
+      margin:0!important;
+      border:0!important;
+      box-shadow:none!important;
+      background:#fff!important;
+    }
+    #results>.section-body{padding:0!important}
+    #resultsContent{display:block!important}
+    #resultsContent>*{display:none!important}
+    #resultsContent>#evidencePackage{display:block!important}
+    #resultsContent [data-result-tab]:not([data-result-tab="report"]){display:none!important}
+    [data-result-tab="report"]{display:block!important}
+    #resultsContent.report-section-filtered [data-report-section]{display:block!important}
+    .evidence-package{
+      display:block!important;
+      margin:0!important;
+      border:0!important;
+      box-shadow:none!important;
+      break-inside:auto!important;
+    }
+    .evidence-package>.section-header{display:none!important}
+    .evidence-package>.section-body{
+      display:grid!important;
+      gap:4mm!important;
+      padding:0!important;
+    }
+    .print-report-header{
+      display:block!important;
+      margin:0 0 5mm;
+      padding:0 0 4mm;
+      border-bottom:1.5pt solid #244f7d;
+      break-inside:avoid;
+    }
+    .print-report-kicker{
+      margin-bottom:1.5mm;
+      color:#3976e8;
+      font-size:7.5pt;
+      font-weight:700;
+      letter-spacing:1.2pt;
+    }
+    .print-report-header h1{
+      margin:0;
+      color:#172b4d;
+      font-size:20pt;
+      font-weight:700;
+      line-height:1.08;
+      letter-spacing:-.25pt;
+    }
+    .print-report-study{
+      margin-top:1.8mm;
+      color:#475569;
+      font-size:11pt;
+      font-weight:500;
+    }
+    .print-report-meta{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:2.5mm;
+      margin-top:4mm;
+    }
+    .print-report-meta>div{
+      min-width:0;
+      padding:2.3mm 2.6mm;
+      border:1px solid #dbe4ee;
+      border-radius:2mm;
+      background:#f8fafc;
+    }
+    .print-report-meta span{
+      display:block;
+      margin-bottom:.8mm;
+      color:#64748b;
+      font-size:7pt;
+      font-weight:600;
+      letter-spacing:.35pt;
+      text-transform:uppercase;
+    }
+    .print-report-meta strong{
+      display:block;
+      color:#1e293b;
+      font-size:8.5pt;
+      font-weight:600;
+      line-height:1.3;
+      overflow-wrap:anywhere;
+    }
+    .report-section,
+    .report-chart-block,
+    #doeStudyReport{
+      width:100%!important;
+      max-width:none!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:#fff!important;
+      box-shadow:none!important;
+    }
+    .report-section .subheading,
+    #doeStudyReport .section-header{
+      margin:0 0 2mm!important;
+      padding:0 0 1.2mm!important;
+      border-bottom:1px solid #cbd5e1!important;
+    }
+    .report-section .subheading h3,
+    #doeStudyReport .section-header h2{
+      margin:0!important;
+      color:#1e3a5f!important;
+      font-size:11pt!important;
+      font-weight:700!important;
+      line-height:1.2!important;
+    }
+    #doeStudyReport .section-header p{display:none!important}
+    #doeStudyReport .section-body{padding:0!important}
+    .report-flow .table-wrap,
+    #doeStudyReport .table-wrap{
+      margin-top:1.5mm!important;
+      border:1px solid #dbe3ec!important;
+      border-radius:0!important;
+      overflow:visible!important;
+      break-inside:auto;
+    }
+    .report-flow table,
+    #doeStudyReport table{
+      width:100%!important;
+      border-collapse:collapse!important;
+      table-layout:auto;
+    }
+    .report-flow th,.report-flow td,
+    #doeStudyReport th,#doeStudyReport td{
+      padding:1.5mm 2mm!important;
+      border-bottom:1px solid #e5eaf0!important;
+      color:#334155!important;
+      font-size:8.3pt!important;
+      font-weight:400!important;
+      line-height:1.28!important;
+      vertical-align:top!important;
+    }
+    .report-flow th,
+    #doeStudyReport th{
+      color:#1f2937!important;
+      font-weight:600!important;
+      background:#f6f8fb!important;
+    }
+    .report-flow tr:last-child>th,
+    .report-flow tr:last-child>td,
+    #doeStudyReport tr:last-child>th,
+    #doeStudyReport tr:last-child>td{border-bottom:0!important}
+    #reportExecutiveSection table{display:block}
+    #reportExecutiveSummaryBody{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:0 4mm;
+    }
+    #reportExecutiveSummaryBody tr{
+      display:grid;
+      grid-template-columns:42% minmax(0,1fr);
+      break-inside:avoid;
+    }
+    #reportMainEffectsSection{
+      break-before:page;
+      page-break-before:always;
+    }
+    #reportMainEffectsSection canvas{
+      width:100%!important;
+      height:auto!important;
+      max-height:68mm!important;
+    }
+    #reportRankingSection canvas{
+      width:100%!important;
+      height:auto!important;
+      max-height:48mm!important;
+    }
+    #reportModelSection{
+      break-before:page;
+      page-break-before:always;
+    }
+    .report-chart-block canvas{
+      border:1px solid #dbe3ec!important;
+      border-radius:1.5mm!important;
+      box-shadow:none!important;
+      break-inside:avoid;
+    }
+    .report-chart-interpretation-block{
+      margin-top:1.8mm!important;
+      break-inside:avoid;
+    }
+    .report-chart-interpretation-block .chart-interpretation-card{
+      display:grid!important;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:1.3mm 3mm!important;
+      padding:2mm 2.5mm!important;
+      border:1px solid #dbe3ec!important;
+      border-radius:1.5mm!important;
+      background:#fbfcfe!important;
+      box-shadow:none!important;
+    }
+    .report-chart-interpretation-block .chart-interpretation-card>h4{
+      grid-column:1/-1;
+      margin:0!important;
+      font-size:8.8pt!important;
+    }
+    .report-chart-interpretation-block .chart-interpretation-label{font-size:6.7pt!important}
+    .report-chart-interpretation-block .chart-interpretation-text,
+    .report-chart-interpretation-block .chart-metric-row{font-size:7.5pt!important;line-height:1.3!important}
+    .report-appendix{
+      break-before:page!important;
+      page-break-before:always!important;
+    }
+    .report-appendix>.subheading{
+      padding-bottom:2mm!important;
+      border-bottom:1.5pt solid #244f7d!important;
+    }
+    .report-appendix>.subheading h3{font-size:15pt!important}
+    .report-appendix-content{display:grid!important;gap:4mm!important}
+    .report-appendix-group{
+      padding-top:3mm!important;
+      border-top:1px solid #dbe3ec!important;
+      break-inside:auto;
+    }
+    .report-appendix-group:first-child{padding-top:0!important;border-top:0!important}
+    .report-appendix-group>h4{
+      margin:0 0 1.5mm!important;
+      color:#334155!important;
+      font-size:9.5pt!important;
+      font-weight:700!important;
+    }
+    .report-appendix .report-section{break-inside:auto!important}
+    .report-appendix .report-chart-block{break-inside:auto!important}
+    .report-appendix .table-wrap{margin-top:1mm!important}
+    .report-appendix th,.report-appendix td{
+      padding:1.1mm 1.5mm!important;
+      font-size:7.6pt!important;
+      line-height:1.22!important;
+    }
+    .report-factor-summary{margin-top:2mm}
+    .report-factor-summary .subheading{margin-top:0!important}
+    .report-appendix #reportInteractionPlot{
+      width:100%!important;
+      height:auto!important;
+      max-height:58mm!important;
+    }
+    #limitations{
+      margin:0!important;
+      padding:2.5mm!important;
+      border:1px solid #dbe3ec!important;
+      background:#f8fafc!important;
+      color:#475569!important;
+      font-size:8pt!important;
+      font-weight:400!important;
+      line-height:1.35!important;
+    }
+    tr,.report-section .subheading,.print-report-meta>div{break-inside:avoid;page-break-inside:avoid}
+  }
 </style>
 </head>
 <body>
 <header class="app-nav">
-  <a class="nav-brand" href="#plan" aria-label="DOE">
-    <span class="brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M4 18h16M6 15l3-5 4 3 5-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="6" cy="15" r="1.3" fill="currentColor"/>
-        <circle cx="9" cy="10" r="1.3" fill="currentColor"/>
-        <circle cx="13" cy="13" r="1.3" fill="currentColor"/>
-        <circle cx="18" cy="6" r="1.3" fill="currentColor"/>
-      </svg>
-    </span>
-    <span>DOE Decision Support Tool</span>
-  </a>
-  <nav class="top-links">
-    <div class="nav-demo">
-      <label>
-        <span class="sr-only">Example Study</span>
-        <select id="exampleStudySelect" aria-label="Example Study"></select>
-      </label>
+  <div class="app-nav-inner">
+    <div class="nav-left">
+      <a class="nav-brand" href="#plan" aria-label="DOE">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 18h16M6 15l3-5 4 3 5-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="6" cy="15" r="1.3" fill="currentColor"/>
+            <circle cx="9" cy="10" r="1.3" fill="currentColor"/>
+            <circle cx="13" cy="13" r="1.3" fill="currentColor"/>
+            <circle cx="18" cy="6" r="1.3" fill="currentColor"/>
+          </svg>
+        </span>
+        <span id="navProductName">DOE</span>
+      </a>
+      <button type="button" class="nav-help-link" id="manualNavBtn" aria-controls="helpDrawer" aria-expanded="false">用户手册</button>
+      <button type="button" class="nav-help-link" id="faqNavBtn" aria-controls="helpDrawer" aria-expanded="false">常见问题</button>
+      <div class="nav-language">
+        <label>
+          <span id="uiLangLabel" class="sr-only">Interface Language</span>
+          <select id="uiLanguageInput" aria-label="Interface Language">
+            <option value="zh" selected>中文</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </div>
     </div>
-    <div class="nav-mode">
-      <label>
-        <span id="displayModeLabel" class="sr-only">Display Mode</span>
-        <select id="displayModeInput" aria-label="Display Mode">
-          <option value="guided">引导模式</option>
-          <option value="expert">专家模式</option>
-        </select>
-      </label>
-    </div>
-    <div class="nav-language">
-      <label>
-        <span id="uiLangLabel" class="sr-only">Interface Language</span>
-        <select id="uiLanguageInput">
-          <option value="zh" selected>中文</option>
-          <option value="en">English</option>
-        </select>
-      </label>
-    </div>
-  </nav>
+    <nav class="top-links nav-right" aria-label="DOE global controls">
+      <div class="nav-demo">
+        <label>
+          <span class="sr-only">Example Study</span>
+          <select id="exampleStudySelect" aria-label="Example Study"></select>
+        </label>
+      </div>
+      <div class="nav-mode" hidden aria-hidden="true">
+        <label>
+          <span id="displayModeLabel" class="sr-only">Display Mode</span>
+          <select id="displayModeInput" aria-label="Display Mode">
+            <option value="guided">引导模式</option>
+            <option value="expert">专家模式</option>
+          </select>
+        </label>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-secondary" id="demoBtn">加载示例</button>
+        <button class="btn btn-ghost" id="resetBtn">重置</button>
+        <button class="btn btn-primary" id="printBtn">打印 / PDF</button>
+      </div>
+    </nav>
+  </div>
 </header>
 
-<main>
+<section class="title-band" aria-labelledby="pageTitle">
   <div class="topbar">
     <div>
-      <h1 id="pageTitle">DOE Engineering Decision Support Tool V7.9.2</h1>
+      <h1 id="pageTitle">DOE Engineering Decision Support Tool</h1>
       <p class="subtitle" id="pageSubtitle">A standalone local tool for two-level DOE, statistical evidence, model trust, example studies and engineering-focused reporting.</p>
     </div>
-    <div class="top-actions">
-      <button class="btn btn-secondary" id="demoBtn">加载示例</button>
-      <button class="btn btn-ghost" id="resetBtn">重置</button>
-      <button class="btn btn-primary" id="printBtn">打印 / PDF</button>
-    </div>
   </div>
+</section>
 
+<div class="help-backdrop hidden" id="helpBackdrop">
+  <aside class="help-drawer" id="helpDrawer" role="dialog" aria-modal="true" aria-labelledby="helpDrawerTitle">
+    <div class="help-drawer-header">
+      <div>
+        <div class="help-drawer-kicker" id="helpDrawerKicker">DOE</div>
+        <h2 id="helpDrawerTitle">用户手册</h2>
+      </div>
+      <button type="button" class="help-close" id="helpCloseBtn" aria-label="关闭">×</button>
+    </div>
+    <div class="help-drawer-body" id="helpDrawerBody"></div>
+  </aside>
+</div>
+
+<main>
   <section class="workflow" id="workflowBar">
     <div class="workflow-step active" id="wf1" data-step-nav="define">
       <div class="step-no">1</div>
@@ -560,13 +1525,6 @@
       <div><div class="step-main" id="wf5Main">Analyze Evidence</div><div class="step-sub" id="wf5Sub">Evidence</div></div>
     </div>
   </section>
-
-  
-<div class="note info" style="margin-bottom:16px">
-<strong>DOE Engineering Workflow / DOE工程流程</strong><br>
-Define → Design → Execute → Analyze → Report<br>
-统一质量工程工具平台交互逻辑。
-</div>
 
 <div class="workspace-grid">
     <div class="stack main-stack" id="mainStepContent">
@@ -1248,80 +2206,109 @@ Review dominant factors, recommended settings and confirmation status before imp
                   <p>Structured evidence for engineering review, confirmation and implementation decisions.</p>
                 </div>
               </div>
+              <div class="print-report-header" id="printReportHeader" aria-hidden="true">
+                <div class="print-report-kicker" id="printReportKicker">ENGINEERING REPORT</div>
+                <h1 id="printReportTitle">DOE Engineering Analysis Report</h1>
+                <div class="print-report-study" id="printReportStudy">—</div>
+                <div class="print-report-meta">
+                  <div><span id="printResponseLabel">Response</span><strong id="printReportResponse">—</strong></div>
+                  <div><span id="printObjectiveLabel">Direction</span><strong id="printReportObjective">—</strong></div>
+                  <div><span id="printDesignLabel">Design</span><strong id="printReportDesign">—</strong></div>
+                  <div><span id="printStatusLabel">Decision Status</span><strong id="printReportStatus">—</strong></div>
+                </div>
+              </div>
               <div class="section-body report-flow">
-                <div class="report-section report-keep">
+                <div class="report-section-nav" id="reportSectionNav" role="tablist" aria-label="Report sections">
+                  <button type="button" class="report-section-tab active" data-report-section-button="summary" role="tab" aria-selected="true">摘要</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="design" role="tab" aria-selected="false">实验设计</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="results" role="tab" aria-selected="false">实验结果</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="effects" role="tab" aria-selected="false">效应分析</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="model" role="tab" aria-selected="false">模型分析</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="decision" role="tab" aria-selected="false">工程决策</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="confirmation" role="tab" aria-selected="false">确认实验</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="appendix" role="tab" aria-selected="false">附录</button>
+                  <button type="button" class="report-section-tab" data-report-section-button="full" role="tab" aria-selected="false">完整报告</button>
+                </div>
+                <div class="report-section report-keep" id="reportExecutiveSection" data-report-section="summary" role="tabpanel">
                   <div class="subheading"><h3>Executive Summary</h3></div>
                   <div class="table-wrap"><table><tbody id="reportExecutiveSummaryBody"></tbody></table></div>
                 </div>
-                <div class="report-section">
+                <div class="report-section" id="reportDesignSection" data-report-section="design" role="tabpanel">
                   <div class="subheading"><h3>Experimental Design Summary</h3></div>
                   <div class="table-wrap"><table><tbody id="reportStrategyBody"></tbody></table></div>
                   <div class="table-wrap"><table><tbody id="reportExperimentBody"></tbody></table></div>
                   <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportDesignBody"></tbody></table></div>
-                  <div class="table-wrap report-design-matrix" style="margin-top:8px">
+                  <div class="table-wrap report-design-matrix" id="reportDesignMatrixWrap" style="margin-top:8px">
                     <table>
                       <thead id="reportDesignMatrixHead"></thead>
                       <tbody id="reportDesignMatrixBody"></tbody>
                     </table>
                   </div>
                 </div>
-                <div class="report-section">
+                <div class="report-section" id="reportResultsSection" data-report-section="results" role="tabpanel">
                   <div class="subheading"><h3>Measured Results</h3></div>
                   <div class="table-wrap"><table><tbody id="reportMeasuredEvidenceBody"></tbody></table></div>
                   <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportValidationBody"></tbody></table></div>
                 </div>
-                <div class="report-section report-chart-block report-keep">
+                <div class="report-section report-chart-block report-keep" id="reportMainEffectsSection" data-report-section="effects" role="tabpanel">
                   <div class="subheading"><h3>Main Effects Analysis</h3></div>
                   <canvas id="reportMainEffectsChart" width="920" height="430"></canvas>
                   <div id="reportMainEffectsInterpretation" class="report-chart-interpretation-block"></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportMainEffectsBody"></tbody></table></div>
+                  <div class="table-wrap" id="reportMainEffectsTableWrap" style="margin-top:8px"><table><tbody id="reportMainEffectsBody"></tbody></table></div>
                 </div>
-                <div class="report-section report-chart-block report-keep">
+                <div class="report-section report-chart-block report-keep" id="reportRankingSection" data-report-section="effects" role="tabpanel">
                   <div class="subheading"><h3>Effect Ranking</h3></div>
                   <canvas id="reportRankingChart" width="920" height="320"></canvas>
                   <div id="reportParetoInterpretation" class="report-chart-interpretation-block"></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportEffectRankingBody"></tbody></table></div>
+                  <div class="table-wrap" id="reportRankingTableWrap" style="margin-top:8px"><table><tbody id="reportEffectRankingBody"></tbody></table></div>
                 </div>
-                <div class="report-section">
+                <div class="report-section" id="reportStatisticalSection" data-report-section="appendix" role="tabpanel">
                   <div class="subheading"><h3>Statistical Evidence / ANOVA</h3></div>
                   <div class="table-wrap"><table><tbody id="reportStatisticalEvidenceBody"></tbody></table></div>
                   <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportAnalysisBody"></tbody></table></div>
                 </div>
-                <div class="report-section report-chart-block report-keep">
+                <div class="report-section report-chart-block report-keep" id="reportInteractionSection" data-report-section="appendix" role="tabpanel">
                   <div class="subheading"><h3>Interaction Analysis</h3></div>
                   <div class="table-wrap"><table><tbody id="reportInteractionBody"></tbody></table></div>
                   <canvas id="reportInteractionPlot" width="920" height="300"></canvas>
                   <div id="reportInteractionInterpretation" class="report-chart-interpretation-block"></div>
                 </div>
-                <div class="report-section">
+                <div class="report-section" id="reportDecisionSection" data-report-section="decision" role="tabpanel">
                   <div class="subheading"><h3>Engineering Recommendation</h3></div>
                   <div class="table-wrap"><table><tbody id="reportEngineeringDecisionBody"></tbody></table></div>
                   <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportDecisionBody"></tbody></table></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportConstraintBody"></tbody></table></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportTargetBody"></tbody></table></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportImplementationBody"></tbody></table></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportDecisionTraceBody"></tbody></table></div>
+                  <div class="table-wrap" id="reportConstraintWrap" style="margin-top:8px"><table><tbody id="reportConstraintBody"></tbody></table></div>
+                  <div class="table-wrap" id="reportTargetWrap" style="margin-top:8px"><table><tbody id="reportTargetBody"></tbody></table></div>
+                  <div class="table-wrap" id="reportImplementationWrap" style="margin-top:8px"><table><tbody id="reportImplementationBody"></tbody></table></div>
+                  <div class="table-wrap" id="reportDecisionTraceWrap" style="margin-top:8px"><table><tbody id="reportDecisionTraceBody"></tbody></table></div>
                 </div>
-                <div class="report-section">
+                <div class="report-section" id="reportConfirmationSection" data-report-section="confirmation" role="tabpanel">
                   <div class="subheading"><h3>Confirmation Plan</h3></div>
                   <div class="table-wrap"><table><tbody id="reportConfirmationPlanBody"></tbody></table></div>
                 </div>
-                <div class="report-section">
-                  <div class="subheading"><h3>Method Notes</h3></div>
-                  <div class="table-wrap"><table><tbody id="reportMethodNotesBody"></tbody></table></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportModelOutputBody"></tbody></table></div>
-                  <div class="subheading"><h3>V7.9 Model Trust</h3></div>
-                  <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportModelTrustBody"></tbody></table></div>
+                <div class="report-section" id="reportModelSection" data-report-section="model" role="tabpanel">
+                  <div class="subheading"><h3>Model Analysis</h3></div>
+                  <div class="table-wrap"><table><tbody id="reportModelOutputBody"></tbody></table></div>
+                  <div id="reportModelDetailWrap">
+                    <div class="subheading"><h3>Method Notes</h3></div>
+                    <div class="table-wrap"><table><tbody id="reportMethodNotesBody"></tbody></table></div>
+                    <div class="subheading"><h3>V7.9 Model Trust</h3></div>
+                    <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportModelTrustBody"></tbody></table></div>
+                  </div>
                 </div>
-                <div class="report-section">
+                <div class="report-section" id="reportImprovementSection" data-report-section="appendix" role="tabpanel">
                   <div class="subheading"><h3>Improvement Verification and Closure</h3></div>
                   <div class="table-wrap"><table><tbody id="reportImprovementBody"></tbody></table></div>
                   <div class="table-wrap" style="margin-top:8px"><table><tbody id="reportClosureBody"></tbody></table></div>
                 </div>
+                <div class="report-section report-appendix" id="reportAppendix" data-report-section="appendix" role="tabpanel">
+                  <div class="subheading"><h3 id="reportAppendixTitle">Appendix</h3></div>
+                  <div class="report-appendix-content" id="reportAppendixContent"></div>
+                </div>
               </div>
             </div>
 
-            <div class="section" id="doeStudyReport" style="margin-top:15px">
+            <div class="section" id="doeStudyReport" data-report-section="appendix" role="tabpanel" style="margin-top:15px">
               <div class="section-header">
                 <div>
                   <h2>DOE Study Record / 实验记录</h2>
@@ -1465,7 +2452,7 @@ Review dominant factors, recommended settings and confirmation status before imp
               </div>
             </div>
 
-<div class="footer-note" id="limitations">
+<div class="footer-note" id="limitations" data-report-section="appendix" role="tabpanel">
               本工具通过高水平平均值减去低水平平均值估算主效应。仅当重复全因子实验提供有效纯误差估计时才显示 ANOVA F 值和 p 值。筛选设计中的部分效应可能存在混杂，不提供独立交互作用结论。正式实施前必须进行确认试验。
             </div>
           </div>
@@ -1482,6 +2469,10 @@ Review dominant factors, recommended settings and confirmation status before imp
           </div>
         </div>
         <div class="section-body">
+          <div class="current-study-row" id="currentStudySummary">
+            <span class="current-study-label" id="currentStudyLabel">当前研究</span>
+            <span class="current-study-value" id="currentStudyName">手动研究</span>
+          </div>
           <div class="summary-grid">
             <div class="metric"><div class="label" id="sumFactorsLabel">因素数</div><div class="value" id="sumFactors">3</div><div class="detail">2–6 supported</div></div>
             <div class="metric"><div class="label" id="sumRunsLabel">运行数</div><div class="value" id="sumRuns">—</div><div class="detail">Auto generated</div></div>
@@ -1554,6 +2545,7 @@ const state={
   importPreview:null,
   loadedExampleId:null,
   activeWorkflowStep:'define',
+  activeReportSection:'summary',
   displayMode:'guided',
   analysisContext:null,
   chartInterpretations:{
@@ -1583,7 +2575,7 @@ const state={
 
 const I18N={
 zh:{
- uiLangLabel:'界面语言',pageTitle:'DOE工程决策支持工具 V7.9.1',
+ uiLangLabel:'界面语言',pageTitle:'DOE工程决策支持工具',
  pageSubtitle:'一款用于两水平DOE、分步工作流、统计证据、模型信任和工程化报告的浏览器本地工具。',
  demo:'加载示例',reset:'重置',print:'打印 / PDF',
  wf1:'定义问题',wf2:'实验策略',wf3:'DOE设计',wf4:'执行实验',wf5:'分析证据',
@@ -1611,7 +2603,7 @@ zh:{
  recommendTitle:'基于主效应的预测推荐设定',recommendText:'以下组合用于形成确认试验，不应直接视为已经验证的最优组合。',
  confirmation:'<strong>确认试验：</strong>按推荐设定再执行一次实验，并将实际响应与当前最佳结果比较。',
  limitations:'本工具通过高水平平均值减去低水平平均值估算主效应。仅当重复全因子实验提供有效纯误差估计时才显示 ANOVA F 值和 p 值。筛选设计中的部分效应可能存在混杂，不提供独立交互作用结论。正式实施前必须进行确认试验。',
- studySummary:'研究摘要',studySummaryDesc:'当前 DOE 项目的结构与状态。',sumFactors:'因素数',sumRuns:'运行数',sumResponse:'响应',sumProgress:'完成度',
+ studySummary:'研究摘要',studySummaryDesc:'当前 DOE 项目的结构与状态。',currentStudy:'当前研究',exampleStudy:'示例研究',manualStudy:'手动研究',sumFactors:'因素数',sumRuns:'运行数',sumResponse:'响应',sumProgress:'完成度',
  checks:'分析就绪检查',checksDesc:'运行分析前的最小完整性检查。',factorRange:'因素范围',levels:'高低水平',designMatrix:'设计矩阵',responseData:'响应数据',analysisStatus:'分析状态',
  pass:'通过',notGenerated:'未生成',incomplete:'未完成',notReady:'未就绪',ready:'就绪',
  method:'方法说明',methodDesc:'当前支持范围。',effectCalc:'效应计算',local:'数据处理',localValue:'浏览器本地',
@@ -1622,7 +2614,7 @@ zh:{
  sameLevels:'同一因素的高低水平不能相同。',missingResponses:'请为每一次运行输入有效的数值响应。'
 },
 en:{
- uiLangLabel:'Interface Language',pageTitle:'DOE Engineering Decision Support Tool V7.9.1',
+ uiLangLabel:'Interface Language',pageTitle:'DOE Engineering Decision Support Tool',
  pageSubtitle:'A standalone local tool for two-level DOE, step-based workflow, statistical evidence, model trust and engineering-focused reporting.',
  demo:'Load Demo',reset:'Reset',print:'Print / PDF',
  wf1:'Define Problem',wf2:'Experiment Strategy',wf3:'DOE Design',wf4:'Execute Experiment',wf5:'Analyze Evidence',
@@ -1650,7 +2642,7 @@ en:{
  recommendTitle:'Predicted Preferred Settings Based on Main Effects',recommendText:'Use this combination for a confirmation run. It is not yet a verified optimum.',
  confirmation:'<strong>Confirmation run:</strong> Run the experiment once more at the recommended settings and compare the observed response with the current best result.',
  limitations:'This tool estimates main effects as average at high minus average at low. ANOVA F values and p-values are shown only when replicated full-factorial data provides a valid pure-error estimate. Screening effects may be confounded and do not support independent interaction conclusions. Confirm the recommendation before implementation.',
- studySummary:'Study Summary',studySummaryDesc:'Structure and status of the current DOE project.',sumFactors:'Factors',sumRuns:'Runs',sumResponse:'Response',sumProgress:'Completion',
+ studySummary:'Study Summary',studySummaryDesc:'Structure and status of the current DOE project.',currentStudy:'Current Study',exampleStudy:'Example Study',manualStudy:'Manual Study',sumFactors:'Factors',sumRuns:'Runs',sumResponse:'Response',sumProgress:'Completion',
  checks:'Analysis Readiness',checksDesc:'Minimum completeness checks before analysis.',factorRange:'Factor Range',levels:'Low / High Levels',designMatrix:'Design Matrix',responseData:'Response Data',analysisStatus:'Analysis Status',
  pass:'Pass',notGenerated:'Not Generated',incomplete:'Incomplete',notReady:'Not Ready',ready:'Ready',
  method:'Method Notes',methodDesc:'Current MVP scope.',effectCalc:'Effect Calculation',local:'Data Processing',localValue:'Local Browser',
@@ -1744,17 +2736,16 @@ function tf(key,params={}){
   });
   return value;
 }
-const CANVAS_FONT='Inter, PingFang SC, Microsoft YaHei, Arial';
+const CANVAS_FONT='-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif';
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:3});
 const formatP=p=>p<0.0001?'<0.0001':Number(p).toLocaleString(undefined,{maximumFractionDigits:4});
 
 const UI_PHRASES=[
   ['DOE Decision Support Tool','DOE决策支持工具'],
-  ['DOE Engineering Decision Support Tool V7.9.1','DOE工程决策支持工具 V7.9.1'],
+  ['DOE Engineering Decision Support Tool','DOE工程决策支持工具'],
   ['A standalone local tool for two-level DOE, statistical evidence, model trust, example studies and engineering-focused reporting.','用于两水平DOE、统计证据、模型信任、示例研究和工程化报告的本地工具。'],
   ['A standalone local tool for two-level DOE, step-based workflow, statistical evidence, model trust and engineering-focused reporting.','用于两水平DOE、分步工作流、统计证据、模型信任和工程化报告的本地工具。'],
-  ['Example Study ▼','示例研究 ▼'],
   ['Example Study','示例研究'],
   ['Interface Language','界面语言'],
   ['Define Problem','定义问题'],
@@ -1783,6 +2774,7 @@ const UI_PHRASES=[
   ['Measured Results','测量结果'],
   ['Main Effects Analysis','主效应分析'],
   ['Effect Ranking','效应排序'],
+  ['Model Analysis','模型分析'],
   ['Statistical Evidence / ANOVA','统计证据 / 方差分析'],
   ['Interaction Analysis','交互作用分析'],
   ['Engineering Recommendation','工程建议'],
@@ -1793,6 +2785,9 @@ const UI_PHRASES=[
   ['Best Observed Run','最佳已观察运行'],
   ['Dominant Factor','主导因素'],
   ['Evidence Level','证据等级'],
+  ['Completed Runs','已完成运行'],
+  ['Data Integrity','数据完整性'],
+  ['Target / Specification','目标 / 规格'],
   ['Engineering Decision Status','工程决策状态'],
   ['Recommended Next Action','建议下一步行动'],
   ['Validation Purpose','验证目的'],
@@ -3329,7 +4324,215 @@ function computeFullFactorialAnova(design,factors){
 }
 /* STAT_ENGINE_END */
 
+const HELP_COPY={
+  zh:{
+    product:'DOE',
+    manualNav:'用户手册',
+    faqNav:'常见问题',
+    close:'关闭帮助面板',
+    manualTitle:'用户手册',
+    manualIntro:'本手册说明如何使用当前 DOE 工作流规划实验、录入测量结果、分析效应并形成可确认的工程建议。',
+    overviewTitle:'工具用途',
+    overviewText:'本工具用于两水平实验设计，帮助工程团队以结构化实验比较多个可控因素对一个响应指标的影响。',
+    whenTitle:'何时使用 DOE',
+    manualWhen:[
+      '需要同时评估多个潜在影响因素，而不是逐一改变因素时。',
+      '需要在有限实验次数内识别主要影响方向或寻找更优设定时。',
+      '问题、响应和可执行的因素水平已经能够清楚定义时。'
+    ],
+    workflowTitle:'基本工作流程',
+    manualSteps:[
+      ['定义研究目标','填写研究名称、响应名称与单位，并选择最大化或最小化方向。'],
+      ['选择或加载示例','可从空白研究开始，也可加载示例研究了解完整操作路径。'],
+      ['定义因素与水平','为每个因素设置清晰、可执行且安全的低水平和高水平。'],
+      ['生成实验设计','检查策略后生成设计矩阵；因素水平来自当前研究定义。'],
+      ['执行实验并录入响应','按运行顺序完成实验，逐行录入数值响应，或使用现有 CSV 模板导入。'],
+      ['分析效应','完成数据检查后运行分析，查看主效应、效应排序和最佳已观察运行。'],
+      ['审阅建议','区分测量结果、模型预测和工程决策，并检查证据限制。'],
+      ['导出报告','预览完整报告后打印或导出 PDF；需要时同时保留 CSV 原始数据。']
+    ],
+    supportedTitle:'支持的研究类型',
+    manualSupported:[
+      '2–4 个因素：使用两水平全因子设计，覆盖全部高低水平组合。',
+      '5–6 个因素：使用 8 次筛选设计，适合识别主要效应；部分效应可能存在混杂。'
+    ],
+    dataTitle:'数据录入规则',
+    manualData:[
+      '每次运行填写一个数值响应，并在整个研究中保持单位一致。',
+      '实际因素设定应与定义的低水平或高水平一致。',
+      '避免缺失响应、重复运行序号或非数值内容。',
+      '按随机运行顺序执行可降低时间趋势和其他潜在偏差。',
+      '导入数据时使用现有 CSV 模板并保留列结构。'
+    ],
+    interpretationTitle:'如何解读结果',
+    manualInterpretations:[
+      ['主效应','比较因素高水平与低水平的平均响应差异；方向来自效应符号和两端均值。'],
+      ['效应排序','按绝对效应值排列因素，用于确定优先调查对象，但不单独证明因果或显著性。'],
+      ['最佳已观察运行','研究中实际测得的最佳运行，不代表实验范围之外的全局最优。'],
+      ['模型预测','基于当前数据和模型得到的估计值，不是已验证的生产结果。'],
+      ['确认实验','按建议设定执行独立运行，并与当前最佳结果及目标要求比较。']
+    ],
+    reportTitle:'报告导出',
+    reportText:'导出前检查研究名称、单位、运行完整性和决策状态。PDF 用于审阅与归档；CSV 用于保留或继续处理结构化实验数据。',
+    limitationsTitle:'限制与注意事项',
+    manualLimitations:[
+      '没有有效重复和误差估计时，结果主要用于描述性效应判断。',
+      '筛选设计中的效应可能混杂，不应解读为完整交互作用结论。',
+      '建议设定必须经过确认实验，并满足安全、质量和工艺约束。',
+      'DOE 支持工程判断，但不能替代过程知识、风险评估或专业审批。'
+    ],
+    manualNote:'DOE 设计、响应录入和分析在浏览器中处理。只有主动使用可选专家建议功能时，才会调用其现有接口。',
+    faqTitle:'常见问题',
+    faqIntro:'选择一个问题查看答案。所有问题默认收起。',
+    faqs:[
+      ['什么是 DOE？','DOE 是实验设计方法，用结构化运行组合评估多个因素对响应的影响。'],
+      ['什么时候适合使用本工具？','当响应可测量、因素可控制且希望用有限运行比较多个因素时使用。'],
+      ['什么是因素？','因素是实验中主动改变或分类观察的输入变量，例如温度、压力或材料类别。'],
+      ['什么是水平？','水平是因素在实验中的设定值；本工具使用低水平和高水平。'],
+      ['什么是响应？','响应是每次实验运行得到的数值结果，也是分析和优化的目标指标。'],
+      ['为什么要随机化运行顺序？','随机化有助于分散时间趋势、设备漂移和其他未知偏差对因素比较的影响。'],
+      ['全因子设计与筛选设计有什么区别？','全因子覆盖全部高低组合；筛选设计用较少运行识别主要效应，但可能存在效应混杂。'],
+      ['只有 2 个因素可以使用吗？','可以。2 个因素会生成完整的两水平全因子组合。'],
+      ['主效应是什么意思？','主效应是因素从低水平变到高水平时平均响应的观察变化。'],
+      ['最大效应是否总是代表最佳设定？','不是。效应大小表示观察影响程度；最佳水平还取决于方向、目标、约束和交互风险。'],
+      ['为什么需要确认实验？','确认实验用于验证建议设定能否在独立运行中重复获得预期改善。'],
+      ['DOE 能代替工程判断吗？','不能。DOE 提供结构化证据，最终决策仍需结合过程知识、风险和约束。'],
+      ['为什么有些结论标记为证据有限？','数据量、重复、误差估计或设计混杂不足以支持更强结论时，工具会限制表述。'],
+      ['如何导出和使用报告？','先检查研究和数据完整性，再打印或导出 PDF 用于审阅归档；CSV 用于保留结构化数据。']
+    ]
+  },
+  en:{
+    product:'DOE',
+    manualNav:'User Manual',
+    faqNav:'FAQ',
+    close:'Close help panel',
+    manualTitle:'User Manual',
+    manualIntro:'This manual explains how to use the current DOE workflow to plan an experiment, enter measurements, analyze effects, and form an engineering recommendation that can be confirmed.',
+    overviewTitle:'What this tool is for',
+    overviewText:'This tool supports two-level experimental design so engineering teams can compare how several controllable factors affect one measured response.',
+    whenTitle:'When to use DOE',
+    manualWhen:[
+      'Use it when several potential factors must be assessed together instead of changing one factor at a time.',
+      'Use it to identify major effect directions or seek improved settings with a limited run budget.',
+      'Use it after the problem, measurable response, and practical factor levels can be defined clearly.'
+    ],
+    workflowTitle:'Basic workflow',
+    manualSteps:[
+      ['Define the study objective','Enter the study name, response and unit, then choose whether to maximize or minimize it.'],
+      ['Select or load an example','Start with a manual study or load an example to review the complete operating path.'],
+      ['Define factors and levels','Set a clear, practical, and safe low and high level for every factor.'],
+      ['Generate the design','Review the strategy and generate the design matrix from the current factor definitions.'],
+      ['Run the experiment and enter responses','Execute in run order and enter one numeric response per row, or use the existing CSV template.'],
+      ['Analyze effects','After data checks pass, review main effects, effect ranking, and the best observed run.'],
+      ['Review the recommendation','Separate measured results, model prediction, and engineering decision, then check evidence limitations.'],
+      ['Export the report','Preview the complete report and print or export PDF; retain the CSV data when needed.']
+    ],
+    supportedTitle:'Supported study types',
+    manualSupported:[
+      '2–4 factors: a two-level full-factorial design covering every low/high combination.',
+      '5–6 factors: an 8-run screening design for identifying major effects; some effects may be confounded.'
+    ],
+    dataTitle:'Data entry rules',
+    manualData:[
+      'Enter one numeric response for every run and use a consistent unit throughout the study.',
+      'Actual factor settings should match the defined low or high levels.',
+      'Avoid missing responses, duplicate run numbers, and nonnumeric response content.',
+      'Follow randomized run order to reduce the influence of time trends and other potential bias.',
+      'Use the existing CSV template and preserve its column structure when importing data.'
+    ],
+    interpretationTitle:'How to interpret results',
+    manualInterpretations:[
+      ['Main effects','Compare the average response at the high and low level; direction comes from the effect sign and endpoint means.'],
+      ['Effect ranking','Orders factors by absolute effect to prioritize investigation, but does not by itself prove causation or significance.'],
+      ['Best observed run','The best result actually measured in this study, not a global optimum beyond the tested region.'],
+      ['Model prediction','An estimate from the current data and model, not a validated production result.'],
+      ['Confirmation experiment','An independent run at the recommended settings, compared with the current best result and target.']
+    ],
+    reportTitle:'Report export guidance',
+    reportText:'Before export, check the study name, units, run completeness, and decision status. Use PDF for review and archiving, and CSV to retain or continue processing structured experiment data.',
+    limitationsTitle:'Limitations and cautions',
+    manualLimitations:[
+      'Without valid replication and error estimation, results are mainly descriptive effect evidence.',
+      'Effects in screening designs may be confounded and should not be read as complete interaction conclusions.',
+      'Recommended settings require a confirmation experiment and must satisfy safety, quality, and process constraints.',
+      'DOE supports engineering judgment; it does not replace process knowledge, risk assessment, or professional approval.'
+    ],
+    manualNote:'DOE design, response entry, and analysis are processed in the browser. Only the optional Expert Recommendation feature calls its existing interface when deliberately used.',
+    faqTitle:'Frequently Asked Questions',
+    faqIntro:'Select a question to view its answer. All questions are collapsed by default.',
+    faqs:[
+      ['What is DOE?','DOE is a structured experiment method for evaluating how several factors affect a measured response.'],
+      ['When should I use this tool?','Use it when the response is measurable, factors are controllable, and several factors must be compared with a limited number of runs.'],
+      ['What is a factor?','A factor is an input changed or classified during the experiment, such as temperature, pressure, or material type.'],
+      ['What is a level?','A level is a factor setting used in the experiment. This tool uses a low level and a high level.'],
+      ['What is a response?','A response is the numeric result measured for each run and the outcome being analyzed or optimized.'],
+      ['Why does the tool randomize runs?','Randomization helps distribute the influence of time trends, equipment drift, and other unknown bias.'],
+      ['What is the difference between full factorial and screening design?','Full factorial covers every low/high combination. Screening uses fewer runs to identify major effects, but effects may be confounded.'],
+      ['Can I use this tool with only 2 factors?','Yes. Two factors produce the complete set of two-level full-factorial combinations.'],
+      ['What does main effect mean?','A main effect is the observed average response change when a factor moves from its low level to its high level.'],
+      ['Does the largest effect always mean the best setting?','No. Effect magnitude shows observed influence; the preferred level also depends on direction, objective, constraints, and interaction risk.'],
+      ['Why is a confirmation experiment needed?','It verifies whether the recommended settings reproduce the expected improvement in an independent run.'],
+      ['Can DOE replace engineering judgment?','No. DOE provides structured evidence, while final decisions still require process knowledge, risk review, and constraints.'],
+      ['Why are some conclusions marked as limited evidence?','The tool limits wording when sample size, replication, error estimation, or design confounding cannot support a stronger conclusion.'],
+      ['How should I export and use the report?','Check study and data completeness first, then export PDF for review and archiving. Use CSV to retain structured data.']
+    ]
+  }
+};
+let activeHelpView='manual';
+let helpReturnFocus=null;
+
+function renderHelpDrawer(){
+  const copy=HELP_COPY[state.lang]||HELP_COPY.en;
+  const isFaq=activeHelpView==='faq';
+  const renderManualList=items=>`<ul class="manual-list">${items.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`;
+  const renderManualSection=(title,content)=>`<section class="manual-section"><h3>${esc(title)}</h3>${content}</section>`;
+  const manualHtml=[
+    `<p class="help-intro">${esc(copy.manualIntro)}</p>`,
+    renderManualSection(copy.overviewTitle,`<p>${esc(copy.overviewText)}</p>`),
+    renderManualSection(copy.whenTitle,renderManualList(copy.manualWhen)),
+    renderManualSection(copy.workflowTitle,`<ol class="manual-steps">${copy.manualSteps.map(([title,description])=>`<li><strong>${esc(title)}</strong>${esc(description)}</li>`).join('')}</ol>`),
+    renderManualSection(copy.supportedTitle,renderManualList(copy.manualSupported)),
+    renderManualSection(copy.dataTitle,renderManualList(copy.manualData)),
+    renderManualSection(copy.interpretationTitle,`<div class="manual-key-list">${copy.manualInterpretations.map(([term,description])=>`<div class="manual-key-item"><strong>${esc(term)}</strong>${esc(description)}</div>`).join('')}</div>`),
+    renderManualSection(copy.reportTitle,`<p>${esc(copy.reportText)}</p>`),
+    renderManualSection(copy.limitationsTitle,renderManualList(copy.manualLimitations)),
+    `<div class="manual-note">${esc(copy.manualNote)}</div>`
+  ].join('');
+  $('navProductName').textContent=copy.product;
+  $('manualNavBtn').textContent=copy.manualNav;
+  $('faqNavBtn').textContent=copy.faqNav;
+  $('uiLanguageInput').value=state.lang;
+  $('helpDrawerKicker').textContent='DOE';
+  $('helpDrawerTitle').textContent=isFaq?copy.faqTitle:copy.manualTitle;
+  $('helpCloseBtn').setAttribute('aria-label',copy.close);
+  $('helpDrawerBody').innerHTML=isFaq
+    ? `<p class="help-intro">${esc(copy.faqIntro)}</p><div class="faq-list">${copy.faqs.map(([question,answer])=>`<details><summary>${esc(question)}</summary><div class="faq-answer">${esc(answer)}</div></details>`).join('')}</div>`
+    : manualHtml;
+}
+
+function openHelpDrawer(view){
+  activeHelpView=view;
+  helpReturnFocus=document.activeElement;
+  renderHelpDrawer();
+  $('helpBackdrop').classList.remove('hidden');
+  document.body.classList.add('help-open');
+  $('manualNavBtn').setAttribute('aria-expanded',String(view==='manual'));
+  $('faqNavBtn').setAttribute('aria-expanded',String(view==='faq'));
+  $('helpCloseBtn').focus();
+}
+
+function closeHelpDrawer(){
+  $('helpBackdrop').classList.add('hidden');
+  document.body.classList.remove('help-open');
+  $('manualNavBtn').setAttribute('aria-expanded','false');
+  $('faqNavBtn').setAttribute('aria-expanded','false');
+  if(helpReturnFocus&&typeof helpReturnFocus.focus==='function')helpReturnFocus.focus();
+  helpReturnFocus=null;
+}
+
 function renderLanguage(){
+  document.documentElement.lang=state.lang==='zh'?'zh-CN':'en';
+  renderHelpDrawer();
   $('uiLangLabel').textContent=t('uiLangLabel');
   if($('displayModeLabel'))$('displayModeLabel').textContent=t('displayModeLabel');
   if($('displayModeInput')){
@@ -3356,6 +4559,7 @@ function renderLanguage(){
   $('largestK').textContent=t('largest'); $('bestRunK').textContent=t('bestRun'); $('objectiveK').textContent=t('objective'); $('completeK').textContent=t('completeRuns');
   $('mainEffectsChartTitle').textContent=t('mainChart'); $('mainEffectsChartDesc').textContent=t('mainChartDesc');
   $('rankingChartTitle').textContent=t('rankChart'); $('rankingChartDesc').textContent=t('rankChartDesc'); $('effectTableTitle').textContent=t('effectTable');
+  renderReportSectionNav();
   $('erFactor').textContent=t('factor'); $('erLow').textContent=t('avgLow'); $('erHigh').textContent=t('avgHigh'); $('erEffect').textContent=t('effect');
   $('recommendTitle').textContent=t('recommendTitle'); $('recommendText').textContent=t('recommendText'); $('confirmationNote').innerHTML=t('confirmation'); $('limitations').textContent=t('limitations');
   $('studySummaryTitle').textContent=t('studySummary'); $('studySummaryDesc').textContent=t('studySummaryDesc');
@@ -4097,11 +5301,21 @@ function renderEvidenceSeparation(evidence){
   `).join('');
 }
 function renderEvidenceSeparationReport(evidence){
+  const totalRuns=state.design?.runs?.length||0;
+  const completedRuns=state.design?.runs?.filter(run=>Number.isFinite(run.response)).length||0;
+  const targetOrSpecification=[
+    state.study.target?`${state.lang==='zh'?'目标':'Target'}: ${state.study.target}`:'',
+    state.study.specification?`${state.lang==='zh'?'规格':'Specification'}: ${state.study.specification}`:''
+  ].filter(Boolean).join('; ')||uiText('Not set');
   $('reportMeasuredEvidenceBody').innerHTML=rowsHtml([
     ['Source',esc(uiText('Experimental Run Data'))],
+    ['Completed Runs',`${completedRuns} / ${totalRuns}`],
     ['Best Measured Run',evidence.measured?runLabelText(evidence.measured.runId):esc(uiText('Unavailable'))],
     ['Factor Settings',evidence.measured?Object.entries(evidence.measured.settings).map(([name,value])=>`${esc(name)}: ${esc(value)}`).join('<br>'):esc(uiText('Unavailable'))],
     ['Actual Measured Response',evidence.measured?`${fmt(evidence.measured.response)} ${esc($('responseUnit').value||'')}`:esc(uiText('Unavailable'))],
+    ['Data Integrity',esc(uiValue(state.validation?.valid?'Pass':'Review'))],
+    ['Evidence Level',esc(state.analyzed?reportEvidenceLevel(state.decision,state.statisticalFoundation):uiText('Pending'))],
+    ['Target / Specification',esc(targetOrSpecification)],
     ['Confirmation Result',Number.isFinite(Number($('confirmationActual').value))?`${fmt(Number($('confirmationActual').value))} ${esc($('responseUnit').value||'')}`:esc(uiText('Pending'))]
   ]);
   $('reportModelOutputBody').innerHTML=rowsHtml([
@@ -4307,9 +5521,8 @@ function smallEffectNames(ctx,topAbs){
   return ctx.effects.filter(item=>item.absoluteEffect<=topAbs*.15).map(item=>item.factorName);
 }
 function objectivePreferredText(metric,ctx,language=state.lang){
-  const direction=metric.effect>=0?(language==='zh'?'增加':'increases'):(language==='zh'?'降低':'decreases');
-  if(language==='zh')return `从低水平到高水平时，平均${ctx.responseName}${direction}${displayedMetric(Math.abs(metric.effect),ctx.responseUnit)}；当前目标为${ctx.objective==='maximize'?'最大化':'最小化'}${ctx.responseName}，因此 ${metric.preferredLevel} 可作为确认实验候选设置。`;
-  return `Moving from the low level to the high level ${metric.effect>=0?'increases':'decreases'} average ${ctx.responseName} by ${displayedMetric(Math.abs(metric.effect),ctx.responseUnit)}. Because the objective is to ${ctx.objective==='maximize'?'maximize':'minimize'} ${ctx.responseName}, ${metric.preferredLevel} is a candidate setting for confirmation.`;
+  if(language==='zh')return `基于当前${ctx.objective==='maximize'?'最大化':'最小化'}${ctx.responseName}的目标，候选确认设定为 ${metric.factorName} = ${metric.preferredLevel}。`;
+  return `For the current objective to ${ctx.objective==='maximize'?'maximize':'minimize'} ${ctx.responseName}, the candidate confirmation setting is ${metric.factorName} = ${metric.preferredLevel}.`;
 }
 function buildMainEffectsInterpretation(ctx,displayMode=state.displayMode,language=state.lang){
   if(!ctx.effects.length)return null;
@@ -5063,7 +6276,10 @@ function renderReportInteractionSection(){
   const body=$('reportInteractionBody');
   const canvas=$('reportInteractionPlot');
   if(!body)return;
-  if(canvas)canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  if(canvas){
+    canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+    clearChartTooltip(canvas,canvas.width,canvas.height);
+  }
   if(!state.design||state.design.type==='screening_8_run'){
     body.innerHTML=rowsHtml([
       ['Status',state.lang==='zh'?'筛选设计不启用交互作用结论。':'Interaction conclusions are disabled for screening designs.'],
@@ -5203,6 +6419,7 @@ function renderEvidencePackage(effects,decision,validation){
     ].map(esc).join('<br>')]
   ]);
   renderImprovementReport(state.improvementVerification);
+  renderPrintReportHeader();
 }
 function confirmationGate(predicted,actual,hasSetting){
   if(!hasSetting)return {status:'Pending',message:'Recommended setting is not defined. Run analysis before confirmation.',error:null,level:'warn'};
@@ -5271,96 +6488,361 @@ function niceRange(values){
   const pad=(max-min)*0.12;
   return {min:min-pad,max:max+pad};
 }
+function niceChartScale(values,tickCount=4){
+  let min=Math.min(...values),max=Math.max(...values);
+  if(!Number.isFinite(min)||!Number.isFinite(max)){min=0;max=1}
+  if(max===min){
+    const spread=Math.abs(max)||1;
+    min-=spread*.5;max+=spread*.5;
+  }
+  const paddedSpan=(max-min)*1.16;
+  const rawStep=paddedSpan/Math.max(1,tickCount);
+  const magnitude=Math.pow(10,Math.floor(Math.log10(rawStep)));
+  const normalized=rawStep/magnitude;
+  const niceFactor=normalized<=1?1:normalized<=2?2:normalized<=5?5:10;
+  const step=niceFactor*magnitude;
+  const scaledMin=Math.floor((min-(max-min)*.08)/step)*step;
+  const scaledMax=Math.ceil((max+(max-min)*.08)/step)*step;
+  return {min:scaledMin,max:scaledMax,step};
+}
+function roundedRectPath(ctx,x,y,width,height,radius){
+  const r=Math.max(0,Math.min(radius,width/2,height/2));
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+width-r,y);
+  ctx.quadraticCurveTo(x+width,y,x+width,y+r);
+  ctx.lineTo(x+width,y+height-r);
+  ctx.quadraticCurveTo(x+width,y+height,x+width-r,y+height);
+  ctx.lineTo(x+r,y+height);
+  ctx.quadraticCurveTo(x,y+height,x,y+height-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+function prepareDoeChartCanvas(canvas,kind,itemCount){
+  const isReport=canvas.id.startsWith('report');
+  const viewport=Math.max(320,document.documentElement.clientWidth||window.innerWidth||920);
+  const measured=Math.round(canvas.getBoundingClientRect().width);
+  let width;
+  if(isReport){
+    width=920;
+  }else if(measured>=280){
+    width=measured;
+  }else if(viewport<=700){
+    width=Math.max(300,viewport-54);
+  }else if(viewport<=980){
+    width=Math.max(560,viewport-72);
+  }else{
+    width=Math.min(720,Math.max(560,viewport-790));
+  }
+  const compact=!isReport&&width<520;
+  const columns=kind==='main'?(compact?1:Math.min(3,Math.max(1,itemCount))):1;
+  const rows=kind==='main'?Math.ceil(itemCount/columns):Math.max(1,itemCount);
+  const height=isReport
+    ? (kind==='main'?430:320)
+    : kind==='main'
+      ? Math.max(310,rows*(compact?190:205)+48)
+      : Math.max(270,Math.min(410,rows*46+88));
+  const pixelRatio=Math.min(2,Math.max(1,window.devicePixelRatio||1));
+  canvas.width=Math.round(width*pixelRatio);
+  canvas.height=Math.round(height*pixelRatio);
+  canvas.style.width='100%';
+  canvas.style.height=`${height}px`;
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);
+  return {ctx,w:width,h:height,compact,columns,rows};
+}
 function doeLevelLabels(){
   return state.lang==='zh'?['-1','+1']:['Low','High'];
+}
+let chartTooltipHideTimer=null;
+function chartTooltipLabels(){
+  return state.lang==='zh'
+    ? {factor:'因子',low:'低水平',high:'高水平',mean:'平均响应',effect:'效应值',absoluteEffect:'绝对效应'}
+    : {factor:'Factor',low:'Low level',high:'High level',mean:'Mean response',effect:'Effect',absoluteEffect:'Absolute effect'};
+}
+function chartTooltipMetric(value){
+  const unit=$('responseUnit')?.value||'';
+  return `${fmt(value)}${unit?` ${unit}`:''}`;
+}
+function ensureChartTooltip(){
+  let tooltip=$('doeChartTooltip');
+  if(tooltip)return tooltip;
+  tooltip=document.createElement('div');
+  tooltip.id='doeChartTooltip';
+  tooltip.className='doe-chart-tooltip';
+  tooltip.setAttribute('role','status');
+  tooltip.setAttribute('aria-live','polite');
+  document.body.appendChild(tooltip);
+  return tooltip;
+}
+function hideChartTooltip(){
+  const tooltip=$('doeChartTooltip');
+  if(tooltip)tooltip.classList.remove('visible');
+  clearTimeout(chartTooltipHideTimer);
+}
+function showChartTooltip(content,clientX,clientY,autoHide=false){
+  const tooltip=ensureChartTooltip();
+  const resolved=typeof content==='function'?content():content;
+  if(!resolved)return hideChartTooltip();
+  tooltip.replaceChildren();
+  const title=document.createElement('div');
+  title.className='doe-chart-tooltip-title';
+  title.textContent=resolved.title;
+  tooltip.appendChild(title);
+  (resolved.rows||[]).forEach(text=>{
+    const row=document.createElement('div');
+    row.className='doe-chart-tooltip-row';
+    row.textContent=text;
+    tooltip.appendChild(row);
+  });
+  tooltip.classList.add('visible');
+  const rect=tooltip.getBoundingClientRect();
+  const margin=8;
+  const left=Math.max(margin,Math.min(clientX+14,window.innerWidth-rect.width-margin));
+  const below=clientY+14;
+  const top=below+rect.height<=window.innerHeight-margin
+    ? below
+    : Math.max(margin,clientY-rect.height-14);
+  tooltip.style.left=`${left}px`;
+  tooltip.style.top=`${top}px`;
+  clearTimeout(chartTooltipHideTimer);
+  if(autoHide)chartTooltipHideTimer=setTimeout(hideChartTooltip,2400);
+}
+function chartLineDistance(px,py,x1,y1,x2,y2){
+  const dx=x2-x1,dy=y2-y1;
+  if(dx===0&&dy===0)return Math.hypot(px-x1,py-y1);
+  const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy)));
+  return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
+}
+function chartRegionContains(region,x,y){
+  if(region.type==='point')return Math.hypot(x-region.x,y-region.y)<=region.radius;
+  if(region.type==='bar')return x>=region.x&&x<=region.x+region.w&&y>=region.y&&y<=region.y+region.h;
+  if(region.type==='line')return chartLineDistance(x,y,region.x1,region.y1,region.x2,region.y2)<=region.radius;
+  return false;
+}
+function chartRegionAt(canvas,event){
+  const meta=canvas.__doeTooltip;
+  if(!meta)return null;
+  const rect=canvas.getBoundingClientRect();
+  if(!rect.width||!rect.height)return null;
+  const x=(event.clientX-rect.left)*meta.width/rect.width;
+  const y=(event.clientY-rect.top)*meta.height/rect.height;
+  for(let index=meta.regions.length-1;index>=0;index--){
+    if(chartRegionContains(meta.regions[index],x,y))return meta.regions[index];
+  }
+  return null;
+}
+function bindChartTooltip(canvas,regions,width,height){
+  canvas.__doeTooltip={regions,width,height};
+  if(canvas.__doeTooltipBound)return;
+  canvas.__doeTooltipBound=true;
+  canvas.tabIndex=canvas.tabIndex>=0?canvas.tabIndex:0;
+  canvas.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch')return;
+    const region=chartRegionAt(canvas,event);
+    canvas.style.cursor=region?'pointer':'default';
+    if(region)showChartTooltip(region.content,event.clientX,event.clientY);
+    else hideChartTooltip();
+  });
+  canvas.addEventListener('pointerdown',event=>{
+    const region=chartRegionAt(canvas,event);
+    if(region)showChartTooltip(region.content,event.clientX,event.clientY,event.pointerType==='touch');
+  });
+  canvas.addEventListener('pointerleave',()=>{
+    canvas.style.cursor='default';
+    hideChartTooltip();
+  });
+  canvas.addEventListener('focus',()=>{
+    const first=canvas.__doeTooltip?.regions?.find(region=>region.type==='point'||region.type==='bar');
+    if(!first)return;
+    const rect=canvas.getBoundingClientRect();
+    showChartTooltip(first.content,rect.left+rect.width/2,rect.top+Math.min(rect.height/2,120));
+  });
+  canvas.addEventListener('blur',hideChartTooltip);
+  canvas.addEventListener('keydown',event=>{if(event.key==='Escape')hideChartTooltip()});
+}
+function clearChartTooltip(canvas,width=canvas.width,height=canvas.height){
+  bindChartTooltip(canvas,[],width,height);
+  hideChartTooltip();
+}
+function mainEffectPointTooltip(effect,level,value){
+  return ()=>{
+    const labels=chartTooltipLabels();
+    const actual=level==='low'?effect.factor.low:effect.factor.high;
+    return {
+      title:effect.factor.name,
+      rows:[
+        `${level==='low'?labels.low:labels.high}: ${actual}`,
+        `${labels.mean}: ${chartTooltipMetric(value)}`
+      ]
+    };
+  };
+}
+function mainEffectLineTooltip(effect){
+  return ()=>{
+    const labels=chartTooltipLabels();
+    return {
+      title:effect.factor.name,
+      rows:[
+        `${labels.low}: ${effect.factor.low} · ${labels.mean}: ${chartTooltipMetric(effect.averageLow)}`,
+        `${labels.high}: ${effect.factor.high} · ${labels.mean}: ${chartTooltipMetric(effect.averageHigh)}`,
+        `${labels.effect}: ${effect.effect>=0?'+':''}${chartTooltipMetric(effect.effect)}`
+      ]
+    };
+  };
+}
+function rankingTooltip(effect){
+  return ()=>{
+    const labels=chartTooltipLabels();
+    return {
+      title:`${labels.factor}: ${effect.factor.name}`,
+      rows:[
+        `${labels.absoluteEffect}: ${chartTooltipMetric(effect.abs)}`,
+        `${labels.effect}: ${effect.effect>=0?'+':''}${chartTooltipMetric(effect.effect)}`
+      ]
+    };
+  };
+}
+function interactionPointTooltip(interaction,aLevel,bLevel,value){
+  return ()=>{
+    const labels=chartTooltipLabels();
+    const aValue=aLevel==='low'?interaction.a.low:interaction.a.high;
+    const bValue=bLevel==='low'?interaction.b.low:interaction.b.high;
+    return {
+      title:`${interaction.a.name} × ${interaction.b.name}`,
+      rows:[
+        `${interaction.a.name}: ${aLevel==='low'?labels.low:labels.high} · ${aValue}`,
+        `${interaction.b.name}: ${bLevel==='low'?labels.low:labels.high} · ${bValue}`,
+        `${labels.mean}: ${chartTooltipMetric(value)}`
+      ]
+    };
+  };
+}
+function interactionLineTooltip(interaction,bLevel,values){
+  return ()=>{
+    const labels=chartTooltipLabels();
+    const bValue=bLevel==='low'?interaction.b.low:interaction.b.high;
+    return {
+      title:`${interaction.a.name} × ${interaction.b.name}`,
+      rows:[
+        `${interaction.b.name}: ${bLevel==='low'?labels.low:labels.high} · ${bValue}`,
+        `${interaction.a.name} ${labels.low}: ${chartTooltipMetric(values[0])}`,
+        `${interaction.a.name} ${labels.high}: ${chartTooltipMetric(values[1])}`
+      ]
+    };
+  };
 }
 function drawMainEffects(effects,canvasId='mainEffectsChart'){
   const c=$(canvasId);
   if(!c)return;
-  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  const chart=prepareDoeChartCanvas(c,'main',effects.length);
+  const {ctx,w,h,compact,columns:cols,rows}=chart;
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
-  if(!effects.length)return;
+  if(!effects.length)return clearChartTooltip(c,w,h);
+  const tooltipRegions=[];
   const responseValues=state.design?.runs?.map(run=>Number(run.response)).filter(Number.isFinite)||[];
   const overall=responseValues.length?responseValues.reduce((sum,value)=>sum+value,0)/responseValues.length:null;
   const vals=effects.flatMap(e=>[e.averageLow,e.averageHigh]).concat(overall==null?[]:[overall]);
-  const range=niceRange(vals);
-  const cols=effects.length<=3?effects.length:3;
-  const rows=Math.ceil(effects.length/cols);
-  const outer={l:58,r:16,t:34,b:34};
-  const gapX=18,gapY=24;
+  const range=niceChartScale(vals,4);
+  const outer={l:compact?50:58,r:14,t:42,b:18};
+  const gapX=16,gapY=18;
   const panelW=(w-outer.l-outer.r-gapX*(cols-1))/cols;
   const panelH=(h-outer.t-outer.b-gapY*(rows-1))/rows;
   const [lowLabel,highLabel]=doeLevelLabels();
-  ctx.font=`11px ${CANVAS_FONT}`;
-  ctx.fillStyle='#344054';
+  ctx.font=`600 11px ${CANVAS_FONT}`;
+  ctx.fillStyle='#475467';
   ctx.textAlign='left';
-  ctx.fillText(t('responseMean'),8,18);
-  const yFor=value=>outer.t+(range.max-value)/(range.max-range.min)*panelH;
+  ctx.fillText(t('responseMean'),12,22);
+  if(overall!=null){
+    ctx.strokeStyle='#9a6b2f';ctx.lineWidth=1.4;ctx.setLineDash([6,4]);
+    ctx.beginPath();ctx.moveTo(w-148,18);ctx.lineTo(w-118,18);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#667085';ctx.font=`10px ${CANVAS_FONT}`;ctx.textAlign='left';
+    canvasText(ctx,`${t('overallMean')} ${fmt(overall)}`,w-112,21,100,'left');
+  }
   effects.forEach((effect,index)=>{
     const col=index%cols,row=Math.floor(index/cols);
     const x=outer.l+col*(panelW+gapX),y=outer.t+row*(panelH+gapY);
-    const plot={l:x+30,r:x+panelW-14,t:y+24,b:y+panelH-28};
+    const plot={l:x+(compact?44:38),r:x+panelW-14,t:y+38,b:y+panelH-31};
     const plotW=plot.r-plot.l,plotH=plot.b-plot.t;
     const mapY=value=>plot.t+(range.max-value)/(range.max-range.min)*plotH;
-    ctx.fillStyle='#fbfcfe';ctx.fillRect(x,y,panelW,panelH);
-    ctx.strokeStyle='#d9e2ec';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,panelW-1,panelH-1);
-    ctx.fillStyle='#26364a';ctx.font=`12px ${CANVAS_FONT}`;
-    canvasText(ctx,effect.factor.name,x+10,y+15,panelW-20,'left');
-    ctx.strokeStyle='#e7edf3';ctx.lineWidth=1;ctx.setLineDash([]);
+    roundedRectPath(ctx,x+.5,y+.5,panelW-1,panelH-1,8);
+    ctx.fillStyle='#fbfcfe';ctx.fill();
+    ctx.strokeStyle='#dce4ee';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='#25364d';ctx.font=`600 12px ${CANVAS_FONT}`;
+    canvasText(ctx,effect.factor.name,x+12,y+21,panelW-24,'left');
+    ctx.fillStyle='#ffffff';ctx.fillRect(plot.l,plot.t,plotW,plotH);
+    ctx.strokeStyle='#e5ebf2';ctx.lineWidth=1;ctx.setLineDash([]);
     for(let i=0;i<=4;i++){
       const gy=plot.t+plotH*i/4;
       ctx.beginPath();ctx.moveTo(plot.l,gy);ctx.lineTo(plot.r,gy);ctx.stroke();
       if(col===0){
         const tick=range.max-(range.max-range.min)*i/4;
-        ctx.fillStyle='#667085';ctx.font=`10px ${CANVAS_FONT}`;ctx.textAlign='right';ctx.fillText(fmt(tick),plot.l-6,gy+3);
+        ctx.fillStyle='#667085';ctx.font=`10px ${CANVAS_FONT}`;ctx.textAlign='right';ctx.fillText(fmt(tick),plot.l-7,gy+3);
       }
     }
     if(overall!=null){
       const oy=mapY(overall);
-      ctx.strokeStyle='#9aa9ba';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(plot.l,oy);ctx.lineTo(plot.r,oy);ctx.stroke();ctx.setLineDash([]);
-      if(index===0){
-        ctx.fillStyle='#667085';ctx.font=`10px ${CANVAS_FONT}`;ctx.textAlign='left';ctx.fillText(`${t('overallMean')} ${fmt(overall)}`,plot.l+3,oy-4);
-      }
+      ctx.strokeStyle='#b28a59';ctx.lineWidth=1.3;ctx.setLineDash([5,4]);
+      ctx.beginPath();ctx.moveTo(plot.l,oy);ctx.lineTo(plot.r,oy);ctx.stroke();ctx.setLineDash([]);
     }
-    ctx.strokeStyle='#1f4e79';ctx.lineWidth=2;
-    const xLow=plot.l+plotW*.22,xHigh=plot.l+plotW*.78;
+    const xLow=plot.l+plotW*.2,xHigh=plot.l+plotW*.8;
     const yLow=mapY(effect.averageLow),yHigh=mapY(effect.averageHigh);
+    tooltipRegions.push({type:'line',x1:xLow,y1:yLow,x2:xHigh,y2:yHigh,radius:8,content:mainEffectLineTooltip(effect)});
+    const lineGradient=ctx.createLinearGradient(xLow,yLow,xHigh,yHigh);
+    lineGradient.addColorStop(0,'#315f91');lineGradient.addColorStop(1,'#3976e8');
+    ctx.strokeStyle=lineGradient;ctx.lineWidth=2.4;
     ctx.beginPath();ctx.moveTo(xLow,yLow);ctx.lineTo(xHigh,yHigh);ctx.stroke();
-    [[xLow,yLow,'#1f4e79'],[xHigh,yHigh,'#2d7b54']].forEach(([px,py,color])=>{
-      ctx.fillStyle=color;ctx.beginPath();ctx.arc(px,py,4.5,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;ctx.stroke();
+    [[xLow,yLow,'#315f91',effect.averageLow],[xHigh,yHigh,'#3976e8',effect.averageHigh]].forEach(([px,py,color,value])=>{
+      ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.stroke();
+      ctx.fillStyle='#344054';ctx.font=`600 10px ${CANVAS_FONT}`;ctx.textAlign='center';
+      const labelY=py-10<plot.t+9?py+17:py-10;
+      ctx.fillText(fmt(value),px,labelY);
     });
-    ctx.strokeStyle='#98a6b5';ctx.lineWidth=1;
+    tooltipRegions.push(
+      {type:'point',x:xLow,y:yLow,radius:12,content:mainEffectPointTooltip(effect,'low',effect.averageLow)},
+      {type:'point',x:xHigh,y:yHigh,radius:12,content:mainEffectPointTooltip(effect,'high',effect.averageHigh)}
+    );
+    ctx.strokeStyle='#98a6b5';ctx.lineWidth=1.1;
     ctx.beginPath();ctx.moveTo(plot.l,plot.b);ctx.lineTo(plot.r,plot.b);ctx.stroke();
-    ctx.fillStyle='#526273';ctx.font=`10px ${CANVAS_FONT}`;ctx.textAlign='center';
+    ctx.fillStyle='#526273';ctx.font=`600 10px ${CANVAS_FONT}`;ctx.textAlign='center';
     ctx.fillText(lowLabel,xLow,plot.b+15);
     ctx.fillText(highLabel,xHigh,plot.b+15);
   });
   ctx.setLineDash([]);
   ctx.textAlign='left';
+  bindChartTooltip(c,tooltipRegions,w,h);
 }
 
 function drawRanking(effects,canvasId='rankingChart'){
   const c=$(canvasId);
   if(!c)return;
-  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  const chart=prepareDoeChartCanvas(c,'ranking',effects.length);
+  const {ctx,w,h,compact}=chart;
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
   const ranked=[...effects].sort((a,b)=>b.abs-a.abs);
-  if(!ranked.length)return;
+  if(!ranked.length)return clearChartTooltip(c,w,h);
+  const tooltipRegions=[];
   const maxEffect=Math.max(...ranked.map(e=>e.abs),1);
   const confirmed=ranked.filter(effect=>{
     const row=anovaRowForEffect(effect);
     return row&&row.p!=null&&row.p<=0.05;
   });
   const reference=state.anova?.valid&&confirmed.length?Math.min(...confirmed.map(e=>e.abs)):null;
-  const axisMax=Math.max(maxEffect,reference||0)*1.12;
-  const pad={l:190,r:88,t:30,b:36};
+  const axisMax=niceChartScale([0,Math.max(maxEffect,reference||0)],4).max;
+  const pad={l:compact?112:Math.min(190,Math.max(148,w*.27)),r:compact?52:78,t:42,b:38};
   const plotW=w-pad.l-pad.r,plotH=h-pad.t-pad.b,rowH=plotH/ranked.length;
-  ctx.font=`11px ${CANVAS_FONT}`;
-  ctx.fillStyle='#344054';ctx.textAlign='left';ctx.fillText(t('absoluteEffect'),pad.l,pad.t-12);
-  ctx.strokeStyle='#e5ebf1';ctx.lineWidth=1;
+  ranked.forEach((_,index)=>{
+    if(index%2===0){
+      ctx.fillStyle='#f8fafc';ctx.fillRect(0,pad.t+index*rowH,w,rowH);
+    }
+  });
+  ctx.font=`600 11px ${CANVAS_FONT}`;
+  ctx.fillStyle='#475467';ctx.textAlign='left';ctx.fillText(t('absoluteEffect'),pad.l,22);
+  ctx.strokeStyle='#e4eaf1';ctx.lineWidth=1;
   for(let i=0;i<=4;i++){
     const x=pad.l+plotW*i/4;
     ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+plotH);ctx.stroke();
@@ -5368,20 +6850,32 @@ function drawRanking(effects,canvasId='rankingChart'){
   }
   if(reference!=null){
     const rx=pad.l+(reference/axisMax)*plotW;
-    ctx.strokeStyle='#9b5d28';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(rx,pad.t-2);ctx.lineTo(rx,pad.t+plotH);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='#9b5d28';ctx.lineWidth=1.4;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(rx,pad.t-2);ctx.lineTo(rx,pad.t+plotH);ctx.stroke();ctx.setLineDash([]);
     ctx.fillStyle='#7a4d00';ctx.font=`10px ${CANVAS_FONT}`;ctx.textAlign='left';ctx.fillText(t('significanceRef'),Math.min(rx+5,w-pad.r-58),pad.t+10);
   }
   ranked.forEach((effect,index)=>{
-    const y=pad.t+index*rowH+rowH*.22;
-    const barH=Math.min(20,rowH*.52);
+    const rowY=pad.t+index*rowH;
+    const barH=Math.min(23,rowH*.48);
+    const y=rowY+(rowH-barH)/2;
     const bw=(effect.abs/axisMax)*plotW;
-    ctx.fillStyle='#425f7a';ctx.fillRect(pad.l,y,bw,barH);
-    ctx.fillStyle='#425365';ctx.font=`11px ${CANVAS_FONT}`;
-    canvasText(ctx,effect.factor.name,pad.l-10,y+barH*.72,pad.l-22,'right');
-    ctx.fillStyle='#1d2939';ctx.textAlign='left';ctx.fillText(fmt(effect.abs),pad.l+bw+8,y+barH*.72);
+    const barGradient=ctx.createLinearGradient(pad.l,y,pad.l+Math.max(1,bw),y);
+    barGradient.addColorStop(0,index===0?'#244f7d':'#52779d');
+    barGradient.addColorStop(1,index===0?'#3976e8':'#7898b8');
+    roundedRectPath(ctx,pad.l,y,Math.max(2,bw),barH,4);
+    ctx.fillStyle=barGradient;ctx.fill();
+    tooltipRegions.push({type:'bar',x:pad.l,y,w:Math.max(2,bw),h:barH,content:rankingTooltip(effect)});
+    ctx.fillStyle='#98a2b3';ctx.font=`600 10px ${CANVAS_FONT}`;ctx.textAlign='left';
+    ctx.fillText(String(index+1).padStart(2,'0'),8,y+barH*.7);
+    ctx.fillStyle='#344054';ctx.font=`600 11px ${CANVAS_FONT}`;
+    canvasText(ctx,effect.factor.name,pad.l-10,y+barH*.7,pad.l-42,'right');
+    const valueX=pad.l+bw+8;
+    const useRight=valueX>w-10;
+    ctx.fillStyle='#1d2939';ctx.font=`600 11px ${CANVAS_FONT}`;ctx.textAlign=useRight?'right':'left';
+    ctx.fillText(fmt(effect.abs),useRight?w-8:valueX,y+barH*.7);
   });
-  ctx.strokeStyle='#98a6b5';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t+plotH);ctx.lineTo(pad.l+plotW,pad.t+plotH);ctx.stroke();
+  ctx.strokeStyle='#98a6b5';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(pad.l,pad.t+plotH);ctx.lineTo(pad.l+plotW,pad.t+plotH);ctx.stroke();
   ctx.textAlign='left';
+  bindChartTooltip(c,tooltipRegions,w,h);
 }
 
 function validateDOEData(updateUi=true){
@@ -5498,6 +6992,8 @@ function renderStudyReport(){
 }
 
 function updateStatus({refreshLanguage=true,showStep=true}={}){
+  renderCurrentStudySummary();
+  renderPrintReportHeader();
   renderStudyReport();
   renderFactorReport();
   const planOk=validatePlan(false);
@@ -5586,12 +7082,190 @@ function organizeResultsTabs(){
   tagResultElement('evidencePackage','report');
   tagResultElement('doeStudyReport','report');
   tagResultElement('limitations','report');
+  renderReportSectionNav();
   showResultTab(document.querySelector('[data-result-tab-button].active')?.dataset.resultTabButton||'evidence');
 }
 function showResultTab(tab){
   document.querySelectorAll('[data-result-tab-button]').forEach(btn=>btn.classList.toggle('active',btn.dataset.resultTabButton===tab));
   document.querySelectorAll('[data-result-tab]').forEach(el=>el.classList.toggle('active-result-tab',el.dataset.resultTab===tab));
+  if(tab==='report')setReportSection(state.activeReportSection||'summary');
   refreshLocalizedUi();
+}
+
+const REPORT_SECTION_LABELS={
+  zh:{
+    summary:'摘要',
+    design:'实验设计',
+    results:'实验结果',
+    effects:'效应分析',
+    model:'模型分析',
+    decision:'工程决策',
+    confirmation:'确认实验',
+    appendix:'附录',
+    full:'完整报告',
+    navigation:'报告章节'
+  },
+  en:{
+    summary:'Summary',
+    design:'Design',
+    results:'Results',
+    effects:'Effects',
+    model:'Model',
+    decision:'Decision',
+    confirmation:'Confirmation',
+    appendix:'Appendix',
+    full:'Full Report',
+    navigation:'Report sections'
+  }
+};
+const PRINT_REPORT_LABELS={
+  zh:{
+    kicker:'工程分析报告',
+    title:'DOE 工程分析报告',
+    response:'响应',
+    direction:'优化方向',
+    design:'实验设计',
+    status:'证据 / 决策状态',
+    manualStudy:'手动研究',
+    pending:'待分析',
+    appendix:'附录',
+    study:'完整实验记录',
+    matrix:'完整设计矩阵与运行数据',
+    effects:'详细效应表',
+    statistics:'统计证据与 ANOVA 详情',
+    interaction:'交互作用分析详情',
+    model:'模型方法与信任详情',
+    decision:'工程决策与追溯详情',
+    improvement:'改善验证与研究关闭',
+    limitations:'方法限制'
+  },
+  en:{
+    kicker:'ENGINEERING ANALYSIS REPORT',
+    title:'DOE Engineering Analysis Report',
+    response:'Response',
+    direction:'Optimization Direction',
+    design:'Experimental Design',
+    status:'Evidence / Decision Status',
+    manualStudy:'Manual Study',
+    pending:'Pending analysis',
+    appendix:'Appendix',
+    study:'Full Experiment Record',
+    matrix:'Full Design Matrix and Run Data',
+    effects:'Detailed Effect Tables',
+    statistics:'Statistical Evidence and ANOVA Detail',
+    interaction:'Interaction Analysis Detail',
+    model:'Model Method and Trust Detail',
+    decision:'Engineering Decision and Traceability Detail',
+    improvement:'Improvement Verification and Study Closure',
+    limitations:'Method Limitations'
+  }
+};
+function reportAppendixGroup(groupId,labelKey,elementIds){
+  const content=$('reportAppendixContent');
+  if(!content)return;
+  let group=$(groupId);
+  if(!group){
+    group=document.createElement('div');
+    group.id=groupId;
+    group.className='report-appendix-group';
+    const heading=document.createElement('h4');
+    heading.dataset.appendixLabel=labelKey;
+    group.appendChild(heading);
+    content.appendChild(group);
+  }
+  elementIds.forEach(id=>{
+    const element=$(id);
+    if(element&&element.parentElement!==group)group.appendChild(element);
+  });
+}
+function organizeReportAppendix(){
+  const flow=document.querySelector('#evidencePackage .report-flow');
+  const study=$('doeStudyReport');
+  const design=$('reportDesignSection');
+  const factorTable=$('factorReportBody')?.closest('.table-wrap');
+  const factorHeading=factorTable?.previousElementSibling?.classList.contains('subheading')?factorTable.previousElementSibling:null;
+  let factorSummary=$('reportFactorSummary');
+  if(design&&factorTable&&!factorSummary){
+    factorSummary=document.createElement('div');
+    factorSummary.id='reportFactorSummary';
+    factorSummary.className='report-factor-summary';
+    if(factorHeading)factorSummary.appendChild(factorHeading);
+    factorSummary.appendChild(factorTable);
+    design.appendChild(factorSummary);
+  }
+  const model=$('reportModelSection');
+  const decision=$('reportDecisionSection');
+  if(flow&&model&&decision)flow.insertBefore(model,decision);
+  reportAppendixGroup('reportAppendixStudyGroup','study',['doeStudyReport']);
+  reportAppendixGroup('reportAppendixMatrixGroup','matrix',['reportDesignMatrixWrap']);
+  reportAppendixGroup('reportAppendixEffectsGroup','effects',['reportMainEffectsTableWrap','reportRankingTableWrap']);
+  reportAppendixGroup('reportAppendixStatisticsGroup','statistics',['reportStatisticalSection']);
+  reportAppendixGroup('reportAppendixInteractionGroup','interaction',['reportInteractionSection']);
+  reportAppendixGroup('reportAppendixModelGroup','model',['reportModelDetailWrap']);
+  reportAppendixGroup('reportAppendixDecisionGroup','decision',['reportConstraintWrap','reportTargetWrap','reportImplementationWrap','reportDecisionTraceWrap']);
+  reportAppendixGroup('reportAppendixImprovementGroup','improvement',['reportImprovementSection']);
+  reportAppendixGroup('reportAppendixLimitationsGroup','limitations',['limitations']);
+}
+function renderReportAppendixLabels(){
+  const labels=PRINT_REPORT_LABELS[state.lang]||PRINT_REPORT_LABELS.en;
+  if($('reportAppendixTitle'))$('reportAppendixTitle').textContent=labels.appendix;
+  document.querySelectorAll('[data-appendix-label]').forEach(heading=>{
+    heading.textContent=labels[heading.dataset.appendixLabel]||heading.textContent;
+  });
+}
+function renderPrintReportHeader(){
+  const labels=PRINT_REPORT_LABELS[state.lang]||PRINT_REPORT_LABELS.en;
+  const source=EXAMPLE_STUDIES.find(item=>item.id===state.loadedExampleId);
+  const studyName=source
+    ? exampleOptionLabel(source)
+    : ($('projectName')?.value||labels.manualStudy);
+  const responseName=$('responseName')?.value||'—';
+  const responseUnit=$('responseUnit')?.value||'';
+  const objective=$('objective')?.value==='minimize'?t('minimize'):t('maximize');
+  const design=state.design
+    ? `${state.design.type==='full_factorial'?t('full'):t('screen')} · ${state.design.runs.length} ${t('run')}`
+    : labels.pending;
+  const evidence=state.analyzed?reportEvidenceLevel(state.decision,state.statisticalFoundation):labels.pending;
+  const decision=state.governance?.readiness?.status?uiValue(state.governance.readiness.status):labels.pending;
+  $('printReportKicker').textContent=labels.kicker;
+  $('printReportTitle').textContent=labels.title;
+  $('printReportStudy').textContent=studyName;
+  $('printResponseLabel').textContent=labels.response;
+  $('printObjectiveLabel').textContent=labels.direction;
+  $('printDesignLabel').textContent=labels.design;
+  $('printStatusLabel').textContent=labels.status;
+  $('printReportResponse').textContent=`${responseName}${responseUnit?` · ${responseUnit}`:''}`;
+  $('printReportObjective').textContent=objective;
+  $('printReportDesign').textContent=design;
+  $('printReportStatus').textContent=`${evidence} · ${decision}`;
+}
+function setReportSection(section){
+  const allowed=['summary','design','results','effects','model','decision','confirmation','appendix','full'];
+  const selected=allowed.includes(section)?section:'summary';
+  state.activeReportSection=selected;
+  $('resultsContent')?.classList.add('report-section-filtered');
+  document.querySelectorAll('[data-report-section-button]').forEach(button=>{
+    const active=button.dataset.reportSectionButton===selected;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-selected',String(active));
+    button.tabIndex=active?0:-1;
+  });
+  document.querySelectorAll('[data-report-section]').forEach(panel=>{
+    const active=selected==='full'||panel.dataset.reportSection===selected;
+    panel.classList.toggle('active-report-section',active);
+    panel.setAttribute('aria-hidden',String(!active));
+  });
+}
+function renderReportSectionNav(){
+  const labels=REPORT_SECTION_LABELS[state.lang]||REPORT_SECTION_LABELS.en;
+  const nav=$('reportSectionNav');
+  if(nav)nav.setAttribute('aria-label',labels.navigation);
+  document.querySelectorAll('[data-report-section-button]').forEach(button=>{
+    button.textContent=labels[button.dataset.reportSectionButton]||button.textContent;
+  });
+  renderReportAppendixLabels();
+  renderPrintReportHeader();
+  setReportSection(state.activeReportSection||'summary');
 }
 
 function localizedExample(example,lang=state.lang){
@@ -5608,11 +7282,25 @@ function localizedExample(example,lang=state.lang){
   };
 }
 
+function exampleOptionLabel(example){
+  const view=localizedExample(example);
+  return `${view.type} - ${view.title}`;
+}
+function renderCurrentStudySummary(){
+  const source=EXAMPLE_STUDIES.find(item=>item.id===state.loadedExampleId);
+  const label=$('currentStudyLabel');
+  const name=$('currentStudyName');
+  const summary=$('currentStudySummary');
+  if(!label||!name||!summary)return;
+  label.textContent=source?t('exampleStudy'):t('currentStudy');
+  name.textContent=source?exampleOptionLabel(source):t('manualStudy');
+  summary.dataset.studyMode=source?'example':'manual';
+}
 function renderExampleLibrary(){
   const select=$('exampleStudySelect');
   if(!select)return;
   const selected=select.value||state.loadedExampleId||'';
-  select.innerHTML=`<option value="">${esc(translateUiText('Example Study ▼'))}</option>`+EXAMPLE_STUDIES.map(example=>{
+  select.innerHTML=`<option value="">${esc(translateUiText('Example Study'))}</option>`+EXAMPLE_STUDIES.map(example=>{
     const view=localizedExample(example);
     return `
     <option value="${esc(example.id)}">${esc(view.type)} - ${esc(view.title)}</option>
@@ -5620,6 +7308,7 @@ function renderExampleLibrary(){
   }).join('');
   if(selected)select.value=selected;
   localizeVisibleUi(select);
+  renderCurrentStudySummary();
 }
 function localizedExampleMeta(label){
   return state.lang==='zh'?{
@@ -5760,6 +7449,7 @@ function loadExampleStudy(exampleId){
   setValue('objective',example.objective);
   resetAnalysisState();
   state.loadedExampleId=source.id;
+  renderExampleLibrary();
   state.study={
     experimentType:localizedExperimentTypeLabel(source),
     projectId:`DEMO-${example.id.toUpperCase()}`,
@@ -5802,6 +7492,9 @@ function loadDemo(){
 }
 function resetAll(){
   $('projectName').value='Heat Seal Strength Optimization';$('responseName').value='Seal Strength';$('responseUnit').value='N/15mm';$('objective').value='maximize';
+  state.loadedExampleId=null;
+  state.activeReportSection='summary';
+  if($('exampleStudySelect'))$('exampleStudySelect').value='';
   state.factors=[
     {id:'f1',name:'Temperature',type:'numeric',classification:'controlled',low:'160°C',high:'180°C',constraintMin:'',constraintMax:'',constraintType:'none'},
     {id:'f2',name:'Pressure',type:'numeric',classification:'controlled',low:'2.0 bar',high:'3.0 bar',constraintMin:'',constraintMax:'',constraintType:'none'},
@@ -5812,7 +7505,7 @@ function resetAll(){
   state.design=null;state.randomized=false;state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;state.expertRecommendation=null;state.acceptedExpertRecommendation=null;state.importPreview=null;
   invalidateChartInterpretations();
   $('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
-  renderFactors();renderDesign();renderRun();syncExpertInputsFromStrategy();resetExpertRecommendationUi();updateStatus();showWorkflowStep('define');
+  renderCurrentStudySummary();renderReportSectionNav();renderFactors();renderDesign();renderRun();syncExpertInputsFromStrategy();resetExpertRecommendationUi();updateStatus();showWorkflowStep('define');
 }
 
 ['experimentType','projectId','problemStatement','engineeringHypothesis','responseType','responseTarget','responseSpec','productName','partNumber','materialLot'].forEach(id=>{
@@ -5848,8 +7541,21 @@ $('analyzeBtn').addEventListener('click',()=>analyze(true));
 $('demoBtn').addEventListener('click',loadDemo);
 $('resetBtn').addEventListener('click',resetAll);
 $('printBtn').addEventListener('click',()=>window.print());
+$('manualNavBtn').addEventListener('click',()=>openHelpDrawer('manual'));
+$('faqNavBtn').addEventListener('click',()=>openHelpDrawer('faq'));
+$('helpCloseBtn').addEventListener('click',closeHelpDrawer);
+$('helpBackdrop').addEventListener('click',event=>{
+  if(event.target===$('helpBackdrop'))closeHelpDrawer();
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!$('helpBackdrop').classList.contains('hidden'))closeHelpDrawer();
+});
 $('exampleStudySelect').addEventListener('change',event=>{
   if(event.target.value)loadExampleStudy(event.target.value);
+  else{
+    state.loadedExampleId=null;
+    renderCurrentStudySummary();
+  }
 });
 ['projectName','responseName','responseUnit','objective'].forEach(id=>$(id).addEventListener('input',()=>{
   if(id==='responseName')renderRun();
@@ -5861,7 +7567,9 @@ document.querySelectorAll('[data-step-nav]').forEach(el=>el.addEventListener('cl
   showWorkflowStep(el.dataset.stepNav);
 }));
 document.querySelectorAll('[data-result-tab-button]').forEach(btn=>btn.addEventListener('click',()=>showResultTab(btn.dataset.resultTabButton)));
+document.querySelectorAll('[data-report-section-button]').forEach(button=>button.addEventListener('click',()=>setReportSection(button.dataset.reportSectionButton)));
 
+organizeReportAppendix();
 initializeStepPanels();
 renderExampleLibrary();renderFactors();renderDesign();renderRun();renderLanguage();updateStatus();showWorkflowStep(location.hash.replace('#','')||'define',false);
 
@@ -5975,7 +7683,8 @@ function drawInteractionPlot(interaction,canvasId='interactionPlot'){
   const ctx=c.getContext('2d'),w=c.width,h=c.height;
   ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
   const series=interactionPlotSeries(interaction);
-  if(!series)return;
+  if(!series)return clearChartTooltip(c,w,h);
+  const tooltipRegions=[];
   const values=[...series.lowB,...series.highB];
   const range=niceRange(values);
   const pad={l:70,r:180,t:28,b:48},plotW=w-pad.l-pad.r,plotH=h-pad.t-pad.b;
@@ -5988,13 +7697,24 @@ function drawInteractionPlot(interaction,canvasId='interactionPlot'){
     ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+plotW,y);ctx.stroke();
     ctx.fillStyle='#667085';ctx.textAlign='right';ctx.fillText(fmt(range.max-(range.max-range.min)*i/4),pad.l-8,y+3);
   }
-  const drawLine=(points,color,dash=[])=>{
+  const drawLine=(points,color,dash=[],bLevel='low')=>{
+    tooltipRegions.push({
+      type:'line',
+      x1:xLow,y1:yFor(points[0]),x2:xHigh,y2:yFor(points[1]),radius:8,
+      content:interactionLineTooltip(interaction,bLevel,points)
+    });
     ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.setLineDash(dash);
     ctx.beginPath();ctx.moveTo(xLow,yFor(points[0]));ctx.lineTo(xHigh,yFor(points[1]));ctx.stroke();ctx.setLineDash([]);
-    [xLow,xHigh].forEach((x,index)=>{ctx.beginPath();ctx.arc(x,yFor(points[index]),4.5,0,Math.PI*2);ctx.fill();});
+    [xLow,xHigh].forEach((x,index)=>{
+      ctx.beginPath();ctx.arc(x,yFor(points[index]),4.5,0,Math.PI*2);ctx.fill();
+      tooltipRegions.push({
+        type:'point',x,y:yFor(points[index]),radius:12,
+        content:interactionPointTooltip(interaction,index===0?'low':'high',bLevel,points[index])
+      });
+    });
   };
-  drawLine(series.lowB,'#1f4e79');
-  drawLine(series.highB,'#2d7b54',[5,3]);
+  drawLine(series.lowB,'#1f4e79',[],'low');
+  drawLine(series.highB,'#2d7b54',[5,3],'high');
   ctx.strokeStyle='#98a6b5';ctx.beginPath();ctx.moveTo(pad.l,pad.t+plotH);ctx.lineTo(pad.l+plotW,pad.t+plotH);ctx.stroke();
   ctx.fillStyle='#526273';ctx.textAlign='center';
   ctx.fillText(state.lang==='zh'?'-1 / 低':`Low`,xLow,pad.t+plotH+18);
@@ -6006,6 +7726,7 @@ function drawInteractionPlot(interaction,canvasId='interactionPlot'){
   ctx.fillStyle='#344054';ctx.fillText(`${state.lang==='zh'?'低水平':'Low'}: ${interaction.b.low}`,lx+36,ly+3);
   ctx.strokeStyle='#2d7b54';ctx.setLineDash([5,3]);ctx.beginPath();ctx.moveTo(lx,ly+24);ctx.lineTo(lx+28,ly+24);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#344054';ctx.fillText(`${state.lang==='zh'?'高水平':'High'}: ${interaction.b.high}`,lx+36,ly+27);
+  bindChartTooltip(c,tooltipRegions,w,h);
 }
 
 
