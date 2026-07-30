@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DOE Engineering Decision Support Tool V7.9.2</title>
+<link rel="stylesheet" href="https://ellenloog-coder.github.io/guided-8d-investigation-tool/feedback-widget.css?v=20260730-1">
 <style>
   :root{
     --nav:#101828;
@@ -8305,6 +8306,19 @@ window.QualityCopilotConfig = {
 };
 </script>
 <script src="https://ellenloog-coder.github.io/guided-8d-investigation-tool/ai-assistant.js?v=20260730-6"></script>
+<script>
+window.BlendexFeedbackConfig = {
+  tool: "design_of_experiments",
+  toolName: "Design of Experiments",
+  toolVersion: "V7.9.2",
+  language: () => state.lang === "zh" ? "zh" : "en",
+  metadata: () => ({
+    currentWorkflowStep: state.activeWorkflowStep || "",
+    experimentType: state.study?.experimentType || ""
+  })
+};
+</script>
+<script src="https://ellenloog-coder.github.io/guided-8d-investigation-tool/feedback-widget.js?v=20260730-2"></script>
 
 </body>
 </html>
