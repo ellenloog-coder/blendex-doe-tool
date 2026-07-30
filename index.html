@@ -1426,6 +1426,7 @@
     tr,.report-section .subheading,.print-report-meta>div{break-inside:avoid;page-break-inside:avoid}
   }
 </style>
+<link rel="stylesheet" href="https://ellenloog-coder.github.io/guided-8d-investigation-tool/ai-assistant.css?v=20260730-5">
 </head>
 <body>
 <header class="app-nav">
@@ -8230,6 +8231,78 @@ syncExpertInputsFromStrategy();
 resetExpertRecommendationUi();
 refreshLocalizedUi();
 </script>
+<script>
+window.QualityCopilotConfig = {
+  currentTool: "design_of_experiments",
+  analysisButtonTarget: "#results",
+  insertButtonAfter: false,
+  language: () => state.lang === "zh" ? "zh" : "en",
+  quickQuestions: {
+    zh: [
+      "解释我当前的 DOE 结果",
+      "下一步应该验证什么？",
+      "当前模型的证据强度如何？",
+      "主效应、交互作用和显著性有什么区别？",
+      "如何设计确认试验？"
+    ],
+    en: [
+      "Explain my current DOE result",
+      "What should I verify next?",
+      "How strong is the evidence for the current model?",
+      "How do main effects, interactions, and significance differ?",
+      "How should I design the confirmation run?"
+    ]
+  },
+  requiresPageContext: question => {
+    const text = String(question || "").toLowerCase();
+    return /当前|这个|这份|页面|报告|结果|我的|下一步|当前模型|证据强度|确认试验|current|this result|these results|my result|page|report|next step|current model|evidence strength|confirmation run/.test(text);
+  },
+  collectSummary: () => {
+    const zh = state.lang === "zh";
+    const metrics = {};
+    const add = (zhKey, enKey, value) => {
+      if (value !== null && value !== undefined && String(value).trim() && String(value).trim() !== "—") {
+        metrics[zh ? zhKey : enKey] = String(value).trim().slice(0, 160);
+      }
+    };
+    const runs = state.design?.runs || [];
+    const completedRuns = runs.filter(run => Number.isFinite(Number(run.response))).length;
+    add("当前工作流步骤", "current workflow step", state.activeWorkflowStep);
+    add("分析状态", "analysis status", state.analyzed ? (zh ? "已分析" : "Analyzed") : (zh ? "未分析" : "Not analyzed"));
+    add("实验类型", "experiment type", state.study?.experimentType);
+    add("设计类型", "design type", state.design?.type);
+    add("因素数量", "factor count", state.factors?.length);
+    add("运行数量", "run count", runs.length || "");
+    add("已完成运行", "completed runs", runs.length ? `${completedRuns}/${runs.length}` : "");
+    add("数据验证", "data validation", state.validation ? (state.validation.valid ? (zh ? "通过" : "Pass") : (zh ? "未通过" : "Not passed")) : "");
+    add("ANOVA 证据", "ANOVA evidence", state.anova ? (state.anova.valid ? (zh ? "有效误差估计" : "Valid error estimate") : (zh ? "仅描述性分析" : "Descriptive only")) : "");
+    add("模型信任状态", "model trust status", state.modelTrust?.trust?.status);
+    add("实施准备状态", "implementation readiness", state.governance?.readiness?.status);
+    add("确认试验状态", "confirmation status", state.analyzed ? currentConfirmationStatus() : "");
+    add("改善验证状态", "improvement verification", state.improvementVerification?.decision?.status);
+    add("研究关闭状态", "study closure", document.getElementById("closureStatusValue")?.textContent);
+    const interpretation = [
+      state.analyzed
+        ? (zh ? "页面已完成 DOE 分析；统计结果必须以页面计算为准。" : "The page has completed DOE analysis; page-calculated statistics remain authoritative.")
+        : (zh ? "页面尚未完成 DOE 分析。" : "DOE analysis has not been completed on the page."),
+      state.anova && !state.anova.valid
+        ? (zh ? "当前 ANOVA 不具备有效误差估计，只能作为描述性证据。" : "The current ANOVA lacks a valid error estimate and is descriptive evidence only.")
+        : "",
+      state.governance?.readiness?.rationale || "",
+      state.modelTrust?.trust?.rationale || ""
+    ].filter(Boolean).join(" ").slice(0, 1800);
+    return {
+      current_tool: "design_of_experiments",
+      analysis_type: state.study?.experimentType || "DOE",
+      available_context: ["workflow", "design", "run completion", "validation", "ANOVA evidence", "model trust", "confirmation", "closure"],
+      summary_metrics: metrics,
+      deterministic_interpretation: interpretation,
+      has_results: Boolean(state.analyzed)
+    };
+  }
+};
+</script>
+<script src="https://ellenloog-coder.github.io/guided-8d-investigation-tool/ai-assistant.js?v=20260730-5"></script>
 
 </body>
 </html>
