@@ -65,7 +65,7 @@ examples.forEach(example => {
 
 const header = html.match(/<header class="app-nav">([\s\S]*?)<\/header>/)?.[1] || '';
 assert(header.includes('id="exampleStudySelect"'), 'Example study selector should be in the global header');
-assert(html.includes('Example Study ▼'));
+assert(html.includes('aria-label="Example Study"'), 'Example study selector should expose the compact Example Study label');
 assert(html.includes('id="exampleStudySelect"'));
 assert(html.includes('function localizedExample'));
 assert(html.includes('const view=localizedExample(example);'));

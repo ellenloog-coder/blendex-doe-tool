@@ -114,6 +114,15 @@ async function importCsv(page, name, content) {
   });
 }
 
+async function importCsvAndWaitForStatus(page, name, content) {
+  const previous = await page.locator('#importStatus').innerText();
+  await importCsv(page, name, content);
+  await page.waitForFunction(
+    prev => document.querySelector('#importStatus')?.textContent !== prev,
+    previous
+  );
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const summary = { responsive: {}, csv: {}, diagnostics: [] };
@@ -151,7 +160,7 @@ async function importCsv(page, name, content) {
       ['wrong-row-count', validCsv.split('\n').slice(0, -1).join('\n'), '当前 DOE 需要 8 行数据，实际检测到 7 行']
     ];
     for (const [name, content, expected] of cases) {
-      await importCsv(page, `${name}.csv`, content);
+      await importCsvAndWaitForStatus(page, `${name}.csv`, content);
       const message = await page.locator('#importStatus').innerText();
       assert(message.includes(expected), `${name}: ${message}`);
       assert(message.includes('重新导入') && message.includes('CSV 模板'), `${name}: recovery guidance missing`);
@@ -160,6 +169,10 @@ async function importCsv(page, name, content) {
       console.log(`PASS csv-zh-${name}`);
     }
     await importCsv(page, 'valid-zh.csv', validCsv);
+    await page.waitForFunction(() => {
+      const panel = document.querySelector('#importMappingPanel');
+      return panel && !panel.classList.contains('hidden');
+    });
     assert.strictEqual(await page.locator('#importMappingPanel').isVisible(), true);
     await page.locator('#confirmImportMappingBtn').click();
     const success = await page.locator('#importStatus').innerText();
@@ -170,12 +183,12 @@ async function importCsv(page, name, content) {
     assert.strictEqual((await page.locator('#analysisStatus').innerText()).trim(), '分析完成');
     summary.csv['zh-valid-recovery'] = success;
     console.log('PASS csv-zh-valid-recovery');
-    await importCsv(page, 'invalid-after-valid-zh.csv', validCsv.replace('31', 'not-a-number'));
+    await importCsvAndWaitForStatus(page, 'invalid-after-valid-zh.csv', validCsv.replace('31', 'not-a-number'));
     assert.deepStrictEqual(await page.locator('input[data-response]').evaluateAll(inputs => inputs.map(input => input.value)), importedValues);
     assert.strictEqual((await page.locator('#analysisStatus').innerText()).trim(), '分析完成');
     console.log('PASS csv-zh-invalid-preserves-valid-state');
     await page.selectOption('#uiLanguageInput', 'en');
-    await importCsv(page, 'invalid-after-language-switch.csv', validCsv.replace('31', 'not-a-number'));
+    await importCsvAndWaitForStatus(page, 'invalid-after-language-switch.csv', validCsv.replace('31', 'not-a-number'));
     const switchedMessage = await page.locator('#importStatus').innerText();
     assert(switchedMessage.includes('must be numeric') && !/[\u4e00-\u9fff]/.test(switchedMessage));
     assert.deepStrictEqual(await page.locator('input[data-response]').evaluateAll(inputs => inputs.map(input => input.value)), importedValues);
@@ -199,7 +212,7 @@ async function importCsv(page, name, content) {
       ['wrong-row-count', validCsv.split('\n').slice(0, -1).join('\n'), 'current DOE requires 8 data rows, but 7 were detected']
     ];
     for (const [name, content, expected] of cases) {
-      await importCsv(page, `${name}.csv`, content);
+      await importCsvAndWaitForStatus(page, `${name}.csv`, content);
       const message = await page.locator('#importStatus').innerText();
       assert(message.includes(expected), `${name}: ${message}`);
       assert(!/[\u4e00-\u9fff]/.test(message), `${name}: Chinese text leaked into English message`);
@@ -209,6 +222,10 @@ async function importCsv(page, name, content) {
       console.log(`PASS csv-en-${name}`);
     }
     await importCsv(page, 'valid-en.csv', validCsv);
+    await page.waitForFunction(() => {
+      const panel = document.querySelector('#importMappingPanel');
+      return panel && !panel.classList.contains('hidden');
+    });
     assert.strictEqual(await page.locator('#importMappingPanel').isVisible(), true);
     await page.locator('#confirmImportMappingBtn').click();
     const success = await page.locator('#importStatus').innerText();
@@ -219,7 +236,7 @@ async function importCsv(page, name, content) {
     assert.strictEqual((await page.locator('#analysisStatus').innerText()).trim().toLowerCase(), 'analysis complete');
     summary.csv['en-valid-recovery'] = success;
     console.log('PASS csv-en-valid-recovery');
-    await importCsv(page, 'invalid-after-valid-en.csv', validCsv.replace('31', 'not-a-number'));
+    await importCsvAndWaitForStatus(page, 'invalid-after-valid-en.csv', validCsv.replace('31', 'not-a-number'));
     assert.deepStrictEqual(await page.locator('input[data-response]').evaluateAll(inputs => inputs.map(input => input.value)), importedValues);
     assert.strictEqual((await page.locator('#analysisStatus').innerText()).trim().toLowerCase(), 'analysis complete');
     console.log('PASS csv-en-invalid-preserves-valid-state');
