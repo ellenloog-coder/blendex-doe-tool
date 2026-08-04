@@ -385,6 +385,14 @@
   .note.good{background:var(--green-soft);color:#236245;border-color:#cdebd9}
 
   .table-wrap{border-color:var(--line);border-radius:14px;background:#fff}
+  .response-entry-list{display:grid;gap:6px;min-width:154px}
+  .response-entry-row{display:flex;align-items:center;gap:6px}
+  .response-entry-row input{min-width:92px;width:100%}
+  .response-entry-row .row-btn{flex:0 0 auto;padding:6px 8px}
+  .response-add-btn{width:100%;padding:6px 8px}
+  .response-stat{white-space:nowrap;font-variant-numeric:tabular-nums}
+  .design-enhancement-panel{margin-top:12px}
+  .design-enhancement-panel .field{max-width:360px;margin-top:10px}
   table{min-width:620px}
   th,td{font-size:12px;padding:8px 10px;border-bottom-color:#edf1f6}
   th{background:#f8fafc;color:#667085;font-weight:850}
@@ -1624,6 +1632,7 @@
               <select id="objective">
                 <option value="maximize">最大化</option>
                 <option value="minimize">最小化</option>
+                <option value="target">接近目标值</option>
               </select>
             </div>
           </div>
@@ -1739,6 +1748,17 @@ Project ID、产品信息、物料批次、工程假设等用于报告追溯，�
           <div class="section-actions" style="margin-top:14px">
             <button class="btn btn-secondary" id="assessStrategyBtn">Assess Strategy</button>
             <button class="btn btn-primary" id="acceptStrategyBtn">Accept Strategy and Generate DOE Design</button>
+          </div>
+          <div class="note info design-enhancement-panel" id="designEnhancementPanel">
+            <strong id="designEnhancementTitle">Design Enhancement / 设计增强</strong>
+            <div id="designEnhancementSummary">Assess the strategy to review how remaining run budget can improve the design.</div>
+            <div class="field">
+              <label id="designPlanModeLabel" for="designPlanMode">Design plan</label>
+              <select id="designPlanMode">
+                <option value="base">Base design</option>
+                <option value="enhanced">Enhanced design (recommended when eligible)</option>
+              </select>
+            </div>
           </div>
           <div class="section" id="expertRecommendationCard" style="margin-top:15px">
             <div class="section-header">
@@ -1870,7 +1890,7 @@ Project ID、产品信息、物料批次、工程假设等用于报告追溯，�
         <div class="section-header">
           <div>
             <h2 id="runTitle">3. 执行实验</h2>
-            <p id="runDesc">按随机运行顺序执行实验，每次运行录入一个响应值。</p>
+            <p id="runDesc">按随机运行顺序执行实验；每次运行可录入一个或多个单点响应。</p>
           </div>
           <div>
             <span class="status-pill pending" id="runStatus">0 / 0 已完成</span>
@@ -1880,6 +1900,7 @@ Project ID、产品信息、物料批次、工程假设等用于报告追溯，�
           <div id="runEmpty" class="empty">生成设计矩阵后可录入实验响应。</div>
           <div id="runContent" class="hidden">
             <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="note info" id="responseModelingNote" style="margin-top:14px">模型基于每个试验运行的平均响应值建立。同一运行内的多个测量值不会被当作独立试验。</div>
             <div class="table-wrap" style="margin-top:14px">
               <table>
                 <thead id="runHead"></thead>
@@ -2541,6 +2562,7 @@ const state={
   analyzed:false,
   validation:null,
   anova:null,
+  regressionModel:null,
   decision:null,
   governance:null,
   evidenceSeparation:null,
@@ -2552,10 +2574,12 @@ const state={
   acceptedExpertRecommendation:null,
   acceptedStrategy:null,
   importPreview:null,
+  importWarnings:[],
   loadedExampleId:null,
   activeWorkflowStep:'define',
   activeReportSection:'summary',
   displayMode:'guided',
+  designPlanMode:'base',
   analysisContext:null,
   chartInterpretations:{
     main_effects:null,
@@ -2590,7 +2614,7 @@ zh:{
  wf1:'定义问题',wf2:'实验策略',wf3:'DOE设计',wf4:'执行实验',wf5:'分析证据',
  planTitle:'1. 定义问题',planDesc:'定义一个响应、优化目标以及 2–6 个两水平因素。',
  pending:'待确认',complete:'已完成',project:'实验名称',response:'响应名称',unit:'响应单位',objective:'优化目标',
- maximize:'最大化',minimize:'最小化',factorHeading:'因素与水平',addFactor:'+ 添加因素',
+ maximize:'最大化',minimize:'最小化',targetObjective:'接近目标值',factorHeading:'因素与水平',addFactor:'+ 添加因素',
  factor:'因素',type:'类型',numeric:'数值型',categorical:'类别型',low:'低水平',high:'高水平',action:'操作',remove:'删除',
  planNote:'2–4 个因素使用全因子设计；5–6 个因素使用预定义的 8 次筛选设计。所有计算均在浏览器本地完成。',
  generate:'生成设计矩阵',
@@ -2599,9 +2623,10 @@ zh:{
  designType:'设计类型',factorCount:'因素数',runCount:'运行数',order:'运行顺序',standard:'标准',randomized:'随机',
  full:'全因子设计',screen:'8 次筛选设计',auto:'自动选择',
  screeningWarning:'筛选设计中的部分效应可能存在混杂。当前版本用于主效应筛选，不用于估算全部交互作用。',
- runTitle:'3. 执行实验',runDesc:'按随机运行顺序执行实验，每次运行录入一个响应值。',
+ runTitle:'3. 执行实验',runDesc:'按随机运行顺序执行实验；每次运行可录入一个或多个单点响应。',
  runEmpty:'生成设计矩阵后可录入实验响应。',completed:'已完成',fill:'填充示例响应',analyze:'运行分析',
- run:'运行',stdOrder:'标准序',responseValue:'响应值',
+ run:'运行',stdOrder:'标准序',responseValue:'响应值',responseSamples:'单点响应',responseCount:'N',responseStdDev:'标准差',responseMin:'最小值',responseMax:'最大值',responseRange:'极差',runType:'运行类型',
+ addMeasurement:'+ 添加测量值',removeMeasurement:'删除测量值',modelUsesMean:'模型基于每个试验运行的平均响应值建立。同一运行内的多个测量值不会被当作独立试验。',
  resultsTitle:'4. 分析与报告',resultsDesc:'比较高低水平平均响应，排序主效应，并形成确认试验建议。',
  notAnalyzed:'未分析',analysisReady:'分析完成',resultsEmpty:'完成全部响应值并运行分析后显示结果。',
  largest:'最大效应因素',bestRun:'最佳已观察运行',completeRuns:'完整运行',
@@ -2629,7 +2654,7 @@ en:{
  wf1:'Define Problem',wf2:'Experiment Strategy',wf3:'DOE Design',wf4:'Execute Experiment',wf5:'Analyze Evidence',
  planTitle:'1. Define Problem',planDesc:'Define one response, an objective and 2–6 two-level factors.',
  pending:'Pending',complete:'Complete',project:'Experiment Name',response:'Response Name',unit:'Response Unit',objective:'Objective',
- maximize:'Maximize',minimize:'Minimize',factorHeading:'Factors and Levels',addFactor:'+ Add Factor',
+ maximize:'Maximize',minimize:'Minimize',targetObjective:'Approach Target',factorHeading:'Factors and Levels',addFactor:'+ Add Factor',
  factor:'Factor',type:'Type',numeric:'Numeric',categorical:'Categorical',low:'Low Level',high:'High Level',action:'Action',remove:'Remove',
  planNote:'A full factorial design is used for 2–4 factors. A predefined 8-run screening design is used for 5–6 factors. All calculations run locally in the browser.',
  generate:'Generate Design',
@@ -2638,9 +2663,10 @@ en:{
  designType:'Design Type',factorCount:'Factors',runCount:'Runs',order:'Run Order',standard:'Standard',randomized:'Randomized',
  full:'Full Factorial',screen:'8-Run Screening',auto:'Auto selected',
  screeningWarning:'Some effects in the screening design may be confounded. This version is intended for main-effects screening, not estimation of all interactions.',
- runTitle:'3. Experimental Run and Data Entry',runDesc:'Execute the experiment in run order and enter one response for every run.',
+ runTitle:'3. Experimental Run and Data Entry',runDesc:'Execute the experiment in run order and enter one or more individual measurements for every run.',
  runEmpty:'Generate a design before entering responses.',completed:'completed',fill:'Fill Demo Responses',analyze:'Run Analysis',
- run:'Run',stdOrder:'Std. Order',responseValue:'Response',
+ run:'Run',stdOrder:'Std. Order',responseValue:'Response',responseSamples:'Individual Responses',responseCount:'N',responseStdDev:'Std. Dev.',responseMin:'Min',responseMax:'Max',responseRange:'Range',runType:'Run Type',
+ addMeasurement:'+ Add Measurement',removeMeasurement:'Remove measurement',modelUsesMean:'The model is built from the mean response for each experimental run. Multiple measurements within one run are not treated as independent experiments.',
  resultsTitle:'4. Results and Engineering Interpretation',resultsDesc:'Compare low and high means, rank main effects and prepare a confirmation run.',
  notAnalyzed:'Not Analyzed',analysisReady:'Analysis Complete',resultsEmpty:'Complete all response values and run the analysis to view results.',
  largest:'Largest Effect',bestRun:'Best Observed Run',completeRuns:'Complete Runs',
@@ -3556,6 +3582,10 @@ UI_PHRASES.push(...[
   ,['Engineering Hypothesis','工程假设']
   ,['Characteristic Type','特性类型']
   ,['Target','目标值']
+  ,['Base Design Runs','基础设计运行数']
+  ,['Remaining Run Budget','剩余运行预算']
+  ,['Design Enhancement','设计增强']
+  ,['No eligible enhancement within the current budget.','当前预算内没有可用的设计增强方案。']
   ,['Specification','规格范围']
   ,['Study Metadata','试验追溯信息']
   ,['Product','产品']
@@ -3590,6 +3620,8 @@ UI_PHRASES.push(...[
   ,['Proceed to confirmation using DOE recommendation.','按DOE推荐进入确认。']
   ,['Proceed to confirmation.','进入确认。']
   ,['Predicted response meets the engineering target.','预测响应满足工程目标。']
+  ,['Predicted response matches the target.','预测响应与目标值一致。']
+  ,['This is the closest tested-region prediction; define an engineering tolerance to determine target acceptance.','这是已测试区域内最接近目标的预测；请定义工程容差以判定是否达到目标。']
   ,['Predicted response is unavailable for target verification.','预测响应不可用于目标验证。']
   ,['No engineering response target defined.','未定义工程响应目标。']
   ,['Descriptive effect only. Statistical significance cannot be estimated.','仅描述性效应。无法估计统计显著性。']
@@ -3669,7 +3701,8 @@ const DISPLAY_MAPS={
     confirmation:{en:'Confirmation',zh:'确认'},
     robustness:{en:'Robustness',zh:'稳健性'},
     maximize:{en:'Maximize',zh:'最大化'},
-    minimize:{en:'Minimize',zh:'最小化'}
+    minimize:{en:'Minimize',zh:'最小化'},
+    target:{en:'Approach Target',zh:'接近目标值'}
   },
   knowledge:{
     high:{en:'High',zh:'高'},
@@ -4241,6 +4274,212 @@ function statUiLang(){
 function statUiText(en,zh){
   return statUiLang()==='zh'?zh:en;
 }
+function summarizeResponses(values){
+  const source=Array.isArray(values)?values:[values];
+  const numeric=[];
+  let invalidCount=0;
+  source.forEach(value=>{
+    if(value==null||String(value).trim()==='')return;
+    const parsed=Number(value);
+    if(Number.isFinite(parsed))numeric.push(parsed);
+    else invalidCount++;
+  });
+  const count=numeric.length;
+  const mean=count?numeric.reduce((sum,value)=>sum+value,0)/count:null;
+  const variance=count>1?numeric.reduce((sum,value)=>sum+(value-mean)**2,0)/(count-1):0;
+  const min=count?Math.min(...numeric):null;
+  const max=count?Math.max(...numeric):null;
+  return {
+    values:numeric,
+    count,
+    mean,
+    stdDev:count?Math.sqrt(variance):null,
+    min,
+    max,
+    range:count?max-min:null,
+    invalidCount
+  };
+}
+function ensureRunResponseSummary(run){
+  if(!run)return run;
+  if(!Array.isArray(run.rawResponses)){
+    run.rawResponses=run.response==null||run.response===''?['']:[run.response];
+  }
+  if(!run.rawResponses.length)run.rawResponses=[''];
+  const summary=summarizeResponses(run.rawResponses);
+  run.responseCount=summary.count;
+  run.responseMean=summary.mean;
+  run.responseStdDev=summary.stdDev;
+  run.responseMin=summary.min;
+  run.responseMax=summary.max;
+  run.responseRange=summary.range;
+  run.invalidResponseCount=summary.invalidCount;
+  run.response=summary.mean;
+  if(!run.runType)run.runType='factorial';
+  return run;
+}
+function setRunResponses(run,values){
+  run.rawResponses=Array.isArray(values)?values.slice():[values];
+  return ensureRunResponseSummary(run);
+}
+function modelResponse(run){
+  ensureRunResponseSummary(run);
+  return Number.isFinite(run.responseMean)?run.responseMean:null;
+}
+function makeRunRecord({id,standardOrder,runOrder,settings,runType='factorial',replicateOf=null,rawResponses=['']}){
+  return ensureRunResponseSummary({id,standardOrder,runOrder,settings,runType,replicateOf,rawResponses});
+}
+function doeModelTerms(design,factors){
+  const terms=[{key:'intercept',label:'Intercept',type:'intercept',factorIds:[]}];
+  factors.forEach(factor=>terms.push({key:`main:${factor.id}`,label:factor.name,type:'main',factorIds:[factor.id]}));
+  if(design?.type==='full_factorial'){
+    for(let i=0;i<factors.length;i++)for(let j=i+1;j<factors.length;j++){
+      terms.push({key:`interaction:${factors[i].id}:${factors[j].id}`,label:`${factors[i].name} × ${factors[j].name}`,type:'interaction',factorIds:[factors[i].id,factors[j].id]});
+    }
+  }
+  return terms;
+}
+function encodedRunFactor(run,factor){
+  if(run?.runType==='center'&&factor.type==='numeric')return 0;
+  const value=String(run?.settings?.[factor.id]??'');
+  if(value===String(factor.low))return -1;
+  if(value===String(factor.high))return 1;
+  return null;
+}
+function doeModelRow(run,factors,terms){
+  const codes={};
+  for(const factor of factors){
+    const code=encodedRunFactor(run,factor);
+    if(!Number.isFinite(code))return null;
+    codes[factor.id]=code;
+  }
+  return terms.map(term=>term.type==='intercept'?1:term.factorIds.reduce((value,id)=>value*codes[id],1));
+}
+function solveLeastSquaresQr(matrix,response,terms){
+  const n=matrix.length,p=terms.length;
+  const columns=Array.from({length:p},(_,column)=>matrix.map(row=>row[column]));
+  const permutation=Array.from({length:p},(_,index)=>index);
+  const r=Array.from({length:p},()=>Array(p).fill(0));
+  const q=[];
+  const dot=(a,b)=>a.reduce((sum,value,index)=>sum+value*b[index],0);
+  const originalScale=Math.max(1,...columns.map(column=>Math.sqrt(dot(column,column))));
+  const tolerance=Math.max(n,p)*Number.EPSILON*originalScale*100;
+  let rank=0;
+  for(let k=0;k<p;k++){
+    let pivot=k,pivotNorm=-1;
+    for(let j=k;j<p;j++){
+      const norm=dot(columns[j],columns[j]);
+      if(norm>pivotNorm){pivot=j;pivotNorm=norm}
+    }
+    if(pivot!==k){
+      [columns[k],columns[pivot]]=[columns[pivot],columns[k]];
+      [permutation[k],permutation[pivot]]=[permutation[pivot],permutation[k]];
+      for(let i=0;i<k;i++)[r[i][k],r[i][pivot]]=[r[i][pivot],r[i][k]];
+    }
+    const norm=Math.sqrt(Math.max(0,dot(columns[k],columns[k])));
+    if(!(norm>tolerance))break;
+    r[k][k]=norm;
+    const qColumn=columns[k].map(value=>value/norm);
+    q.push(qColumn);
+    for(let j=k+1;j<p;j++){
+      const projection=dot(qColumn,columns[j]);
+      r[k][j]=projection;
+      columns[j]=columns[j].map((value,index)=>value-projection*qColumn[index]);
+    }
+    rank++;
+  }
+  const unestimableTerms=permutation.slice(rank).map(index=>terms[index].label);
+  if(rank<p)return {valid:false,rank,tolerance,coefficients:null,unestimableTerms};
+  const qty=q.map(column=>dot(column,response));
+  const permuted=Array(p).fill(0);
+  for(let i=p-1;i>=0;i--){
+    const remainder=r[i].slice(i+1).reduce((sum,value,j)=>sum+value*permuted[i+1+j],0);
+    permuted[i]=(qty[i]-remainder)/r[i][i];
+  }
+  const coefficients=Array(p).fill(0);
+  permutation.forEach((originalIndex,index)=>{coefficients[originalIndex]=permuted[index]});
+  if(coefficients.some(value=>!Number.isFinite(value)))return {valid:false,rank,tolerance,coefficients:null,unestimableTerms:terms.map(term=>term.label)};
+  return {valid:true,rank,tolerance,coefficients,unestimableTerms:[]};
+}
+function fitDoeRegressionModel(design,factors,options={}){
+  const allTerms=doeModelTerms(design,factors);
+  const excluded=new Set(options.excludeTermKeys||[]);
+  const terms=allTerms.filter(term=>!excluded.has(term.key));
+  const validRuns=[],matrix=[],response=[];
+  (design?.runs||[]).forEach(run=>{
+    if(run?.excluded===true||run?.invalid===true)return;
+    const y=modelResponse(run),row=doeModelRow(run,factors,terms);
+    if(!Number.isFinite(y)||!row)return;
+    validRuns.push(run);matrix.push(row);response.push(y);
+  });
+  if(!terms.length||validRuns.length<terms.length){
+    return {valid:false,terms,coefficients:null,coefficientByKey:{},rank:Math.min(validRuns.length,terms.length),residualDf:Math.max(0,validRuns.length-Math.min(validRuns.length,terms.length)),fittedValues:[],residuals:[],sse:null,ssr:null,sst:null,validRuns,unestimableTerms:terms.slice(validRuns.length).map(term=>term.label),reason:statUiText('The DOE model cannot be estimated because there are fewer valid runs than model terms.','有效运行数少于模型项数量，DOE模型无法估计。')};
+  }
+  const solved=solveLeastSquaresQr(matrix,response,terms);
+  if(!solved.valid){
+    return {valid:false,terms,coefficients:null,coefficientByKey:{},rank:solved.rank,residualDf:Math.max(0,validRuns.length-solved.rank),fittedValues:[],residuals:[],sse:null,ssr:null,sst:null,validRuns,unestimableTerms:solved.unestimableTerms,reason:statUiText(`The DOE model matrix is rank deficient. Unestimable terms: ${solved.unestimableTerms.join(', ')||'unknown'}.`,`DOE模型矩阵秩不足。不可估计项：${solved.unestimableTerms.join('、')||'未知'}。`)};
+  }
+  const fittedValues=matrix.map(row=>row.reduce((sum,value,index)=>sum+value*solved.coefficients[index],0));
+  const residuals=response.map((value,index)=>value-fittedValues[index]);
+  const mean=statMean(response);
+  const sse=residuals.reduce((sum,value)=>sum+value**2,0);
+  const sst=response.reduce((sum,value)=>sum+(value-mean)**2,0);
+  const coefficientByKey=Object.fromEntries(terms.map((term,index)=>[term.key,solved.coefficients[index]]));
+  return {
+    valid:true,terms,coefficients:solved.coefficients,coefficientByKey,rank:solved.rank,
+    residualDf:validRuns.length-solved.rank,fittedValues,residuals,sse,
+    ssr:Math.max(0,sst-sse),sst,validRuns,response,matrix,unestimableTerms:[],reason:''
+  };
+}
+function predictDoeRegressionModel(model,settings,factors,runType='factorial'){
+  if(!model?.valid)return null;
+  const settingMap=Array.isArray(settings)?Object.fromEntries(settings.map(item=>[item.factor,item.value])):{...(settings||{})};
+  const runSettings={};
+  factors.forEach(factor=>{runSettings[factor.id]=settingMap[factor.id]??settingMap[factor.name]});
+  const row=doeModelRow({settings:runSettings,runType},factors,model.terms);
+  if(!row)return null;
+  const prediction=row.reduce((sum,value,index)=>sum+value*model.coefficients[index],0);
+  return Number.isFinite(prediction)?prediction:null;
+}
+function measurementCountWarning(design){
+  const counts=(design?.runs||[])
+    .filter(run=>run?.excluded!==true&&run?.invalid!==true&&Number.isFinite(modelResponse(run)))
+    .map(run=>run.responseCount);
+  const unique=[...new Set(counts)];
+  if(unique.length<2)return null;
+  return statUiText(
+    'The number of valid measurements differs across experimental runs. The model currently gives equal weight to each run mean. For more consistent comparison, keep the number of measurements per run as uniform as practical.',
+    '不同试验运行的有效测量数量不一致。当前模型仍按每个 Run 的平均响应值等权建模。为便于比较各试验条件，建议尽量保持每个 Run 的测量数量一致。'
+  );
+}
+function buildDoeTemplateRows(design,factors,language='en',responseName='Response',target=''){
+  const runs=(design?.runs||[]).map(run=>ensureRunResponseSummary(run));
+  const responseColumns=Math.max(3,...runs.map(run=>run.rawResponses.length));
+  const zh=language==='zh';
+  const headers=[
+    zh?'运行ID':'Run ID',zh?'试验序号':'Run Order',
+    zh?'标准序':'Std. Order',
+    ...factors.map(factor=>zh?`因子名称：${factor.name}`:`Factor: ${factor.name}`),
+    zh?'运行类型':'Run Type',
+    ...Array.from({length:responseColumns},(_,index)=>`${zh?'响应值':'Response'}_${index+1}`),
+    'N',zh?'均值':'Mean',zh?'标准差':'Standard Deviation',zh?'最小值':'Min',zh?'最大值':'Max',zh?'极差':'Range',
+    zh?'目标值':'Target',zh?'中心点':'Center Point',zh?'重复试验':'Independent Replicate',zh?'重复来源':'Replicate Of'
+  ];
+  const rows=[headers];
+  runs.forEach(run=>{
+    const raw=Array.from({length:responseColumns},(_,index)=>run.rawResponses[index]??'');
+    rows.push([
+      run.id,run.runOrder,run.standardOrder,...factors.map(factor=>run.settings[factor.id]),run.runType,
+      ...raw,run.responseCount,run.responseMean??'',run.responseStdDev??'',run.responseMin??'',run.responseMax??'',run.responseRange??'',
+      target,run.runType==='center'?(zh?'是':'Yes'):'',run.runType==='replicate'?(zh?'是':'Yes'):'',run.replicateOf||''
+    ]);
+  });
+  return rows;
+}
+function encodeCsvWithBom(rows){
+  const csv=rows.map(row=>row.map(value=>`"${String(value??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  return '\uFEFF'+csv;
+}
 function validateDOEDataDetailed(design,factors){
   const result={valid:false,errors:[],warnings:[],metrics:{}};
   if(!design){result.errors.push(statUiText('No DOE design has been generated.','尚未生成DOE设计。'));return result}
@@ -4255,11 +4494,14 @@ function validateDOEDataDetailed(design,factors){
       if(standardOrders.has(Number(run.standardOrder)))result.warnings.push(statUiText(`Standard order ${run.standardOrder} appears more than once; treated as replication if factor levels match.`,`标准顺序 ${run.standardOrder} 出现多次；如果因素水平匹配，则按重复处理。`));
       standardOrders.set(Number(run.standardOrder),true);
     }
-    if(run.response==null || run.response==='')missingResponses++;
-    else if(!Number.isFinite(Number(run.response)))invalidResponses++;
+    ensureRunResponseSummary(run);
+    if(run.responseCount===0)missingResponses++;
+    if(run.invalidResponseCount)invalidResponses+=run.invalidResponseCount;
     factors.forEach(f=>{
       const value=String(run.settings?.[f.id]??'').trim();
-      if(value!==String(f.low).trim() && value!==String(f.high).trim())invalidLevels++;
+      const center=typeof centerLevelValue==='function'?centerLevelValue(f):null;
+      const allowed=value===String(f.low).trim()||value===String(f.high).trim()||(run.runType==='center'&&center!=null&&value===String(center).trim());
+      if(!allowed)invalidLevels++;
     });
     const key=combinationKeyFromRun(run,factors);
     comboCounts.set(key,(comboCounts.get(key)||0)+1);
@@ -4273,37 +4515,39 @@ function validateDOEDataDetailed(design,factors){
   if(invalidLevels)result.errors.push(statUiText(`${invalidLevels} factor level value(s) do not match the defined low/high levels.`,`${invalidLevels} 个因素水平值与定义的低/高水平不匹配。`));
   if(missingKeys.length)result.errors.push(statUiText(`${missingKeys.length} expected design combination(s) are missing.`,`${missingKeys.length} 个预期设计组合缺失。`));
   if(design.type==='full_factorial' && replicateCounts.length && !balancedReplicates)result.warnings.push(statUiText('Replicate counts are not balanced across all factor combinations.','各因素组合的重复次数不平衡。'));
+  const countWarning=measurementCountWarning(design);
+  if(countWarning)result.warnings.push(countWarning);
   result.metrics={
     runCount:runs.length,
-    expectedRunCount:design.type==='full_factorial'?2**factors.length:8,
+    expectedRunCount:runs.length,
+    expectedBaseRunCount:design.type==='full_factorial'?2**factors.length:8,
     missingResponses,
     invalidResponses,
     invalidLevels,
     duplicateCombinations:replicateCounts.length,
     maxReplicates:allCounts.length?Math.max(...allCounts):0,
     missingRuns:missingKeys.length,
-    balancedReplicates
+    balancedReplicates,
+    unequalMeasurementCounts:Boolean(countWarning)
   };
   result.valid=result.errors.length===0;
   return result;
 }
-function computeFullFactorialAnova(design,factors){
+function computeFullFactorialAnova(design,factors,fittedModel=null){
   const validation=validateDOEDataDetailed(design,factors);
   if(!validation.valid)return {valid:false,reason:validation.errors.join(' ')};
-  if(design.type!=='full_factorial')return {valid:false,reason:statUiText('ANOVA significance is disabled for screening designs because effects may be aliased/confounded.','筛选设计中效应可能存在混杂，因此不启用ANOVA显著性。')};
-  const runs=design.runs.map(run=>({...run,response:Number(run.response)}));
-  const n=runs.length,grandMean=statMean(runs.map(run=>run.response));
-  const totalSS=runs.reduce((sum,run)=>sum+(run.response-grandMean)**2,0);
+  const model=fittedModel?.valid?fittedModel:fitDoeRegressionModel(design,factors);
+  if(design.type!=='full_factorial')return {valid:false,reason:statUiText('ANOVA significance is disabled for screening designs because effects may be aliased/confounded.','筛选设计中效应可能存在混杂，因此不启用ANOVA显著性。'),model,total:{term:'Total',df:model.validRuns.length-1,ss:model.sst,ms:null},residual:{term:'Residual',df:model.residualDf,ss:model.sse,ms:model.residualDf>0?model.sse/model.residualDf:null}};
+  if(!model.valid)return {valid:false,reason:model.reason,model};
+  const runs=model.validRuns.map(run=>({...run,response:modelResponse(run)}));
   const factorRows=factors.map(f=>{
-    const low=runs.filter(run=>String(run.settings[f.id])===String(f.low)).map(run=>run.response);
-    const high=runs.filter(run=>String(run.settings[f.id])===String(f.high)).map(run=>run.response);
-    const lowMean=statMean(low),highMean=statMean(high);
-    const ss=(low.length*(lowMean-grandMean)**2)+(high.length*(highMean-grandMean)**2);
-    return {term:f.name,df:1,ss,ms:ss,effect:highMean-lowMean,coefficient:(highMean-lowMean)/2};
+    const key=`main:${f.id}`;
+    const reduced=fitDoeRegressionModel(design,factors,{excludeTermKeys:[key]});
+    const df=reduced.valid?Math.max(1,model.rank-reduced.rank):1;
+    const ss=reduced.valid?Math.max(0,reduced.sse-model.sse):0;
+    const coefficient=model.coefficientByKey[key];
+    return {term:f.name,df,ss,ms:ss/df,effect:2*coefficient,coefficient};
   });
-  const factorSS=factorRows.reduce((sum,row)=>sum+row.ss,0);
-  const residualSS=Math.max(0,totalSS-factorSS);
-  const residualDf=n-factors.length-1;
   const groups=new Map();
   runs.forEach(run=>{
     const key=combinationKeyFromRun(run,factors);
@@ -4311,8 +4555,8 @@ function computeFullFactorialAnova(design,factors){
     groups.get(key).push(run.response);
   });
   const pureError=statVarianceWithinGroups([...groups.values()]);
-  const lackOfFitSS=Math.max(0,residualSS-pureError.ss);
-  const lackOfFitDf=Math.max(0,residualDf-pureError.df);
+  const lackOfFitSS=Math.max(0,model.sse-pureError.ss);
+  const lackOfFitDf=Math.max(0,model.residualDf-pureError.df);
   const mse=pureError.df>0&&pureError.ms>0?pureError.ms:null;
   const valid=Boolean(mse);
   const pReason=valid?'':'Descriptive analysis only. Statistical significance cannot be estimated due to insufficient error estimation.';
@@ -4324,10 +4568,11 @@ function computeFullFactorialAnova(design,factors){
     valid,
     reason:pReason,
     rows:factorRows,
-    residual:{term:'Residual',df:residualDf,ss:residualSS,ms:residualDf>0?residualSS/residualDf:null},
+    residual:{term:'Residual',df:model.residualDf,ss:model.sse,ms:model.residualDf>0?model.sse/model.residualDf:null},
     pureError:{term:'Pure Error',df:pureError.df,ss:pureError.ss,ms:pureError.ms},
     lackOfFit:{term:'Lack of Fit / Interactions',df:lackOfFitDf,ss:lackOfFitSS,ms:lackOfFitDf>0?lackOfFitSS/lackOfFitDf:null},
-    total:{term:'Total',df:n-1,ss:totalSS,ms:null},
+    total:{term:'Total',df:runs.length-1,ss:model.sst,ms:null},
+    model,
     validation
   };
 }
@@ -4351,11 +4596,11 @@ const HELP_COPY={
     ],
     workflowTitle:'基本工作流程',
     manualSteps:[
-      ['定义研究目标','填写研究名称、响应名称与单位，并选择最大化或最小化方向。'],
+      ['定义研究目标','填写研究名称、响应名称与单位，并选择最大化、最小化或接近目标值。选择接近目标值时必须填写有效目标值。'],
       ['选择或加载示例','可从空白研究开始，也可加载示例研究了解完整操作路径。'],
       ['定义因素与水平','为每个因素设置清晰、可执行且安全的低水平和高水平。'],
       ['生成实验设计','检查策略后生成设计矩阵；因素水平来自当前研究定义。'],
-      ['执行实验并录入响应','按运行顺序完成实验，逐行录入数值响应，或使用现有 CSV 模板导入。'],
+      ['执行实验并录入响应','按运行顺序完成实验；每个运行可录入多个单点响应，或使用包含响应值_1、响应值_2、响应值_3 的 CSV 模板导入。'],
       ['分析效应','完成数据检查后运行分析，查看主效应、效应排序和最佳已观察运行。'],
       ['审阅建议','区分测量结果、模型预测和工程决策，并检查证据限制。'],
       ['导出报告','预览完整报告后打印或导出 PDF；需要时同时保留 CSV 原始数据。']
@@ -4367,7 +4612,7 @@ const HELP_COPY={
     ],
     dataTitle:'数据录入规则',
     manualData:[
-      '每次运行填写一个数值响应，并在整个研究中保持单位一致。',
+      '每次运行可填写一个或多个单点响应；工具计算运行内均值和标准差，并默认使用每个运行的均值建模。',
       '实际因素设定应与定义的低水平或高水平一致。',
       '避免缺失响应、重复运行序号或非数值内容。',
       '按随机运行顺序执行可降低时间趋势和其他潜在偏差。',
@@ -4427,11 +4672,11 @@ const HELP_COPY={
     ],
     workflowTitle:'Basic workflow',
     manualSteps:[
-      ['Define the study objective','Enter the study name, response and unit, then choose whether to maximize or minimize it.'],
+      ['Define the study objective','Enter the study name, response and unit, then choose Maximize, Minimize, or Approach Target. Approach Target requires a valid target value.'],
       ['Select or load an example','Start with a manual study or load an example to review the complete operating path.'],
       ['Define factors and levels','Set a clear, practical, and safe low and high level for every factor.'],
       ['Generate the design','Review the strategy and generate the design matrix from the current factor definitions.'],
-      ['Run the experiment and enter responses','Execute in run order and enter one numeric response per row, or use the existing CSV template.'],
+      ['Run the experiment and enter responses','Execute in run order and enter one or more individual measurements per row, or use the CSV template with Response_1, Response_2, and Response_3 columns.'],
       ['Analyze effects','After data checks pass, review main effects, effect ranking, and the best observed run.'],
       ['Review the recommendation','Separate measured results, model prediction, and engineering decision, then check evidence limitations.'],
       ['Export the report','Preview the complete report and print or export PDF; retain the CSV data when needed.']
@@ -4443,7 +4688,7 @@ const HELP_COPY={
     ],
     dataTitle:'Data entry rules',
     manualData:[
-      'Enter one numeric response for every run and use a consistent unit throughout the study.',
+      'Enter one or more individual numeric measurements per run. The tool calculates within-run statistics and models the run mean by default.',
       'Actual factor settings should match the defined low or high levels.',
       'Avoid missing responses, duplicate run numbers, and nonnumeric response content.',
       'Follow randomized run order to reduce the influence of time trends and other potential bias.',
@@ -4555,7 +4800,7 @@ function renderLanguage(){
   ['wf1','wf2','wf3','wf4','wf5'].forEach(id=>$(id+'Main').textContent=t(id));
   $('planTitle').textContent=t('planTitle'); $('planDesc').textContent=t('planDesc');
   $('projectLabel').textContent=t('project'); $('responseLabel').textContent=t('response'); $('unitLabel').textContent=t('unit'); $('objectiveLabel').textContent=t('objective');
-  $('objective').options[0].textContent=t('maximize'); $('objective').options[1].textContent=t('minimize');
+  $('objective').options[0].textContent=t('maximize'); $('objective').options[1].textContent=t('minimize'); $('objective').options[2].textContent=t('targetObjective');
   $('factorHeading').textContent=t('factorHeading'); $('addFactorBtn').textContent=t('addFactor');
   $('thFactor').textContent=t('factor'); $('thType').textContent=t('type'); $('thLow').textContent=t('low'); $('thHigh').textContent=t('high'); $('thAction').textContent=t('action');
   $('planNote').textContent=t('planNote'); $('generateBtn').textContent=t('generate');
@@ -4564,6 +4809,7 @@ function renderLanguage(){
   $('designTypeK').textContent=t('designType'); $('factorCountK').textContent=t('factorCount'); $('runCountK').textContent=t('runCount'); $('orderK').textContent=t('order'); $('designTypeS').textContent=t('auto');
   $('screeningWarning').textContent=t('screeningWarning');
   $('runTitle').textContent=t('runTitle'); $('runDesc').textContent=t('runDesc'); $('runEmpty').textContent=t('runEmpty'); $('fillResponsesBtn').textContent=t('fill'); $('analyzeBtn').textContent=t('analyze');
+  $('responseModelingNote').textContent=t('modelUsesMean');
   $('resultsTitle').textContent=t('resultsTitle'); $('resultsDesc').textContent=t('resultsDesc'); $('resultsEmpty').textContent=t('resultsEmpty');
   $('largestK').textContent=t('largest'); $('bestRunK').textContent=t('bestRun'); $('objectiveK').textContent=t('objective'); $('completeK').textContent=t('completeRuns');
   $('mainEffectsChartTitle').textContent=t('mainChart'); $('mainEffectsChartDesc').textContent=t('mainChartDesc');
@@ -4697,9 +4943,50 @@ function validatePlan(show=true){
   if(state.factors.length<2||state.factors.length>6){if(show)alert(t('invalidCount'));return false}
   if(!state.factors.every(f=>f.name.trim()&&String(f.low).trim()&&String(f.high).trim())){if(show)alert(t('missingFields'));return false}
   if(state.factors.some(f=>String(f.low).trim()===String(f.high).trim())){if(show)alert(t('sameLevels'));return false}
+  if($('objective').value==='target'&&parseEngineeringNumber($('responseTarget').value)==null){if(show)alert(state.lang==='zh'?'“接近目标值”模式需要有效的目标值。':'Approach Target mode requires a valid Target.');return false}
   return true;
 }
 function cartesian(arrs){return arrs.reduce((a,c)=>a.flatMap(x=>c.map(y=>[...x,y])),[[]])}
+function dispersedReplicateIndexes(cornerCount,replicateCount){
+  if(cornerCount<=0||replicateCount<=0)return [];
+  const cycle=[];
+  for(let left=0,right=cornerCount-1;left<=right;left++,right--){
+    cycle.push(left);
+    if(right!==left)cycle.push(right);
+  }
+  return Array.from({length:replicateCount},(_,index)=>cycle[index%cycle.length]);
+}
+function buildDesignRuns(combos,factors,enhancement=null){
+  const runs=combos.map((combo,index)=>makeRunRecord({
+    id:`run_${index+1}`,
+    standardOrder:index+1,
+    runOrder:index+1,
+    settings:Object.fromEntries(combo.map((value,factorIndex)=>[factors[factorIndex].id,value])),
+    runType:'factorial'
+  }));
+  if(!enhancement?.canEnhance)return runs;
+  const centerSettings=centerPointSettings(factors);
+  if(centerSettings){
+    for(let index=0;index<enhancement.centerPoints;index++){
+      const order=runs.length+1;
+      runs.push(makeRunRecord({id:`run_${order}`,standardOrder:order,runOrder:order,settings:{...centerSettings},runType:'center'}));
+    }
+  }
+  const replicateIndexes=dispersedReplicateIndexes(combos.length,enhancement.independentReplicates);
+  for(let index=0;index<enhancement.independentReplicates;index++){
+    const base=runs[replicateIndexes[index]];
+    const order=runs.length+1;
+    runs.push(makeRunRecord({
+      id:`run_${order}`,
+      standardOrder:order,
+      runOrder:order,
+      settings:{...base.settings},
+      runType:'replicate',
+      replicateOf:base.id
+    }));
+  }
+  return runs;
+}
 
 function generate(){
   if(!validatePlan())return;
@@ -4719,11 +5006,15 @@ function generate(){
     ];
     combos=m.map(r=>state.factors.map((f,i)=>r[i]===-1?f.low:f.high));
   }
-  state.design={type,runs:combos.map((c,i)=>({
-    id:'run_'+(i+1),standardOrder:i+1,runOrder:i+1,
-    settings:Object.fromEntries(c.map((v,j)=>[state.factors[j].id,v])),
-    response:null
-  }))};
+  const useEnhancement=state.designPlanMode==='enhanced'&&type==='full_factorial';
+  const enhancement=useEnhancement?state.strategyAssessment?.enhancement:null;
+  state.design={
+    type,
+    planMode:useEnhancement&&enhancement?.canEnhance?'enhanced':'base',
+    baseRunCount:combos.length,
+    enhancement:useEnhancement?enhancement:null,
+    runs:buildDesignRuns(combos,state.factors,enhancement)
+  };
   state.randomized=false;state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;
   invalidateChartInterpretations();
   renderDesign();renderRun();updateStatus();
@@ -4731,6 +5022,14 @@ function generate(){
   showWorkflowStep('design');
 }
 
+function runTypeLabel(runType){
+  const labels={
+    factorial:{zh:'基础因子运行',en:'Factorial'},
+    center:{zh:'中心点',en:'Center Point'},
+    replicate:{zh:'独立重复试验',en:'Independent Replicate'}
+  };
+  return labels[runType]?.[state.lang]||runType||labels.factorial[state.lang];
+}
 function renderDesign(){
   if(!state.design){$('designEmpty').classList.remove('hidden');$('designContent').classList.add('hidden');return}
   $('designEmpty').classList.add('hidden');$('designContent').classList.remove('hidden');
@@ -4739,24 +5038,59 @@ function renderDesign(){
   $('orderV').textContent=state.randomized?t('randomized'):t('standard');
   $('screeningWarning').classList.toggle('hidden',state.design.type!=='screening_8_run');
   const runs=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
-  $('designHead').innerHTML='<tr><th>'+t('run')+'</th><th>'+t('stdOrder')+'</th>'+state.factors.map(f=>'<th>'+esc(f.name)+'</th>').join('')+'</tr>';
-  $('designBody').innerHTML=runs.map(r=>'<tr><td>'+r.runOrder+'</td><td>'+r.standardOrder+'</td>'+state.factors.map(f=>'<td>'+esc(r.settings[f.id])+'</td>').join('')+'</tr>').join('');
+  $('designHead').innerHTML='<tr><th>'+t('run')+'</th><th>'+t('stdOrder')+'</th><th>'+t('runType')+'</th>'+state.factors.map(f=>'<th>'+esc(f.name)+'</th>').join('')+'</tr>';
+  $('designBody').innerHTML=runs.map(r=>'<tr><td>'+r.runOrder+'</td><td>'+r.standardOrder+'</td><td>'+esc(runTypeLabel(r.runType))+'</td>'+state.factors.map(f=>'<td>'+esc(r.settings[f.id])+'</td>').join('')+'</tr>').join('');
 }
 
 function renderRun({refreshStatus=true}={}){
   if(!state.design){$('runEmpty').classList.remove('hidden');$('runContent').classList.add('hidden');return}
   $('runEmpty').classList.add('hidden');$('runContent').classList.remove('hidden');
   const runs=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
-  $('runHead').innerHTML='<tr><th>'+t('run')+'</th><th>'+t('stdOrder')+'</th>'+state.factors.map(f=>'<th>'+esc(f.name)+'</th>').join('')+'<th>'+esc($('responseName').value||t('responseValue'))+'</th></tr>';
-  $('runBody').innerHTML=runs.map(r=>'<tr><td>'+r.runOrder+'</td><td>'+r.standardOrder+'</td>'+state.factors.map(f=>'<td>'+esc(r.settings[f.id])+'</td>').join('')+`<td><input type="number" step="any" data-response="${r.id}" value="${r.response??''}" placeholder="${t('responseValue')}"></td></tr>`).join('');
-  $('runBody').querySelectorAll('[data-response]').forEach(inp=>inp.addEventListener('input',e=>{
-    const r=state.design.runs.find(x=>x.id===e.target.dataset.response);
-    r.response=e.target.value===''?null:Number(e.target.value);
-    state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;$('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
-    invalidateChartInterpretations({render:false});
-    updateStatus({refreshLanguage:false,showStep:false});
+  runs.forEach(ensureRunResponseSummary);
+  $('responseModelingNote').textContent=t('modelUsesMean');
+  $('runHead').innerHTML='<tr><th>'+t('run')+'</th><th>'+t('stdOrder')+'</th><th>'+t('runType')+'</th>'+state.factors.map(f=>'<th>'+esc(f.name)+'</th>').join('')+'<th>'+t('responseSamples')+'</th><th>'+t('responseCount')+'</th><th>'+t('responseMean')+'</th><th>'+t('responseStdDev')+'</th><th>'+t('responseMin')+'</th><th>'+t('responseMax')+'</th><th>'+t('responseRange')+'</th></tr>';
+  $('runBody').innerHTML=runs.map(run=>{
+    const inputs=run.rawResponses.map((value,index)=>`<div class="response-entry-row"><input inputmode="decimal" data-response="${run.id}" data-response-run="${run.id}" data-response-index="${index}" value="${esc(value??'')}" placeholder="${t('responseValue')} ${index+1}"><button type="button" class="btn btn-ghost row-btn" data-remove-response="${run.id}" data-response-index="${index}" aria-label="${t('removeMeasurement')}" ${run.rawResponses.length<=1?'disabled':''}>−</button></div>`).join('');
+    return '<tr><td>'+run.runOrder+'</td><td>'+run.standardOrder+'</td><td>'+esc(runTypeLabel(run.runType))+'</td>'+state.factors.map(f=>'<td>'+esc(run.settings[f.id])+'</td>').join('')+`<td><div class="response-entry-list">${inputs}<button type="button" class="btn btn-secondary response-add-btn" data-add-response="${run.id}">${t('addMeasurement')}</button></div></td><td class="response-stat" data-run-stat="count" data-run-id="${run.id}">${run.responseCount}</td><td class="response-stat" data-run-stat="mean" data-run-id="${run.id}">${formatResponseStat(run.responseMean)}</td><td class="response-stat" data-run-stat="stdDev" data-run-id="${run.id}">${formatResponseStat(run.responseStdDev)}</td><td class="response-stat" data-run-stat="min" data-run-id="${run.id}">${formatResponseStat(run.responseMin)}</td><td class="response-stat" data-run-stat="max" data-run-id="${run.id}">${formatResponseStat(run.responseMax)}</td><td class="response-stat" data-run-stat="range" data-run-id="${run.id}">${formatResponseStat(run.responseRange)}</td></tr>`;
+  }).join('');
+  $('runBody').querySelectorAll('[data-response-run]').forEach(input=>input.addEventListener('input',event=>{
+    const run=state.design.runs.find(item=>item.id===event.target.dataset.responseRun);
+    if(!run)return;
+    run.rawResponses[Number(event.target.dataset.responseIndex)]=event.target.value;
+    ensureRunResponseSummary(run);
+    updateRunSummaryCells(run);
+    invalidateAnalysisForResponseChange();
+  }));
+  $('runBody').querySelectorAll('[data-add-response]').forEach(button=>button.addEventListener('click',()=>{
+    const run=state.design.runs.find(item=>item.id===button.dataset.addResponse);
+    if(!run)return;
+    ensureRunResponseSummary(run);
+    run.rawResponses.push('');
+    renderRun();
+  }));
+  $('runBody').querySelectorAll('[data-remove-response]').forEach(button=>button.addEventListener('click',()=>{
+    const run=state.design.runs.find(item=>item.id===button.dataset.removeResponse);
+    if(!run||run.rawResponses.length<=1)return;
+    run.rawResponses.splice(Number(button.dataset.responseIndex),1);
+    ensureRunResponseSummary(run);
+    invalidateAnalysisForResponseChange();
+    renderRun();
   }));
   if(refreshStatus)updateStatus();
+}
+function formatResponseStat(value){return Number.isFinite(value)?fmt(value):'—'}
+function updateRunSummaryCells(run){
+  const values={count:run.responseCount,mean:run.responseMean,stdDev:run.responseStdDev,min:run.responseMin,max:run.responseMax,range:run.responseRange};
+  Object.entries(values).forEach(([key,value])=>{
+    const cell=$('runBody').querySelector(`[data-run-stat="${key}"][data-run-id="${run.id}"]`);
+    if(cell)cell.textContent=key==='count'?String(value):formatResponseStat(value);
+  });
+}
+function invalidateAnalysisForResponseChange(){
+  state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;
+  $('resultsContent').classList.add('hidden');$('resultsEmpty').classList.remove('hidden');
+  invalidateChartInterpretations({render:false});
+  updateStatus({refreshLanguage:false,showStep:false});
 }
 
 function randomize(){
@@ -4784,19 +5118,23 @@ function fillDemoResponses(){
       if(high)y+=weights[i]||.5;
     });
     y+=(r.standardOrder%3-1)*.7;
-    r.response=Number(y.toFixed(2));
+    setRunResponses(r,[Number(y.toFixed(2))]);
   });
   state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;invalidateChartInterpretations({render:false});renderRun({refreshStatus:false});updateStatus({refreshLanguage:false,showStep:false});
 }
 
-function computeEffects(){
+function computeEffects(fittedModel=null){
   const rs=state.design.runs;
+  const model=fittedModel?.valid?fittedModel:fitDoeRegressionModel(state.design,state.factors);
+  if(!model.valid)return [];
+  const intercept=model.coefficientByKey.intercept;
   return state.factors.map(f=>{
-    const lo=rs.filter(r=>String(r.settings[f.id])===String(f.low)).map(r=>r.response);
-    const hi=rs.filter(r=>String(r.settings[f.id])===String(f.high)).map(r=>r.response);
+    const lo=rs.filter(r=>String(r.settings[f.id])===String(f.low)).map(modelResponse).filter(Number.isFinite);
+    const hi=rs.filter(r=>String(r.settings[f.id])===String(f.high)).map(modelResponse).filter(Number.isFinite);
     const avg=a=>a.reduce((s,v)=>s+v,0)/a.length;
-    const averageLow=avg(lo),averageHigh=avg(hi),effect=averageHigh-averageLow;
-    return{factor:f,averageLow,averageHigh,effect,abs:Math.abs(effect)}
+    const coefficient=model.coefficientByKey[`main:${f.id}`];
+    const averageLow=intercept-coefficient,averageHigh=intercept+coefficient,effect=2*coefficient;
+    return{factor:f,averageLow,averageHigh,effect,abs:Math.abs(effect),coefficient,observedLow:lo.length?avg(lo):null,observedHigh:hi.length?avg(hi):null}
   });
 }
 
@@ -4806,6 +5144,15 @@ function localText(value){
 }
 function preferred(e,obj){
   if(Math.abs(e.effect)<1e-12)return{label:t('noDifference'),value:e.factor.low,meaning:t('noObserved')};
+  if(obj==='target'){
+    const target=parseEngineeringNumber(state.study?.target??$('responseTarget')?.value);
+    if(target!=null){
+      const high=Math.abs(e.averageHigh-target)<Math.abs(e.averageLow-target);
+      return high
+        ? {label:t('highLevel'),value:e.factor.high,meaning:state.lang==='zh'?'该水平的端点均值更接近目标值':'This endpoint mean is closer to the target'}
+        : {label:t('lowLevel'),value:e.factor.low,meaning:state.lang==='zh'?'该水平的端点均值更接近目标值':'This endpoint mean is closer to the target'};
+    }
+  }
   const high=obj==='maximize'?e.effect>0:e.effect<0;
   return high?{label:t('highLevel'),value:e.factor.high,meaning:t('highBetter')}:{label:t('lowLevel'),value:e.factor.low,meaning:t('lowBetter')};
 }
@@ -4837,6 +5184,27 @@ function parseEngineeringNumber(value){
   if(value==null||String(value).trim()==='')return null;
   const match=String(value).replace(',', '').match(/-?\d+(?:\.\d+)?/);
   return match?Number(match[0]):null;
+}
+function parseLevelForCenter(value){
+  const raw=String(value??'').trim();
+  const match=raw.match(/^(.*?)(-?\d+(?:\.\d+)?)(.*)$/);
+  if(!match)return null;
+  const number=Number(match[2]);
+  return Number.isFinite(number)?{prefix:match[1],number,suffix:match[3]}:null;
+}
+function centerLevelValue(factor){
+  if(!factor||factor.type!=='numeric')return null;
+  const low=parseLevelForCenter(factor.low),high=parseLevelForCenter(factor.high);
+  if(!low||!high||low.number===high.number||low.prefix!==high.prefix||low.suffix!==high.suffix)return null;
+  const midpoint=(low.number+high.number)/2;
+  const rounded=Number(midpoint.toFixed(6));
+  return `${low.prefix}${rounded}${low.suffix}`;
+}
+function centerPointSettings(factors){
+  if(!Array.isArray(factors)||!factors.length)return null;
+  const pairs=factors.map(factor=>[factor.id,centerLevelValue(factor)]);
+  if(pairs.some(([,value])=>value==null))return null;
+  return Object.fromEntries(pairs);
 }
 function constraintCheck(settings,factors){
   const rows=settings.map(setting=>{
@@ -4872,6 +5240,18 @@ function targetCheck(predicted,targetValue,objective){
   const target=parseEngineeringNumber(targetValue);
   if(target==null)return {status:'NOT SET',message:'No engineering response target defined.',target:null,predicted};
   if(!Number.isFinite(predicted))return {status:'FAIL',message:'Predicted response is unavailable for target verification.',target,predicted};
+  if(objective==='target'){
+    const deviation=predicted-target;
+    const pass=Math.abs(deviation)<=1e-9;
+    return {
+      status:pass?'PASS':'REVIEW',
+      message:pass?'Predicted response matches the target.':'This is the closest tested-region prediction; define an engineering tolerance to determine target acceptance.',
+      target,
+      predicted,
+      deviation,
+      squaredDeviation:deviation**2
+    };
+  }
   const pass=objective==='maximize'?predicted>=target:predicted<=target;
   return {
     status:pass?'PASS':'FAIL',
@@ -4902,26 +5282,31 @@ function buildGovernance(decision,validation,confirmationStatus='Pending'){
   const constraints=constraintCheck(decision.settings,state.factors);
   const target=targetCheck(decision.predicted,state.study.target,$('objective').value);
   const checklist={
-    experimentCompleted:Boolean(state.design?.runs?.length&&state.design.runs.every(run=>Number.isFinite(run.response))),
+    experimentCompleted:Boolean(state.design?.runs?.length&&state.design.runs.every(run=>Number.isFinite(modelResponse(run)))),
     dataValidated:Boolean(validation.valid),
     keyFactorsIdentified:Boolean(decision.keyFactor),
     evidenceAvailable:Boolean(state.analyzed&&decision.confidence),
     constraintPassed:constraints.status!=='FAILED',
-    targetAchieved:target.status==='PASS'||target.status==='NOT SET',
+    targetAchieved:target.status==='PASS'||(target.status==='NOT SET'&&$('objective').value!=='target'),
     confirmationStatus
   };
   return {constraints,target,readiness:implementationReadinessGate(checklist),checklist};
 }
 function modelBasisLabel(){
   if(!state.design)return state.lang==='zh'?'DOE模型不可用':'DOE model unavailable';
-  if(state.lang==='zh')return state.design.type==='full_factorial'?'全因子一阶编码模型':'8次筛选主效应模型';
-  return state.design.type==='full_factorial'?'Full Factorial First-Order Coded Model':'8-Run Screening Main-Effect Model';
+  if(state.lang==='zh')return state.design.type==='full_factorial'?'基于运行均值的全因子一阶编码模型':'基于运行均值的8次筛选主效应模型';
+  return state.design.type==='full_factorial'?'Full Factorial First-Order Coded Model Using Run Means':'8-Run Screening Main-Effect Model Using Run Means';
 }
 function cloneSettings(settings){
   return settings.map(item=>({factor:item.factor,value:item.value,label:item.label}));
 }
 function bestMeasuredRun(runs,objective){
-  const sorted=[...runs].filter(run=>Number.isFinite(run.response)).sort((a,b)=>objective==='maximize'?b.response-a.response:a.response-b.response);
+  const target=parseEngineeringNumber(state.study?.target??$('responseTarget')?.value);
+  const sorted=[...runs].filter(run=>Number.isFinite(modelResponse(run))).sort((a,b)=>{
+    const av=modelResponse(a),bv=modelResponse(b);
+    if(objective==='target'&&target!=null)return Math.abs(av-target)-Math.abs(bv-target);
+    return objective==='maximize'?bv-av:av-bv;
+  });
   const best=sorted[0]||null;
   if(!best)return null;
   const replicateCount=runs.filter(run=>combinationKeyFromRun(run,state.factors)===combinationKeyFromRun(best,state.factors)).length;
@@ -4930,7 +5315,7 @@ function bestMeasuredRun(runs,objective){
     runId:best.runOrder,
     standardOrder:best.standardOrder,
     settings:Object.fromEntries(state.factors.map(f=>[f.name,best.settings[f.id]])),
-    response:best.response,
+    response:modelResponse(best),
     replicateCount
   };
 }
@@ -4957,7 +5342,7 @@ function buildEvidenceSeparation(effects,decision,governance,confirmationGateRes
     decision:engineeringDecision.recommendation,
     measuredResult:measured?`${measured.response} ${$('responseUnit').value||''} at run ${measured.runId}`:'No measured result available',
     modelPrediction:Number.isFinite(model.predictedResponse)?`${model.predictedResponse} ${$('responseUnit').value||''}`:'Prediction unavailable',
-    target:governance.target.target==null?'Not set':`${$('objective').value==='maximize'?'≥':'≤'} ${governance.target.target} ${$('responseUnit').value||''} (${governance.target.status})`,
+    target:governance.target.target==null?'Not set':`${$('objective').value==='target'?'≈':$('objective').value==='maximize'?'≥':'≤'} ${governance.target.target} ${$('responseUnit').value||''} (${governance.target.status})`,
     constraint:`${governance.constraints.status}: ${governance.constraints.message}`,
     confirmation:confirmationGateResult?.status||'Pending',
     finalStatus:governance.readiness.status,
@@ -4965,7 +5350,7 @@ function buildEvidenceSeparation(effects,decision,governance,confirmationGateRes
   };
   return {measured,model,engineeringDecision,trace};
 }
-function improvementCalculation(baselineMean,improvedMean,baselineStd,improvedStd,objective='maximize'){
+function improvementCalculation(baselineMean,improvedMean,baselineStd,improvedStd,objective='maximize',targetValue=null){
   const beforeMean=Number(baselineMean),afterMean=Number(improvedMean),beforeStd=Number(baselineStd),afterStd=Number(improvedStd);
   const meanImprovement=Number.isFinite(beforeMean)&&beforeMean!==0&&Number.isFinite(afterMean)
     ? ((afterMean-beforeMean)/Math.abs(beforeMean))*100
@@ -4973,8 +5358,13 @@ function improvementCalculation(baselineMean,improvedMean,baselineStd,improvedSt
   const variationReduction=Number.isFinite(beforeStd)&&beforeStd!==0&&Number.isFinite(afterStd)
     ? ((beforeStd-afterStd)/Math.abs(beforeStd))*100
     : null;
-  const improvementObserved=meanImprovement!=null && (objective==='maximize'?meanImprovement>0:meanImprovement<0);
-  return {baselineMean:beforeMean,improvedMean:afterMean,baselineStd:beforeStd,improvedStd:afterStd,meanImprovement,variationReduction,improvementObserved};
+  const target=parseEngineeringNumber(targetValue);
+  const targetDeviationBefore=objective==='target'&&target!=null&&Number.isFinite(beforeMean)?Math.abs(beforeMean-target):null;
+  const targetDeviationAfter=objective==='target'&&target!=null&&Number.isFinite(afterMean)?Math.abs(afterMean-target):null;
+  const improvementObserved=objective==='target'
+    ? targetDeviationBefore!=null&&targetDeviationAfter!=null&&targetDeviationAfter<targetDeviationBefore
+    : meanImprovement!=null && (objective==='maximize'?meanImprovement>0:meanImprovement<0);
+  return {baselineMean:beforeMean,improvedMean:afterMean,baselineStd:beforeStd,improvedStd:afterStd,meanImprovement,variationReduction,targetDeviationBefore,targetDeviationAfter,improvementObserved};
 }
 function improvementVerificationDecision(metrics,targetStatus,confirmationStatus){
   if(metrics.meanImprovement==null)return {status:'NOT VERIFIED',message:'Improvement not demonstrated because baseline or improved mean is missing.'};
@@ -4993,11 +5383,11 @@ function studyClosureGate(checklist){
   return {status:'OPEN - Additional Action Required',message:'Required closure checklist items are incomplete.'};
 }
 function buildImprovementVerification(values,governance,confirmationStatus){
-  const metrics=improvementCalculation(values.baselineMean,values.improvedMean,values.baselineStd,values.improvedStd,$('objective').value);
+  const metrics=improvementCalculation(values.baselineMean,values.improvedMean,values.baselineStd,values.improvedStd,$('objective').value,state.study.target);
   const decision=improvementVerificationDecision(metrics,governance?.target?.status,confirmationStatus);
   const capability=capabilityVerificationStatus(decision.status);
   const checklist={
-    experimentCompleted:Boolean(state.design?.runs?.length&&state.design.runs.every(run=>Number.isFinite(run.response))),
+    experimentCompleted:Boolean(state.design?.runs?.length&&state.design.runs.every(run=>Number.isFinite(modelResponse(run)))),
     dataValidated:Boolean(state.validation?.valid),
     evidenceReviewed:Boolean(state.evidenceSeparation),
     recommendationImplemented:confirmationStatus==='PASS',
@@ -5046,6 +5436,38 @@ function screeningRunCount(factorCount){
   if(factorCount<=1)return 0;
   if(factorCount<=6)return 8;
   return Math.max(16,Math.ceil(factorCount/8)*8);
+}
+function buildDesignEnhancementPlan(inputs,recommendation,factors){
+  const baseRuns=recommendation.runCount;
+  const budget=Math.max(0,Math.floor(Number(inputs.availableRuns)||0));
+  const remainingBudget=Math.max(0,budget-baseRuns);
+  const definitions=Array.isArray(factors)&&factors.length?factors:[];
+  const centerEligible=definitions.length
+    ? Boolean(centerPointSettings(definitions))
+    : inputs.factorType==='continuous';
+  const fullFactorial=recommendation.strategy==='Full Factorial DOE';
+  let centerPoints=0;
+  if(fullFactorial&&centerEligible&&remainingBudget>=3){
+    centerPoints=remainingBudget>=8?4:3;
+    centerPoints=Math.min(centerPoints,remainingBudget);
+  }
+  const independentReplicates=fullFactorial?Math.max(0,remainingBudget-centerPoints):0;
+  const canEnhance=fullFactorial&&remainingBudget>0;
+  return {
+    canEnhance,
+    baseRuns,
+    budget,
+    remainingBudget,
+    centerEligible,
+    centerPoints,
+    independentReplicates,
+    enhancedRuns:baseRuns+centerPoints+independentReplicates,
+    curvatureInformation:centerPoints>0,
+    pureErrorInformation:centerPoints>1||independentReplicates>0,
+    centerPointReason:centerEligible
+      ? 'Center points provide data for assessing potential curvature and estimating pure error. This version does not automatically perform a formal curvature significance test.'
+      : 'Center points are not generated because one or more factors are categorical or do not have a meaningful numeric midpoint.'
+  };
 }
 function feasibilityCheck(inputs){
   const fullRuns=fullFactorialRunCount(inputs.factorCount);
@@ -5099,6 +5521,8 @@ function buildStrategyAssessment(rawInputs){
   const recommendation=strategyRecommendation(inputs,feasibility);
   const selectedImpact=costImpact(recommendation.runCount,inputs.costPerRun,inputs.timePerRun);
   const fullFactorialImpact=costImpact(feasibility.fullRuns,inputs.costPerRun,inputs.timePerRun);
+  const enhancement=buildDesignEnhancementPlan(inputs,recommendation,rawInputs.factorDefinitions||state.factors);
+  const enhancedImpact=costImpact(enhancement.enhancedRuns,inputs.costPerRun,inputs.timePerRun);
   const trace={
     engineeringQuestion:inputs.engineeringQuestion||'Defined in problem statement.',
     objective:inputs.objective,
@@ -5110,9 +5534,12 @@ function buildStrategyAssessment(rawInputs){
     expectedInformationGain:recommendation.gain,
     informationLoss:recommendation.loss,
     resourceImpact:`${selectedImpact.runs} runs, cost ${selectedImpact.cost}, duration ${selectedImpact.durationDays} days`,
+    baseDesignRuns:enhancement.baseRuns,
+    remainingRunBudget:enhancement.remainingBudget,
+    enhancementSuggestion:enhancement.canEnhance?`${enhancement.centerPoints} center point(s) and ${enhancement.independentReplicates} independent replicate run(s)`:'No eligible enhancement within the current budget.',
     finalSelectedStrategy:recommendation.strategy
   };
-  return {inputs,feasibility,recommendation,selectedImpact,fullFactorialImpact,trace};
+  return {inputs,feasibility,recommendation,enhancement,selectedImpact,enhancedImpact,fullFactorialImpact,trace};
 }
 function statisticalEvidenceStatus(effect,validation,anova){
   if(!validation?.valid)return {availability:'NOT AVAILABLE',status:'INSUFFICIENT',p:null,reason:'Data quality or design validation issue prevents conclusion.'};
@@ -5126,14 +5553,16 @@ function statisticalEvidenceStatus(effect,validation,anova){
 }
 function modelSummary(anova,design,factors){
   if(!design||!design.runs?.length)return {modelType:'First-order coded model',r2:null,adjustedR2:null,predictionStatus:'Not Available',limitation:'No design data available.'};
-  const totalSS=anova?.total?.ss;
-  const residualSS=anova?.residual?.ss;
-  const n=design.runs.length,p=factors.length;
+  const model=anova?.model?.valid?anova.model:fitDoeRegressionModel(design,factors);
+  const totalSS=model?.sst;
+  const residualSS=model?.sse;
+  const n=model?.validRuns?.length||0,p=model?.rank||0;
   const r2=Number.isFinite(totalSS)&&totalSS>0&&Number.isFinite(residualSS)?Math.max(0,Math.min(1,1-residualSS/totalSS)):null;
-  const adjustedR2=r2!=null&&n>p+1?1-(1-r2)*(n-1)/(n-p-1):null;
-  const predictionStatus=anova?.valid?'Available':design.type==='full_factorial'?'Limited':'Limited';
-  const limitation=anova?.valid?'Prediction supported by replicated error estimate.':'Prediction is model-based and limited by unavailable or insufficient error estimation.';
-  return {modelType:'First-order coded model',r2,adjustedR2,predictionStatus,limitation};
+  const adjustedR2=r2!=null&&n>p?1-(1-r2)*(n-1)/(n-p):null;
+  const predictionStatus=model?.valid?(anova?.valid?'Available':'Limited'):'Not Available';
+  const limitation=!model?.valid?(model?.reason||'The model matrix is not estimable.'):anova?.valid?'Prediction uses one OLS model with replicated pure-error support.':'Prediction uses one OLS model; statistical significance remains limited by unavailable or insufficient pure error.';
+  const modelType=design.type==='full_factorial'?'Coded OLS model with main effects and two-factor interactions':'Coded OLS main-effect screening model';
+  return {modelType,r2,adjustedR2,predictionStatus,limitation,rank:model?.rank||0,residualDf:model?.residualDf??null};
 }
 function recommendationState(confirmationStatus,improvementStatus){
   if(improvementStatus==='VERIFIED IMPROVEMENT')return {label:'Validated Process Setting',detail:'Improvement verification supports process adoption.'};
@@ -5311,7 +5740,7 @@ function renderEvidenceSeparation(evidence){
 }
 function renderEvidenceSeparationReport(evidence){
   const totalRuns=state.design?.runs?.length||0;
-  const completedRuns=state.design?.runs?.filter(run=>Number.isFinite(run.response)).length||0;
+  const completedRuns=state.design?.runs?.filter(run=>Number.isFinite(modelResponse(run))).length||0;
   const targetOrSpecification=[
     state.study.target?`${state.lang==='zh'?'目标':'Target'}: ${state.study.target}`:'',
     state.study.specification?`${state.lang==='zh'?'规格':'Specification'}: ${state.study.specification}`:''
@@ -5407,6 +5836,13 @@ function renderImprovementReport(improvement){
 }
 function engineeringMeaning(effect,obj){
   if(Math.abs(effect.effect)<1e-12)return state.lang==='zh'?`${effect.factor.name} 在已测试范围内未显示明确方向性效应。`:`${effect.factor.name} did not show a clear directional effect within the tested range.`;
+  if(obj==='target'){
+    const target=parseEngineeringNumber(state.study?.target??$('responseTarget')?.value);
+    const preferredEndpoint=Math.abs(effect.averageHigh-target)<Math.abs(effect.averageLow-target)?effect.factor.high:effect.factor.low;
+    return state.lang==='zh'
+      ? `${effect.factor.name} 的 ${preferredEndpoint} 端点均值更接近目标；最终组合由全部候选预测值的目标偏差共同确定。`
+      : `${effect.factor.name} at ${preferredEndpoint} has the endpoint mean closer to target; the final combination is selected from target deviation across all candidate predictions.`;
+  }
   const improves=(obj==='maximize'&&effect.effect>0)||(obj==='minimize'&&effect.effect<0);
   const level=effect.effect>0?effect.factor.high:effect.factor.low;
   if(state.lang==='zh'){
@@ -5435,7 +5871,9 @@ function recommendedAction(effect,effects,obj){
   return `Do not implement from this factor alone; use ${p.value} only as a confirmation candidate.${constraintText}${targetText}`;
 }
 function recommendedSettings(effects,obj){
-  return effects.map(effect=>({factor:effect.factor.name,value:preferred(effect,obj).value,label:preferred(effect,obj).label}));
+  const target=parseEngineeringNumber(state.study?.target??$('responseTarget')?.value);
+  const candidate=selectPredictionCandidate(enumeratePredictionCandidates(effects),obj,target);
+  return candidate?candidate.settings:effects.map(effect=>({factor:effect.factor.name,value:preferred(effect,obj).value,label:preferred(effect,obj).label}));
 }
 const CHART_INTERPRETATION_REGISTRY={
   main_effects:{implemented:true},
@@ -5775,30 +6213,79 @@ function invalidateChartInterpretations({render=true}={}){
   state.chartInterpretations={main_effects:null,pareto_effects:null,interaction:null};
   if(render)renderChartInterpretations();
 }
+function predictionForSettings(effects,settings,fittedModel=null){
+  const model=fittedModel?.valid?fittedModel:fitDoeRegressionModel(state.design,state.factors);
+  return predictDoeRegressionModel(model,settings,state.factors);
+}
+function enumeratePredictionCandidates(effects,fittedModel=null){
+  const orderedEffects=state.factors.map(factor=>effects.find(effect=>effect.factor.id===factor.id)).filter(Boolean);
+  const model=fittedModel?.valid?fittedModel:fitDoeRegressionModel(state.design,state.factors);
+  if(!model.valid)return [];
+  const combinations=cartesian(orderedEffects.map(effect=>[effect.factor.low,effect.factor.high]));
+  return combinations.map(values=>{
+    const settings=orderedEffects.map((effect,index)=>({
+      factor:effect.factor.name,
+      value:values[index],
+      label:String(values[index])===String(effect.factor.high)?t('highLevel'):t('lowLevel')
+    }));
+    return {settings,predicted:predictionForSettings(orderedEffects,settings,model)};
+  });
+}
+function candidateSettingKey(candidate){
+  return state.factors.map(factor=>{
+    const setting=candidate.settings.find(item=>item.factor===factor.name);
+    return String(setting?.value)===String(factor.high)?'1':'0';
+  }).join('');
+}
+function selectPredictionCandidate(candidates,obj,target){
+  const usable=(candidates||[]).filter(candidate=>Number.isFinite(candidate.predicted));
+  if(!usable.length)return null;
+  if(obj==='target'&&!Number.isFinite(target))return null;
+  if(obj==='maximize'||obj==='minimize'){
+    const selected=[...usable].sort((a,b)=>obj==='maximize'?b.predicted-a.predicted:a.predicted-b.predicted)[0];
+    return {...selected,loss:null,equivalentCandidates:[selected],tieCount:1,tieTolerance:0};
+  }
+  const scored=usable.map(candidate=>({...candidate,loss:(candidate.predicted-target)**2}));
+  const minLoss=Math.min(...scored.map(candidate=>candidate.loss));
+  const tolerance=Math.max(1,Math.abs(minLoss))*1e-10;
+  const equivalentCandidates=scored
+    .filter(candidate=>Math.abs(candidate.loss-minLoss)<=tolerance)
+    .sort((a,b)=>candidateSettingKey(a).localeCompare(candidateSettingKey(b)));
+  return {...equivalentCandidates[0],equivalentCandidates,tieCount:equivalentCandidates.length,tieTolerance:tolerance};
+}
 function predictedResponseForSettings(effects,obj){
-  const responses=state.design.runs.map(run=>run.response).filter(Number.isFinite);
-  if(!responses.length)return null;
-  const intercept=statMean(responses);
-  return effects.reduce((prediction,effect)=>{
-    const p=preferred(effect,obj);
-    const code=String(p.value)===String(effect.factor.high)?1:-1;
-    return prediction+(effect.effect/2)*code;
-  },intercept);
+  const target=parseEngineeringNumber(state.study?.target??$('responseTarget')?.value);
+  return selectPredictionCandidate(enumeratePredictionCandidates(effects),obj,target)?.predicted??null;
 }
 function buildDecisionSummary(effects,obj,validation){
   const top=effects[0];
   const p=preferred(top,obj);
   const topRow=anovaRowForEffect(top);
   const topConfidence=confidenceForEffect(top,effects);
-  const settings=recommendedSettings(effects,obj);
+  const target=parseEngineeringNumber(state.study?.target??$('responseTarget')?.value);
+  const model=state.regressionModel?.valid?state.regressionModel:fitDoeRegressionModel(state.design,state.factors);
+  const candidates=enumeratePredictionCandidates(effects,model);
+  const candidate=selectPredictionCandidate(candidates,obj,target);
+  const settings=candidate?.settings||recommendedSettings(effects,obj);
+  const predicted=candidate?.predicted??predictionForSettings(effects,settings,model);
+  const deviation=obj==='target'&&Number.isFinite(predicted)&&Number.isFinite(target)?predicted-target:null;
   const responseLabel=$('responseName').value||t('responseValue');
-  const objectiveText=`${obj==='maximize'?t('maximize'):t('minimize')} ${responseLabel}`;
+  const objectiveText=obj==='target'
+    ? `${t('targetObjective')} ${responseLabel} (${state.lang==='zh'?'目标':'Target'}: ${fmt(target)})`
+    : `${obj==='maximize'?t('maximize'):t('minimize')} ${responseLabel}`;
   const evidence=state.anova?.valid && topRow?.p!=null
     ? (state.lang==='zh'
       ? `${top.factor.name}: p=${formatP(topRow.p)}（${topRow.p<=0.05?'显著':'不显著'}）`
       : `${top.factor.name}: p=${formatP(topRow.p)} (${topRow.p<=0.05?'significant':'not significant'})`)
     : localText('Descriptive effect analysis only. Statistical significance cannot be estimated.');
-  const direction=engineeringMeaning(top,obj);
+  const equivalentText=obj==='target'&&candidate?.tieCount>1
+    ? candidate.equivalentCandidates.map(item=>`${item.settings.map(setting=>`${setting.factor}=${setting.value}`).join(', ')} → ${fmt(item.predicted)}`).join('; ')
+    : '';
+  const direction=obj==='target'
+    ? (state.lang==='zh'
+      ? `候选组合预测响应为 ${fmt(predicted)}，目标值为 ${fmt(target)}，偏差为 ${deviation>=0?'+':''}${fmt(deviation)}（绝对偏差 ${fmt(Math.abs(deviation))}）。${candidate?.tieCount>1?`模型下存在 ${candidate.tieCount} 个等价候选设置；当前仅按因素定义顺序的编码字典序显示第一个候选，其他候选为：${equivalentText}。`:`该设置在 ${candidates.length} 个已测试区域候选组合中平方偏差最小。`}`
+      : `The candidate predicts ${fmt(predicted)} versus target ${fmt(target)}, a deviation of ${deviation>=0?'+':''}${fmt(deviation)} (absolute deviation ${fmt(Math.abs(deviation))}). ${candidate?.tieCount>1?`The model has ${candidate.tieCount} equivalent candidate settings. The first is shown only by deterministic coded lexicographic order; equivalent candidates are: ${equivalentText}.`:`It has the smallest squared target deviation among ${candidates.length} tested-region candidates.`}`)
+    : engineeringMeaning(top,obj);
   return {
     objectiveText,
     keyFactor:state.lang==='zh'
@@ -5809,7 +6296,14 @@ function buildDecisionSummary(effects,obj,validation){
     settings,
     validation: validation.valid?localText('Confirmation experiment required before implementation.'):localText('Data validation review required before analysis.'),
     confidence:topConfidence,
-    predicted:predictedResponseForSettings(effects,obj)
+    predicted,
+    target,
+    deviation,
+    squaredDeviation:deviation==null?null:deviation**2,
+    candidateCount:candidates.length,
+    equivalentCandidates:candidate?.equivalentCandidates||[],
+    equivalentCandidateCount:candidate?.tieCount||1,
+    hasEquivalentCandidates:Boolean(candidate?.tieCount>1)
   };
 }
 function renderDecisionSummary(decision){
@@ -5831,7 +6325,7 @@ function renderDecisionSummary(decision){
 }
 function gateStatusClass(status){
   if(['PASSED','PASS','READY FOR IMPLEMENTATION'].includes(status))return 'status-pass';
-  if(['CONDITIONAL','CONDITIONAL RELEASE','NOT SET'].includes(status))return 'status-conditional';
+  if(['CONDITIONAL','CONDITIONAL RELEASE','NOT SET','REVIEW'].includes(status))return 'status-conditional';
   return 'status-fail';
 }
 function renderGovernance(governance){
@@ -5910,9 +6404,40 @@ function renderStrategyAssessment(assessment){
     fullRuns:assessment.fullFactorialImpact.runs,
     fullCost:fmt(assessment.fullFactorialImpact.cost)
   });
+  renderDesignEnhancementPlan(assessment.enhancement);
   $('strategyTraceBody').innerHTML=Object.entries(assessment.trace).map(([key,value])=>`
     <div class="trace-row"><strong>${esc(uiText(key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase())))}</strong><span>${esc(uiValue(value))}</span></div>
   `).join('');
+}
+function renderDesignEnhancementPlan(plan){
+  const summary=$('designEnhancementSummary'),select=$('designPlanMode');
+  if(!summary||!select)return;
+  $('designEnhancementTitle').textContent=state.lang==='zh'?'设计增强建议':'Design Enhancement Recommendation';
+  $('designPlanModeLabel').textContent=state.lang==='zh'?'生成方案':'Generated plan';
+  select.options[0].textContent=state.lang==='zh'?`基础方案（${plan?.baseRuns||0} 次）`:`Base design (${plan?.baseRuns||0} runs)`;
+  select.options[1].textContent=state.lang==='zh'?`增强方案（${plan?.enhancedRuns||plan?.baseRuns||0} 次，推荐）`:`Enhanced design (${plan?.enhancedRuns||plan?.baseRuns||0} runs, recommended)`;
+  select.disabled=!plan?.canEnhance;
+  if(!plan?.canEnhance)state.designPlanMode='base';
+  select.value=state.designPlanMode;
+  if(!plan){
+    summary.textContent=state.lang==='zh'?'评估策略后可查看剩余预算的分配建议。':'Assess the strategy to review allocation of remaining run budget.';
+    return;
+  }
+  if(!plan.canEnhance){
+    summary.textContent=state.lang==='zh'
+      ? `基础设计：${plan.baseRuns} 次。当前没有可用于设计增强的剩余预算。`
+      : `Base design: ${plan.baseRuns} runs. No remaining budget is available for design enhancement.`;
+    return;
+  }
+  const allocation=state.lang==='zh'
+    ? `中心点 ${plan.centerPoints} 次，独立重复试验 ${plan.independentReplicates} 次。`
+    : `${plan.centerPoints} center point(s) and ${plan.independentReplicates} independent replicate run(s).`;
+  const centerNote=plan.centerEligible
+    ? (state.lang==='zh'?'增加中心点可以为后续曲率评估和纯误差估计提供数据。当前版本不会自动执行正式的曲率显著性检验。':'Center points provide data for assessing potential curvature and estimating pure error. This version does not automatically perform a formal curvature significance test.')
+    : (state.lang==='zh'?'因子中存在分类因素或无有效数值中点，因此不生成中心点；剩余预算仅建议用于独立重复试验。':'Center points are disabled because at least one factor is categorical or lacks a meaningful numeric midpoint; remaining budget is allocated only to independent replicate runs.');
+  summary.textContent=state.lang==='zh'
+    ? `基础设计：${plan.baseRuns} 次全因子运行。可用剩余预算：${plan.remainingBudget} 次。建议增强：${allocation} ${centerNote}`
+    : `Base design: ${plan.baseRuns} full-factorial runs. Remaining budget: ${plan.remainingBudget} runs. Suggested enhancement: ${allocation} ${centerNote}`;
 }
 function renderStrategyReport(assessment){
   const data=assessment||state.strategyAssessment;
@@ -5920,6 +6445,11 @@ function renderStrategyReport(assessment){
     ['Why this experiment approach was selected',esc(uiValue(data.recommendation.reason))],
     ['Feasibility Assessment',state.lang==='zh'?`${esc(uiValue(data.feasibility.status))}。全因子需要 ${data.feasibility.fullRuns} 次运行。`:`${esc(uiValue(data.feasibility.status))}. Full factorial requires ${data.feasibility.fullRuns} runs.`],
     ['Design Recommendation',esc(uiValue(data.recommendation.strategy))],
+    ['Base Design Runs',String(data.enhancement.baseRuns)],
+    ['Remaining Run Budget',String(data.enhancement.remainingBudget)],
+    ['Design Enhancement',data.enhancement.canEnhance
+      ? esc(state.lang==='zh'?`中心点 ${data.enhancement.centerPoints} 次；独立重复试验 ${data.enhancement.independentReplicates} 次。`:`${data.enhancement.centerPoints} center point(s); ${data.enhancement.independentReplicates} independent replicate run(s).`)
+      : esc(uiText('No eligible enhancement within the current budget.'))],
     ['Information Gain',esc(uiValue(data.recommendation.gain))],
     ['Information Loss',esc(uiValue(data.recommendation.loss))],
     ['Resource Impact',state.lang==='zh'?`${data.selectedImpact.runs} 次运行，成本 ${fmt(data.selectedImpact.cost)}，周期 ${fmt(data.selectedImpact.durationDays)} 天。`:`${data.selectedImpact.runs} runs, cost ${fmt(data.selectedImpact.cost)}, duration ${fmt(data.selectedImpact.durationDays)} days.`],
@@ -6274,11 +6804,12 @@ function reportBestObservedRun(decision){
 function reportAcceptanceCriteria(governance){
   const unit=$('responseUnit').value||'';
   const target=governance.target?.target;
+  const objective=$('objective').value;
   if(state.lang==='zh'){
-    const targetText=target==null?'满足约定工程目标，且不违反工程约束。':`${$('objective').value==='maximize'?'≥':'≤'} ${fmt(target)} ${esc(unit)}，且无硬约束违反。`;
+    const targetText=target==null?'满足约定工程目标，且不违反工程约束。':objective==='target'?`尽可能接近 ${fmt(target)} ${esc(unit)}；确认前需定义可接受偏差，且无硬约束违反。`:`${objective==='maximize'?'≥':'≤'} ${fmt(target)} ${esc(unit)}，且无硬约束违反。`;
     return `${targetText} 确认响应应支持推荐方向，并保持在已测试因素窗口内。`;
   }
-  const targetText=target==null?'Meet the agreed engineering target and do not violate constraints.':`${$('objective').value==='maximize'?'≥':'≤'} ${fmt(target)} ${esc(unit)} with no hard constraint violation.`;
+  const targetText=target==null?'Meet the agreed engineering target and do not violate constraints.':objective==='target'?`Approach ${fmt(target)} ${esc(unit)}; define an acceptable deviation before confirmation, with no hard constraint violation.`:`${objective==='maximize'?'≥':'≤'} ${fmt(target)} ${esc(unit)} with no hard constraint violation.`;
   return `${targetText} Confirmation response should support the recommended direction and remain within the tested factor window.`;
 }
 function renderReportInteractionSection(){
@@ -6352,11 +6883,12 @@ function renderEvidencePackage(effects,decision,validation){
   ]);
   const reportRuns=[...state.design.runs].sort((a,b)=>a.runOrder-b.runOrder);
   $('reportDesignMatrixHead').innerHTML=`<tr><th>${esc(t('run'))}</th><th>${esc(t('stdOrder'))}</th>`+state.factors.map(f=>`<th>${esc(f.name)}</th>`).join('')+`<th>${esc(t('responseValue'))}</th></tr>`;
-  $('reportDesignMatrixBody').innerHTML=reportRuns.map(run=>`<tr><td>${run.runOrder}</td><td>${run.standardOrder}</td>${state.factors.map(f=>`<td>${esc(run.settings[f.id])}</td>`).join('')}<td>${Number.isFinite(run.response)?fmt(run.response):'-'}</td></tr>`).join('');
+  $('reportDesignMatrixBody').innerHTML=reportRuns.map(run=>`<tr><td>${run.runOrder}</td><td>${run.standardOrder}</td>${state.factors.map(f=>`<td>${esc(run.settings[f.id])}</td>`).join('')}<td>${Number.isFinite(modelResponse(run))?fmt(modelResponse(run)):'-'}</td></tr>`).join('');
   $('reportValidationBody').innerHTML=rowsHtml([
     ['Data Completeness',validation.metrics?.missingResponses===0?uiText('Complete'):(state.lang==='zh'?`${validation.metrics?.missingResponses||0} 个缺失响应`:`${validation.metrics?.missingResponses||0} missing response(s)`)],
     ['Level Validation',validation.metrics?.invalidLevels===0?uiText('Pass'):(state.lang==='zh'?`${validation.metrics?.invalidLevels||0} 个无效水平值`:`${validation.metrics?.invalidLevels||0} invalid level value(s)`)],
-    ['Replication Status',reportReplicationStatus(validation)]
+    ['Replication Status',reportReplicationStatus(validation)],
+    ['Run Mean Weighting',esc(measurementCountWarning(state.design)||(state.lang==='zh'?'各有效 Run 的测量数量一致；模型按 Run Mean 等权拟合。':'Valid measurement counts are consistent; the model gives equal weight to each run mean.'))]
   ]);
   drawMainEffects(effects,'reportMainEffectsChart');
   drawRanking(effects,'reportRankingChart');
@@ -6371,11 +6903,13 @@ function renderEvidencePackage(effects,decision,validation){
   $('reportAnalysisBody').innerHTML=rowsHtml([
     ['Main Effects',effects.map(effect=>`${esc(effect.factor.name)}: ${effect.effect>=0?'+':''}${fmt(effect.effect)}`).join('<br>')],
     ['ANOVA',esc(anovaText)],
-    ['Model',esc(modelText)]
+    ['Model',esc(modelText)],
+    ['Method Note',esc(state.lang==='zh'?'模型使用每个独立 Run 的平均响应值作为一行并进行等权 OLS 拟合；Run 内单点测量不会展开为独立回归行。':'The model uses one equally weighted OLS row per independent run mean; within-run measurements are not expanded into separate regression rows.')]
   ]);
   $('reportDecisionBody').innerHTML=rowsHtml([
     ['Key Factors',esc(uiValue(decision.keyFactor))],
     ['Recommended Settings',decision.settings.map(item=>`${esc(item.factor)}: ${esc(item.value)}`).join('<br>')],
+    ...(decision.hasEquivalentCandidates?[['Equivalent Candidate Settings',decision.equivalentCandidates.map(item=>`${item.settings.map(setting=>`${esc(setting.factor)}=${esc(setting.value)}`).join(', ')} → ${fmt(item.predicted)}`).join('<br>')]]:[]),
     ['Statistical Evidence',state.statisticalFoundation?.evidence?.map(row=>`${esc(row.factor)}: ${esc(uiValue(row.status))}`).join('<br>')||esc(uiText('Pending'))],
     ['Model Trust',`${esc(uiValue(modelTrust.trust.status))}. ${esc(uiValue(modelTrust.trust.rationale))}`],
     ['Prediction Boundary',`${esc(uiValue(modelTrust.boundary.status))}. ${esc(uiValue(modelTrust.boundary.message))}`],
@@ -6389,7 +6923,7 @@ function renderEvidencePackage(effects,decision,validation){
     <td>${esc(uiText('Recommended'))}: ${esc(row.setting)}<br>${esc(uiText('Type'))}: ${esc(uiValue(row.type))}<br>${esc(uiText('Status'))}: ${esc(uiValue(row.status))}<br>${esc(uiValue(row.reason))}<br>${esc(uiText('Action'))}: ${esc(uiValue(row.action))}</td>
   </tr>`).join('');
   $('reportTargetBody').innerHTML=rowsHtml([
-    ['Requirement',governance.target.target==null?uiText('Not set'):`${$('objective').value==='maximize'?'≥':'≤'} ${fmt(governance.target.target)} ${esc($('responseUnit').value||'')}`],
+    ['Requirement',governance.target.target==null?uiText('Not set'):`${$('objective').value==='target'?'≈':$('objective').value==='maximize'?'≥':'≤'} ${fmt(governance.target.target)} ${esc($('responseUnit').value||'')}`],
     ['Predicted Response',Number.isFinite(governance.target.predicted)?`${fmt(governance.target.predicted)} ${esc($('responseUnit').value||'')}`:esc(uiText('Unavailable'))],
     ['Actual Confirmation Result',Number.isFinite(Number($('confirmationActual').value))?`${fmt(Number($('confirmationActual').value))} ${esc($('responseUnit').value||'')}`:esc(uiText('Pending'))],
     ['Target Status',esc(uiValue(governance.target.status))]
@@ -6444,16 +6978,27 @@ function confirmationGate(predicted,actual,hasSetting){
 /* DECISION_ENGINE_END */
 
 function analyze(scroll=true){
+  const obj=$('objective').value;
+  if(obj==='target'&&parseEngineeringNumber($('responseTarget').value)==null){
+    alert(state.lang==='zh'?'“接近目标值”模式需要有效的目标值。':'Approach Target mode requires a valid Target.');
+    return;
+  }
   const validation=validateDOEData(true);
   if(!validation.valid){
     alert(translateUiText('Data validation must pass before analysis:')+'\n\n'+translateMessageLines(validation.errors));
     return;
   }
-  const obj=$('objective').value;
-  const effects=computeEffects().sort((a,b)=>b.abs-a.abs);
-  const best=[...state.design.runs].sort((a,b)=>obj==='maximize'?b.response-a.response:a.response-b.response)[0];
+  const regressionModel=fitDoeRegressionModel(state.design,state.factors);
+  if(!regressionModel.valid){
+    state.regressionModel=null;
+    alert(state.lang==='zh'?`DOE模型无法估计：${regressionModel.reason}`:`DOE model cannot be estimated: ${regressionModel.reason}`);
+    return;
+  }
+  state.regressionModel=regressionModel;
+  const effects=computeEffects(regressionModel).sort((a,b)=>b.abs-a.abs);
+  const best=bestMeasuredRun(state.design.runs,obj);
   const top=effects[0];
-  state.anova=computeFullFactorialAnova(state.design,state.factors);
+  state.anova=computeFullFactorialAnova(state.design,state.factors,regressionModel);
   state.decision=buildDecisionSummary(effects,obj,validation);
   state.governance=buildGovernance(state.decision,validation,'Pending');
   state.statisticalFoundation=buildStatisticalEvidenceFoundation(effects,validation,state.anova,state.design,state.factors,state.governance,'Pending',state.improvementVerification?.decision?.status);
@@ -6461,8 +7006,8 @@ function analyze(scroll=true){
   state.evidenceSeparation=buildEvidenceSeparation(effects,state.decision,state.governance,{status:'Pending'});
   buildChartInterpretations(buildAnalysisContext(effects,validation));
   $('largestV').textContent=top.factor.name;$('largestS').textContent=(top.effect>=0?'+':'')+fmt(top.effect);
-  $('bestRunV').textContent='#'+best.runOrder;$('bestRunS').textContent=fmt(best.response)+' '+$('responseUnit').value;
-  $('objectiveV').textContent=obj==='maximize'?t('maximize'):t('minimize');$('completeV').textContent=state.design.runs.length;
+  $('bestRunV').textContent='#'+best.runId;$('bestRunS').textContent=fmt(best.response)+' '+$('responseUnit').value;
+  $('objectiveV').textContent=obj==='target'?t('targetObjective'):obj==='maximize'?t('maximize'):t('minimize');$('completeV').textContent=state.design.runs.length;
   renderDecisionSummary(state.decision);
   renderGovernance(state.governance);
   renderStatisticalEvidenceFoundation(state.statisticalFoundation);
@@ -6472,12 +7017,17 @@ function analyze(scroll=true){
   $('recommendTitle').textContent=state.lang==='zh'
     ? `${uiValue(state.statisticalFoundation.recommendation.label)} / 候选设置`
     : `${uiValue(state.statisticalFoundation.recommendation.label)} / Candidate Setting`;
-  $('settingGrid').innerHTML=effects.map(e=>{const p=preferred(e,obj);return `<div class="setting"><span>${esc(e.factor.name)}</span><strong>${esc(p.value)} · ${esc(uiValue(p.label))}</strong></div>`}).join('');
+  $('settingGrid').innerHTML=state.decision.settings.map(item=>`<div class="setting"><span>${esc(item.factor)}</span><strong>${esc(item.value)} · ${esc(uiValue(item.label))}</strong></div>`).join('');
+  $('recommendText').textContent=obj==='target'
+    ? (state.lang==='zh'
+      ? `预测响应 ${fmt(state.decision.predicted)}；目标值 ${fmt(state.decision.target)}；偏差 ${state.decision.deviation>=0?'+':''}${fmt(state.decision.deviation)}。${state.decision.hasEquivalentCandidates?`模型下存在 ${state.decision.equivalentCandidateCount} 个等价候选设置；当前卡片仅稳定显示首个候选，并不表示其统计上优于其他并列候选。`:'该组合使预测响应与目标值的平方偏差最小。'}仍需独立确认试验。`
+      : `Predicted response ${fmt(state.decision.predicted)}; target ${fmt(state.decision.target)}; deviation ${state.decision.deviation>=0?'+':''}${fmt(state.decision.deviation)}. ${state.decision.hasEquivalentCandidates?`The model has ${state.decision.equivalentCandidateCount} equivalent candidate settings. This card shows only the deterministic first candidate and does not imply statistical superiority over the other ties.`:'This combination minimizes squared target deviation.'} An independent confirmation run is still required.`)
+    : t('recommendText');
   if(Number.isFinite(state.decision.predicted))$('confirmationPredicted').value=Number(state.decision.predicted.toFixed(3));
   $('resultsEmpty').classList.add('hidden');$('resultsContent').classList.remove('hidden');
   $('analysisStatus').className='status-pill ready';$('analysisStatus').textContent=t('analysisReady');
   state.analyzed=true;
-  drawMainEffects(effects);drawRanking(effects);renderAnovaAnalysis();renderInteractionAnalysis();renderRegressionModel();renderContributionAnalysis();renderEvidencePackage(effects,state.decision,validation);renderChartInterpretations();renderEvidenceSeparationReport(state.evidenceSeparation);renderStatisticalEvidenceReport(state.statisticalFoundation);renderModelTrustReport(state.modelTrust);renderStudyClosure(state.improvementVerification);renderImprovementReport(state.improvementVerification);updateConfirmationDecision();
+  drawMainEffects(effects);drawRanking(effects);renderAnovaAnalysis();renderInteractionAnalysis();renderRegressionModel();renderContributionAnalysis();renderRunResponseSummary();renderEvidencePackage(effects,state.decision,validation);renderChartInterpretations();renderEvidenceSeparationReport(state.evidenceSeparation);renderStatisticalEvidenceReport(state.statisticalFoundation);renderModelTrustReport(state.modelTrust);renderStudyClosure(state.improvementVerification);renderImprovementReport(state.improvementVerification);updateConfirmationDecision();
   updateStatus();
   if(scroll)showWorkflowStep('analyze');
 }
@@ -6751,7 +7301,7 @@ function drawMainEffects(effects,canvasId='mainEffectsChart'){
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
   if(!effects.length)return clearChartTooltip(c,w,h);
   const tooltipRegions=[];
-  const responseValues=state.design?.runs?.map(run=>Number(run.response)).filter(Number.isFinite)||[];
+  const responseValues=state.design?.runs?.map(modelResponse).filter(Number.isFinite)||[];
   const overall=responseValues.length?responseValues.reduce((sum,value)=>sum+value,0)/responseValues.length:null;
   const vals=effects.flatMap(e=>[e.averageLow,e.averageHigh]).concat(overall==null?[]:[overall]);
   const range=niceChartScale(vals,4);
@@ -6962,6 +7512,7 @@ function renderAnovaAnalysis(){
         <tbody>${supportRows}</tbody>
       </table>
     </div>`:''}
+    <div class="note info" style="margin-top:14px">${esc(state.lang==='zh'?'当前仅提供 Lack-of-Fit/交互剩余平方和与自由度的描述性分解；本版本不会自动执行正式的 Lack-of-Fit F 检验、p 值或曲率显著性检验。':'Only a descriptive Lack-of-Fit/interaction remainder SS and degrees-of-freedom partition is provided. This version does not automatically perform a formal Lack-of-Fit F test, p-value, or curvature significance test.')}</div>
   </div>`;
 }
 
@@ -7006,7 +7557,7 @@ function updateStatus({refreshLanguage=true,showStep=true}={}){
   renderStudyReport();
   renderFactorReport();
   const planOk=validatePlan(false);
-  const done=state.design?state.design.runs.filter(r=>Number.isFinite(r.response)).length:0;
+  const done=state.design?state.design.runs.filter(run=>Number.isFinite(modelResponse(run))).length:0;
   const total=state.design?state.design.runs.length:0;
   const pct=total?Math.round(done/total*100):0;
   $('planStatus').className='status-pill '+(planOk?'ready':'pending');$('planStatus').textContent=planOk?t('complete'):t('pending');
@@ -7422,8 +7973,8 @@ function exampleResponseForRun(example,run){
   const model=example.responseModel||{base:30,weights:[],noise:[0]};
   let response=model.base;
   example.factorDefinitions.forEach((factor,index)=>{
-    const high=String(run.settings[`f${index+1}`])===String(factor.high);
-    const code=high?1:-1;
+    const setting=String(run.settings[`f${index+1}`]);
+    const code=setting===String(factor.high)?1:setting===String(factor.low)?-1:0;
     response+=(model.weights[index]||0)*code;
   });
   const noise=model.noise||[0];
@@ -7433,7 +7984,7 @@ function exampleResponseForRun(example,run){
 function fillExampleResponses(example){
   if(!state.design)return;
   state.design.runs.forEach(run=>{
-    run.response=exampleResponseForRun(example,run);
+    setRunResponses(run,[exampleResponseForRun(example,run)]);
   });
   state.analyzed=false;state.validation=null;state.anova=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;
   invalidateChartInterpretations();
@@ -7457,6 +8008,7 @@ function loadExampleStudy(exampleId){
   setValue('responseUnit',example.responseUnit);
   setValue('objective',example.objective);
   resetAnalysisState();
+  state.designPlanMode='base';
   state.loadedExampleId=source.id;
   renderExampleLibrary();
   state.study={
@@ -7502,6 +8054,7 @@ function loadDemo(){
 function resetAll(){
   $('projectName').value='Heat Seal Strength Optimization';$('responseName').value='Seal Strength';$('responseUnit').value='N/15mm';$('objective').value='maximize';
   state.loadedExampleId=null;
+  state.designPlanMode='base';
   state.activeReportSection='summary';
   if($('exampleStudySelect'))$('exampleStudySelect').value='';
   state.factors=[
@@ -7586,21 +8139,16 @@ renderExampleLibrary();renderFactors();renderDesign();renderRun();renderLanguage
 function calculateInteractions(){
   if(!state.design) return [];
   const factors=state.factors;
-  const runs=state.design.runs;
-  const mean=list=>list.reduce((a,b)=>a+b,0)/list.length;
+  const model=state.regressionModel?.valid?state.regressionModel:fitDoeRegressionModel(state.design,factors);
+  if(!model.valid||state.design.type!=='full_factorial')return [];
   const result=[];
   for(let i=0;i<factors.length;i++){
     for(let j=i+1;j<factors.length;j++){
       const a=factors[i], b=factors[j];
-      const cells={HH:[],HL:[],LH:[],LL:[]};
-      runs.forEach(r=>{
-        const av=String(r.settings[a.id])===String(a.high);
-        const bv=String(r.settings[b.id])===String(b.high);
-        cells[(av?'H':'L')+(bv?'H':'L')].push(r.response);
-      });
-      if(Object.values(cells).every(x=>x.length)){
-        const effect=(mean(cells.HH)-mean(cells.HL))-(mean(cells.LH)-mean(cells.LL));
-        result.push({a,b,effect,abs:Math.abs(effect)});
+      const coefficient=model.coefficientByKey[`interaction:${a.id}:${b.id}`];
+      if(Number.isFinite(coefficient)){
+        const effect=2*coefficient;
+        result.push({a,b,effect,abs:Math.abs(effect),coefficient});
       }
     }
   }
@@ -7672,13 +8220,16 @@ function interactionPlotSeries(interaction){
   const mean=list=>list.reduce((a,b)=>a+b,0)/list.length;
   const cells={lowLow:[],lowHigh:[],highLow:[],highHigh:[]};
   state.design.runs.forEach(run=>{
-    const aHigh=String(run.settings[interaction.a.id])===String(interaction.a.high);
-    const bHigh=String(run.settings[interaction.b.id])===String(interaction.b.high);
-    if(!Number.isFinite(run.response))return;
-    if(!aHigh&&!bHigh)cells.lowLow.push(run.response);
-    if(!aHigh&&bHigh)cells.lowHigh.push(run.response);
-    if(aHigh&&!bHigh)cells.highLow.push(run.response);
-    if(aHigh&&bHigh)cells.highHigh.push(run.response);
+    const aValue=String(run.settings[interaction.a.id]),bValue=String(run.settings[interaction.b.id]);
+    if(![String(interaction.a.low),String(interaction.a.high)].includes(aValue)||![String(interaction.b.low),String(interaction.b.high)].includes(bValue))return;
+    const aHigh=aValue===String(interaction.a.high);
+    const bHigh=bValue===String(interaction.b.high);
+    const response=modelResponse(run);
+    if(!Number.isFinite(response))return;
+    if(!aHigh&&!bHigh)cells.lowLow.push(response);
+    if(!aHigh&&bHigh)cells.lowHigh.push(response);
+    if(aHigh&&!bHigh)cells.highLow.push(response);
+    if(aHigh&&bHigh)cells.highHigh.push(response);
   });
   if(Object.values(cells).some(list=>!list.length))return null;
   return {
@@ -7785,6 +8336,28 @@ function renderContributionAnalysis(){
   </div>`;
 }
 
+function renderRunResponseSummary(){
+  let box=document.getElementById('runResponseSummary');
+  if(!box){
+    box=document.createElement('div');
+    box.id='runResponseSummary';
+    box.className='section';
+    const target=document.querySelector('#resultsContent .recommendation');
+    if(target&&target.parentNode)target.parentNode.insertBefore(box,target);
+    else document.getElementById('resultsContent').appendChild(box);
+  }
+  const rows=[...(state.design?.runs||[])].sort((a,b)=>a.runOrder-b.runOrder).map(run=>{
+    ensureRunResponseSummary(run);
+    const raw=run.rawResponses.filter(value=>value!=null&&String(value).trim()!=='').join(', ')||'—';
+    return `<tr><td>${run.runOrder}</td><td>${esc(runTypeLabel(run.runType))}</td><td>${esc(raw)}</td><td>${run.responseCount}</td><td>${formatResponseStat(run.responseMean)}</td><td>${formatResponseStat(run.responseStdDev)}</td><td>${formatResponseStat(run.responseMin)}</td><td>${formatResponseStat(run.responseMax)}</td><td>${formatResponseStat(run.responseRange)}</td><td><strong>${formatResponseStat(modelResponse(run))}</strong></td></tr>`;
+  }).join('');
+  box.innerHTML=`
+    <div class="section-header"><div><h2>${esc(state.lang==='zh'?'运行响应汇总':'Run Response Summary')}</h2><p>${esc(t('modelUsesMean'))}</p></div></div>
+    <div class="section-body">
+      <div class="table-wrap"><table><thead><tr><th>${esc(t('run'))}</th><th>${esc(t('runType'))}</th><th>${esc(t('responseSamples'))}</th><th>N</th><th>${esc(t('responseMean'))}</th><th>${esc(t('responseStdDev'))}</th><th>${esc(t('responseMin'))}</th><th>${esc(t('responseMax'))}</th><th>${esc(t('responseRange'))}</th><th>${esc(state.lang==='zh'?'建模响应':'Model Response')}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+}
+
 function renderRegressionModel(){
   let box=document.getElementById('regressionModel');
   if(!box){
@@ -7794,27 +8367,31 @@ function renderRegressionModel(){
     const target=document.getElementById('resultsContent');
     target.appendChild(box);
   }
-  if(!state.design || !state.design.runs.every(r=>Number.isFinite(r.response))){
-    box.innerHTML='';
+  const model=state.regressionModel?.valid?state.regressionModel:fitDoeRegressionModel(state.design,state.factors);
+  if(!state.design || !model.valid){
+    box.innerHTML=model?.reason?`<div class="note warn">${esc(uiValue(model.reason))}</div>`:'';
     return;
   }
-  const effects=computeEffects().sort((a,b)=>b.abs-a.abs);
   const summary=state.statisticalFoundation?.model||modelSummary(state.anova,state.design,state.factors);
-  const terms=effects.map(e=>`
+  const terms=model.terms.filter(term=>term.type!=='intercept').map((term,index)=>{
+    const coefficient=model.coefficientByKey[term.key];
+    return `
     <tr>
-      <td>${esc(e.factor.name)}</td>
-      <td>${e.effect>=0?'+':''}${fmt(e.effect/2)}</td>
-      <td>${e.effect>=0?'+':''}${fmt(e.effect)}</td>
-    </tr>`).join('');
-  const equation=[
-    'Response = β0',
-    ...effects.map(e=>`${e.effect>=0?'+':'-'} ${Math.abs(e.effect/2).toFixed(2)}×${e.factor.name}`)
-  ].join(' ');
+      <td>${esc(term.label)}</td>
+      <td>${coefficient>=0?'+':''}${fmt(coefficient)}</td>
+      <td>${coefficient>=0?'+':''}${fmt(2*coefficient)}</td>
+    </tr>`;
+  }).join('');
+  const intercept=model.coefficientByKey.intercept;
+  const equation=[`Response = ${fmt(intercept)}`,...model.terms.filter(term=>term.type!=='intercept').map(term=>{
+    const coefficient=model.coefficientByKey[term.key];
+    return `${coefficient>=0?'+':'-'} ${fmt(Math.abs(coefficient))}×${term.label}`;
+  })].join(' ');
   box.innerHTML=`
   <div class="section-header">
     <div>
       <h2>${esc(uiText('Regression Model / 回归模型'))}</h2>
-      <p>${esc(uiText('First-order engineering model based on DOE main effects.'))}</p>
+      <p>${esc(state.lang==='zh'?'每个独立 Run 的平均响应值作为一行，通过带列主元 QR 分解拟合编码 OLS 模型。':'Each independent run mean is one row in a coded OLS model fitted by column-pivoted QR decomposition.')}</p>
     </div>
   </div>
   <div class="section-body">
@@ -7827,6 +8404,7 @@ function renderRegressionModel(){
     <div class="note info">
       <strong>${esc(uiText('Model Equation'))}</strong><br>
       ${esc(equation)}
+      <br>${esc(state.lang==='zh'?`模型秩 ${model.rank}；残差自由度 ${model.residualDf}。`:`Model rank ${model.rank}; residual degrees of freedom ${model.residualDf}.`)}
     </div>
     <div class="table-wrap" style="margin-top:14px">
       <table>
@@ -7837,7 +8415,7 @@ function renderRegressionModel(){
       </table>
     </div>
     <div class="note warn" style="margin-top:14px">
-      ${esc(uiText('Coefficients use coded levels: low = -1, high = +1. Statistical significance is shown only in the ANOVA section when error estimation is valid.'))}
+      ${esc(state.lang==='zh'?'系数使用编码水平：低 = -1，中心 = 0，高 = +1。显示的 Effect = 2 × coefficient。仅在纯误差估计有效时，ANOVA 才显示显著性。':'Coefficients use coded levels: low = -1, center = 0, high = +1. Displayed Effect = 2 × coefficient. ANOVA significance is shown only when pure-error estimation is valid.')}
     </div>
   </div>`;
 }
@@ -7948,15 +8526,12 @@ function updateImprovementVerification(showMessage=true){
 // V6.5 CSV Data Import
 function downloadDoeTemplate(){
   if(!state.design){alert(translateUiText('Please generate DOE design first.'));return}
-  let rows=[[t('run'),t('stdOrder'),...state.factors.map(f=>f.name),$('responseName').value||t('responseValue')]];
-  state.design.runs.forEach((r,i)=>{
-    rows.push([r.runOrder,r.standardOrder,...state.factors.map(f=>r.settings[f.id]),r.response??'']);
-  });
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const rows=buildDoeTemplateRows(state.design,state.factors,state.lang,$('responseName').value||t('responseValue'),state.study.target||$('responseTarget').value);
+  const csv=encodeCsvWithBom(rows);
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='DOE_Data_Template.csv';
+  a.download=state.lang==='zh'?'DOE_数据模板_UTF8.csv':'DOE_Data_Template_UTF8.csv';
   a.click();
 }
 
@@ -7982,10 +8557,23 @@ function parseDelimitedText(text){
   if(row.some(value=>value!==''))rows.push(row);
   return rows;
 }
-function normalizeHeader(value){return String(value||'').trim().toLowerCase().replace(/\s+/g,' ')}
+function normalizeHeader(value){return String(value||'').replace(/^\uFEFF/,'').trim().toLowerCase().replace(/\s+/g,' ')}
 function detectColumn(headers,candidates){
   const normalized=headers.map(normalizeHeader);
   return normalized.findIndex(header=>candidates.some(candidate=>header===normalizeHeader(candidate)));
+}
+function detectResponseColumns(headers,responseHeader){
+  const exact=detectColumn(headers,[responseHeader,'Response','Result','Y',t('responseValue'),'响应值']);
+  const normalizedResponse=normalizeHeader(responseHeader);
+  const matches=[];
+  headers.forEach((header,index)=>{
+    const normalized=normalizeHeader(header);
+    const numbered=/^(response|响应值|y)[ _-]?\d+$/.test(normalized)
+      || (normalizedResponse&&new RegExp(`^${normalizedResponse.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}[ _-]?\\d+$`).test(normalized));
+    if(numbered)matches.push(index);
+  });
+  if(exact>=0&&!matches.includes(exact))matches.unshift(exact);
+  return [...new Set(matches)];
 }
 function importGuidance(){
   return state.lang==='zh'?'请修正后重新导入，或下载 CSV 模板检查所需列。':'Correct the file and import it again, or download the CSV template to verify the required columns.';
@@ -8039,10 +8627,14 @@ function startImportPreview(rows,sourceName){
   const dataRows=rows.slice(1).filter(row=>row.some(value=>String(value).trim()));
   if(!dataRows.length){showImportError('headerOnly');return}
   const responseHeader=$('responseName').value||'Response';
-  const runIndex=detectColumn(headers,['Run Order','Run','Order',t('run')]);
-  const stdIndex=detectColumn(headers,['Std. Order','Standard Order','Std Order',t('stdOrder')]);
-  const responseIndex=detectColumn(headers,[responseHeader,'Response','Result','Y',t('responseValue')]);
-  const factorSelections=state.factors.map(f=>detectColumn(headers,[f.name,f.id]));
+  const runIndex=detectColumn(headers,['Run Order','Run','Order','试验序号',t('run')]);
+  const stdIndex=detectColumn(headers,['Std. Order','Standard Order','Std Order','标准序',t('stdOrder')]);
+  const runIdIndex=detectColumn(headers,['Run ID','运行ID']);
+  const runTypeIndex=detectColumn(headers,['Run Type','运行类型']);
+  const replicateOfIndex=detectColumn(headers,['Replicate Of','ReplicateOf','重复来源']);
+  const responseIndexes=detectResponseColumns(headers,responseHeader);
+  const responseIndex=responseIndexes[0]??-1;
+  const factorSelections=state.factors.map(f=>detectColumn(headers,[f.name,f.id,`因子名称：${f.name}`,`Factor: ${f.name}`]));
   const missing=[
     ...state.factors.filter((_,index)=>factorSelections[index]<0).map(f=>f.name),
     ...(responseIndex<0?[responseHeader]:[])
@@ -8062,24 +8654,24 @@ function startImportPreview(rows,sourceName){
       const factor=state.factors[factorIndex],columnIndex=factorSelections[factorIndex];
       const value=String(row[columnIndex]??'').trim();
       if(!value){showImportError('requiredEmpty',{row:rowNumber,column:factor.name});return}
-      if(value!==String(factor.low).trim()&&value!==String(factor.high).trim()){
+      const allowedValues=new Set(state.design.runs.map(run=>String(run.settings[factor.id]).trim()));
+      if(!allowedValues.has(value)){
         showImportError('factorLevel',{row:rowNumber,column:factor.name});
         return;
       }
     }
-    const responseValue=String(row[responseIndex]??'').trim();
-    if(!responseValue){showImportError('requiredEmpty',{row:rowNumber,column:responseHeader});return}
-    if(!Number.isFinite(Number(responseValue))){
-      showImportError('responseNumeric',{row:rowNumber,column:responseHeader});
-      return;
-    }
+    const rawResponses=responseIndexes.map(columnIndex=>String(row[columnIndex]??'').trim());
+    const nonBlank=rawResponses.filter(value=>value!=='');
+    if(!nonBlank.length){showImportError('requiredEmpty',{row:rowNumber,column:responseHeader});return}
+    const invalid=nonBlank.find(value=>!Number.isFinite(Number(value)));
+    if(invalid!=null){showImportError('responseNumeric',{row:rowNumber,column:responseHeader});return}
   }
-  state.importPreview={headers,dataRows,sourceName};
+  state.importPreview={headers,dataRows,sourceName,responseIndexes,runIdIndex,runTypeIndex,replicateOfIndex};
   const rowsHtml=[
     `<tr><th>${esc(t('run'))}</th><td><select id="map_run_order">${optionList(headers,runIndex,true)}</select></td></tr>`,
     `<tr><th>${esc(t('stdOrder'))}</th><td><select id="map_standard_order">${optionList(headers,stdIndex,true)}</select></td></tr>`,
     ...state.factors.map((f,index)=>`<tr><th>${esc(f.name)}</th><td><select id="map_factor_${index}">${optionList(headers,factorSelections[index])}</select></td></tr>`),
-    `<tr><th>${esc(responseHeader)}</th><td><select id="map_response">${optionList(headers,responseIndex)}</select></td></tr>`
+    `<tr><th>${esc(responseHeader)}</th><td><select id="map_response">${optionList(headers,responseIndex)}</select><div style="margin-top:6px;color:#64748b">${esc(state.lang==='zh'?'自动识别的响应列':'Auto-detected response columns')}: ${responseIndexes.map(index=>esc(headers[index])).join(', ')}</div></td></tr>`
   ].join('');
   $('importMappingPanel').innerHTML=`
     <strong>${esc(uiText('Confirm Import Mapping / 确认导入映射'))}</strong><br>
@@ -8106,8 +8698,17 @@ function applyImportMapping(){
     refreshLocalizedUi();
     return;
   }
-  const templateByKey=new Map(state.design.runs.map(run=>[combinationKeyFromRun(run,state.factors),run]));
+  const responseIndexes=[...new Set([responseIndex,...(preview.responseIndexes||[])])].filter(Number.isInteger);
+  const templateByKey=new Map();
+  state.design.runs.forEach(run=>{
+    const key=combinationKeyFromRun(run,state.factors);
+    if(!templateByKey.has(key))templateByKey.set(key,[]);
+    templateByKey.get(key).push(run);
+  });
   const imported=[];
+  const idMap=new Map();
+  const pendingRelations=[];
+  const importWarnings=[];
   for(let index=0;index<preview.dataRows.length;index++){
     const row=preview.dataRows[index],rowNumber=index+2;
     const settings={};
@@ -8115,30 +8716,52 @@ function applyImportMapping(){
       const factor=state.factors[factorIndex];
       const value=String(row[factorIndexes[factorIndex]]??'').trim();
       if(!value){showImportError('requiredEmpty',{row:rowNumber,column:factor.name});return}
-      if(value!==String(factor.low).trim()&&value!==String(factor.high).trim()){
+      const allowedValues=new Set(state.design.runs.map(run=>String(run.settings[factor.id]).trim()));
+      if(!allowedValues.has(value)){
         showImportError('factorLevel',{row:rowNumber,column:factor.name});
         return;
       }
       settings[factor.id]=value;
     }
-    const responseValue=String(row[responseIndex]??'').trim();
-    if(!responseValue){showImportError('requiredEmpty',{row:rowNumber,column:$('responseName').value||'Response'});return}
-    if(!Number.isFinite(Number(responseValue))){
+    const rawResponses=responseIndexes.map(columnIndex=>String(row[columnIndex]??'').trim());
+    const nonBlank=rawResponses.filter(value=>value!=='');
+    if(!nonBlank.length){showImportError('requiredEmpty',{row:rowNumber,column:$('responseName').value||'Response'});return}
+    if(nonBlank.some(value=>!Number.isFinite(Number(value)))){
       showImportError('responseNumeric',{row:rowNumber,column:$('responseName').value||'Response'});
       return;
     }
     const key=combinationKeyFromRun({settings},state.factors);
-    const template=templateByKey.get(key);
+    const templateQueue=templateByKey.get(key)||[];
+    const template=templateQueue.shift();
     const mappedStd=stdIndex==null?null:Number(row[stdIndex]);
     const mappedRun=runIndex==null?null:Number(row[runIndex]);
-    imported.push({
-      id:'import_'+(index+1),
+    const oldId=preview.runIdIndex>=0?String(row[preview.runIdIndex]??'').trim():'';
+    const newId='import_'+(index+1);
+    if(oldId){
+      if(idMap.has(oldId))importWarnings.push(state.lang==='zh'?`运行ID“${oldId}”重复；仅第一个映射用于恢复重复关系。`:`Run ID “${oldId}” is duplicated; only the first mapping is used to restore replicate relationships.`);
+      else idMap.set(oldId,newId);
+    }
+    const exportedRunType=preview.runTypeIndex>=0?String(row[preview.runTypeIndex]??'').trim():'';
+    const runType=['factorial','center','replicate'].includes(exportedRunType)?exportedRunType:(preview.runTypeIndex>=0?'factorial':'factorial');
+    const oldReplicateOf=preview.replicateOfIndex>=0?String(row[preview.replicateOfIndex]??'').trim():'';
+    const importedRun=makeRunRecord({
+      id:newId,
       standardOrder:Number.isFinite(mappedStd)?mappedStd:(template?.standardOrder||index+1),
       runOrder:Number.isFinite(mappedRun)?mappedRun:index+1,
       settings,
-      response:Number(responseValue)
+      runType,
+      replicateOf:null,
+      rawResponses
     });
+    imported.push(importedRun);
+    pendingRelations.push({run:importedRun,oldReplicateOf});
   }
+  pendingRelations.forEach(({run,oldReplicateOf})=>{
+    if(!oldReplicateOf)return;
+    const mapped=idMap.get(oldReplicateOf);
+    if(mapped)run.replicateOf=mapped;
+    else importWarnings.push(state.lang==='zh'?`运行“${run.id}”的重复来源“${oldReplicateOf}”无法恢复，已设为空。`:`Replicate source “${oldReplicateOf}” for run “${run.id}” could not be restored and was set to null.`);
+  });
   const candidateDesign={...state.design,runs:imported};
   const candidateValidation=validateDOEDataDetailed(candidateDesign,state.factors);
   if(!candidateValidation.valid){
@@ -8146,6 +8769,7 @@ function applyImportMapping(){
     return;
   }
   state.design.runs=imported;
+  state.importWarnings=importWarnings;
   state.randomized=true;
   state.analyzed=false;state.anova=null;state.validation=null;state.decision=null;state.governance=null;state.evidenceSeparation=null;state.statisticalFoundation=null;state.modelTrust=null;state.improvementVerification=null;
   invalidateChartInterpretations();
@@ -8153,12 +8777,13 @@ function applyImportMapping(){
   const validation=validateDOEData(true);
   $('pasteImportBox').classList.add('hidden');
   $('importMappingPanel').classList.add('hidden');
-  $('importStatus').textContent=tf('importedRows',{
+  const successMessage=tf('importedRows',{
     count:imported.length,
     source:preview.sourceName,
     status:validation.valid?uiText('Validation passed.'):uiText('Review validation before analysis.')
   });
-  $('importStatus').className='note '+(validation.valid?'good':'warn');
+  $('importStatus').textContent=importWarnings.length?`${successMessage} ${importWarnings.join(' ')}`:successMessage;
+  $('importStatus').className='note '+(validation.valid&&!importWarnings.length?'good':'warn');
   refreshLocalizedUi();
 }
 function importDoeCSV(file){
@@ -8173,7 +8798,7 @@ function importDoeCSV(file){
   reader.onload=e=>{
     startImportPreview(parseDelimitedText(e.target.result),file.name);
   };
-  reader.readAsText(file);
+  reader.readAsText(file,'UTF-8');
 }
 </script>
 
@@ -8223,9 +8848,12 @@ if(document.getElementById("acceptStrategyBtn")) document.getElementById("accept
   applyAcceptedStrategy(assessment);
   generate();
 };
+if(document.getElementById("designPlanMode")) document.getElementById("designPlanMode").onchange=event=>{
+  state.designPlanMode=event.target.value==='enhanced'?'enhanced':'base';
+};
 ['strategyFactorCount','strategyFactorType','strategyKnowledge','strategyObjective','availableRuns','costPerRun','timePerRun','timeConstraint','sampleAvailability'].forEach(id=>{
   const el=document.getElementById(id);
-  if(el)el.addEventListener('input',()=>{state.strategyAssessment=null;state.acceptedStrategy=null;syncExpertInputsFromStrategy();resetExpertRecommendationUi();renderStrategyReport(null)});
+  if(el)el.addEventListener('input',()=>{state.strategyAssessment=null;state.acceptedStrategy=null;state.designPlanMode='base';syncExpertInputsFromStrategy();resetExpertRecommendationUi();renderDesignEnhancementPlan(null);renderStrategyReport(null)});
 });
 ['expertGoal','expertNumFactors','expertUserBudget'].forEach(id=>{
   const el=document.getElementById(id);
